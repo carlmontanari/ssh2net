@@ -6,7 +6,8 @@ start_dev_env:
 	${DOCKER_COMPOSE} \
 		up -d \
 		iosxe \
-		nxos
+		nxos \
+		junos
 
 .PHONY: stop_dev_env
 stop_dev_env:
