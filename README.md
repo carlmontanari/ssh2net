@@ -13,7 +13,7 @@ ssh2net is focused on being lightweight and pluggable so that it *should* be fle
 
 Documentation is auto-generated [using pdoc3](https://github.com/pdoc3/pdoc). Documentation is linted (see Linting and Testing section) via pydocstyle.
 
-TODO Documentation is hosted via GitHub Pages and can be found [here.]()
+Documentation is hosted via GitHub Pages and can be found [here.](https://carlmontanari.github.io/ssh2net/docs/ssh2net/index.html) You can also view the readme as a webpage [here.](https://carlmontanari.github.io/ssh2net/)
 
 To regenerate documentation locally, use the following make command:
 

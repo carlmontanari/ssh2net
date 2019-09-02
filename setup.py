@@ -18,6 +18,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/carlmontanari/ssh2net",
     packages=setuptools.find_packages(),
+    install_requires=["ssh2-python>=0.18.0-1"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
