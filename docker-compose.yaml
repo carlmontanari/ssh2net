@@ -1,0 +1,26 @@
+---
+version: "3.3"
+
+services:
+  iosxe:
+    hostname: iosxe
+    privileged: true
+    image: ssh2netiosxe
+    networks:
+      net1:
+        ipv4_address: 172.18.0.11
+
+  nxos:
+    hostname: nxos
+    privileged: true
+    image: ssh2netnxos
+    networks:
+      net1:
+        ipv4_address: 172.18.0.12
+
+networks:
+  net1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/26

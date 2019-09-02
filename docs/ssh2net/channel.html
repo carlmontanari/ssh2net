@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>ssh2net.channel API documentation</title>
+<meta name="description" content="ssh2net.channel" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ssh2net.channel</code></h1>
+</header>
+<section id="section-intro">
+<p>ssh2net.channel</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;ssh2net.channel&#34;&#34;&#34;
+from typing import List, Optional, Tuple
+import re
+
+from ssh2.exceptions import SocketRecvError, Timeout
+
+from ssh2net.decorators import operation_timeout, channel_timeout
+
+
+class SSH2NetChannel:
+    @staticmethod
+    def _rstrip_all_lines(output: bytes) -&gt; str:
+        &#34;&#34;&#34;
+        Right strip all lines in provided output
+
+        Args:
+            output: bytes object to handle
+
+        Returns:
+            output: bytes object with each line right stripped
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        output = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
+        output = [line.rstrip() for line in output]
+        return &#34;\n&#34;.join(output)
+
+    @staticmethod
+    def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
+        &#34;&#34;&#34;
+        Clean up preceeding empty lines, and strip prompt if desired
+
+        Args:
+            output: list of strings to parse
+            strip_prompt: bool True/False whether to strip prompt or not
+
+        Returns:
+            output: string of joined output lines
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        output = output.splitlines()
+        # purge empty rows before actual output
+        for row in output.copy():
+            if row == &#34;&#34;:
+                output = output[1:]
+            else:
+                break
+        # should improve -- simply peels the last line out of the list...
+        if strip_prompt:
+            output = output[:-1]
+        output = &#34;\n&#34;.join(output)
+        return output
+
+    # this is useless now; change it to a &#34;find prompt&#34; in case people care
+    @channel_timeout(Timeout)
+    def _set_prompt(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Read from shell and set the current shell prompt
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        self.session.set_timeout(1000)
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+        while True:
+            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
+            output = output.decode(&#34;unicode_escape&#34;).strip()
+            channel_match = re.search(pattern, output)
+            if channel_match:
+                self.current_prompt = channel_match.group(0)
+                self.session.set_timeout(self.session_timeout)
+                return
+
+    @channel_timeout(Timeout)
+    def _read_until_input(self, channel_input: str):
+        &#34;&#34;&#34;
+        Read until all input has been entered, then send return.
+
+        strip off everything before and including the command
+
+        Args:
+            channel_input: string to write to channel
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        output = b&#34;&#34;
+        while channel_input.encode() not in output:
+            output += self.channel.read()[1]
+        # once the input has been fully written to channel; flush it and send return char
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+
+    @channel_timeout(Timeout)
+    def _read_until_prompt(self, output=None, prompt=None):
+        &#34;&#34;&#34;
+        Read the channel until the desired prompt is seen
+
+        Args:
+            output: bytes of previously seen output if any
+            prompt: string of prompt to look for; refactor to prefer regex
+
+        Returns:
+            output: bytes of any channel reads after prompt has been seen
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if not output:
+            output = b&#34;&#34;
+        # do not like the non regex stuff... would rather regex all of it
+        if not prompt:
+            prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        else:
+            prompt_pattern = prompt
+
+        # disabling session blocking means the while loop will actually iterate
+        # without this iteration we can never properly check for prompts
+        self.session.set_blocking(False)
+        while True:
+            output += self.channel.read()[1]
+            # we dont need to deal w/ line replacement for the actual output, only for
+            # parsing if a prompt-like thing is at the end of the output
+            output_copy = output
+            output_copy = re.sub(&#34;\r&#34;, &#34;\n&#34;, output_copy.decode(&#34;unicode_escape&#34;).strip())
+            if not prompt:
+                channel_match = re.search(prompt_pattern, output_copy)
+            elif prompt in output_copy:
+                channel_match = True
+            else:
+                channel_match = False
+            if channel_match:
+                output = self._rstrip_all_lines(output)
+                self.session.set_blocking(True)
+                return output
+
+    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    def _send_input(self, channel_input: str, strip_prompt: bool):
+        &#34;&#34;&#34;
+        Send input to device and return results
+
+        Args:
+            channel_input: string input to write to channel
+            strip_prompt: bool True/False for whether or not to strip prompt
+
+        Returns:
+            output: string of cleaned channel data
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        self.channel.flush()
+        self.channel.write(channel_input)
+        self._read_until_input(channel_input)
+        output = self._read_until_prompt()
+        return self._restructure_output(output, strip_prompt=strip_prompt)
+
+    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    def _send_input_interact(
+        self, channel_input: str, expectation: str, response: str, finale: str
+    ) -&gt; str:
+        &#34;&#34;&#34;
+        Respond to a single &#34;staged&#34; prompt and return results
+
+        Args:
+            channel_input: string input to write to channel
+            expectation: string of what to expect from channel
+            response: string what to respond to the &#34;expectation&#34;
+            finale: string of prompt to look for to know when &#34;done&#34;
+
+        Returns:
+            output: string of cleaned channel data
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        self.channel.flush()
+        self.channel.write(channel_input)
+        self._read_until_input(channel_input)
+        output = self._read_until_prompt(prompt=expectation)
+        # if response is simply a return; add that so it shows in output
+        # otherwise it would get stripped out
+        if not response:
+            output += self.comms_return_char
+        self.channel.write(response)
+        self.channel.write(self.comms_return_char)
+        output += self._read_until_prompt(prompt=finale)
+        return self._restructure_output(output)
+
+    def open_and_execute(self, command: str):
+        &#34;&#34;&#34;
+        Open ssh channel and execute a command; closes channel when done.
+
+        &#34;one time use&#34; method -- best for running one command then moving on; otherwise
+        use &#34;open_shell&#34; instead, though this will likely be substantially faster for &#34;single&#34;
+        operations.
+
+        Args:
+            command: string input to write to channel
+
+        Returns:
+            result: tuple of command sent and resulting output
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if self._shell:
+            self._channel_close()
+        self._channel_open()
+        results = []
+        output = b&#34;&#34;
+        channel_buff = 1
+        self.channel.execute(command)
+        while channel_buff &gt; 0:
+            try:
+                channel_buff, data = self.channel.read()
+                output += data
+            except SocketRecvError:
+                break
+        output = self._rstrip_all_lines(output)
+        output = self._restructure_output(output)
+        results.append((command, output))
+        self.close()
+        return results
+
+    def open_shell(self) -&gt; None:
+        &#34;&#34;&#34;
+        Open and prepare interactive SSH shell
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        # open the channel itself
+        self._channel_open()
+        # invoke a shell on the channel
+        self._channel_invoke_shell()
+        # pre-login handling if needed for things like wlc
+        if self.comms_pre_login_handler:
+            self.comms_pre_login_handler(self)
+        # send disable paging if needed
+        if self.comms_disable_paging:
+            if callable(self.comms_disable_paging):
+                self.comms_disable_paging(self)
+            else:
+                self.send_inputs(self.comms_disable_paging)
+
+    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+        &#34;&#34;&#34;
+        Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+
+        Args:
+            inputs: list of strings or string of inputs to send to channel
+
+        Returns:
+            result: list of tuples of command sent and resulting output
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if isinstance(inputs, str):
+            inputs = [inputs]
+        results = []
+        for channel_input in inputs:
+            output = self._send_input(channel_input, strip_prompt)
+            results.append((channel_input, output))
+        return results
+
+    def send_inputs_interact(self, inputs) -&gt; List[Tuple[str, bytes]]:
+        &#34;&#34;&#34;
+        Primary entrypoint to interact with devices in shell mode
+
+        accepts inputs and looks for expected prompt;
+        sends the appropriate response, then waits for the &#34;finale&#34;
+        returns the results of the interaction
+
+        could be &#34;chained&#34; together to respond to more than a &#34;single&#34; staged prompt
+
+        Args:
+            inputs: list of strings or string of inputs to send to channel
+
+        Returns:
+            result: list of tuples of command sent and resulting output
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if isinstance(inputs, tuple):
+            inputs = [inputs]
+        results = []
+        for channel_input, expectation, response, finale in inputs:
+            output = self._send_input_interact(channel_input, expectation, response, finale)
+            results.append((channel_input, output))
+        return results</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ssh2net.channel.SSH2NetChannel"><code class="flex name class">
+<span>class <span class="ident">SSH2NetChannel</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SSH2NetChannel:
+    @staticmethod
+    def _rstrip_all_lines(output: bytes) -&gt; str:
+        &#34;&#34;&#34;
+        Right strip all lines in provided output
+
+        Args:
+            output: bytes object to handle
+
+        Returns:
+            output: bytes object with each line right stripped
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        output = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
+        output = [line.rstrip() for line in output]
+        return &#34;\n&#34;.join(output)
+
+    @staticmethod
+    def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
+        &#34;&#34;&#34;
+        Clean up preceeding empty lines, and strip prompt if desired
+
+        Args:
+            output: list of strings to parse
+            strip_prompt: bool True/False whether to strip prompt or not
+
+        Returns:
+            output: string of joined output lines
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        output = output.splitlines()
+        # purge empty rows before actual output
+        for row in output.copy():
+            if row == &#34;&#34;:
+                output = output[1:]
+            else:
+                break
+        # should improve -- simply peels the last line out of the list...
+        if strip_prompt:
+            output = output[:-1]
+        output = &#34;\n&#34;.join(output)
+        return output
+
+    # this is useless now; change it to a &#34;find prompt&#34; in case people care
+    @channel_timeout(Timeout)
+    def _set_prompt(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Read from shell and set the current shell prompt
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        self.session.set_timeout(1000)
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+        while True:
+            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
+            output = output.decode(&#34;unicode_escape&#34;).strip()
+            channel_match = re.search(pattern, output)
+            if channel_match:
+                self.current_prompt = channel_match.group(0)
+                self.session.set_timeout(self.session_timeout)
+                return
+
+    @channel_timeout(Timeout)
+    def _read_until_input(self, channel_input: str):
+        &#34;&#34;&#34;
+        Read until all input has been entered, then send return.
+
+        strip off everything before and including the command
+
+        Args:
+            channel_input: string to write to channel
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        output = b&#34;&#34;
+        while channel_input.encode() not in output:
+            output += self.channel.read()[1]
+        # once the input has been fully written to channel; flush it and send return char
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+
+    @channel_timeout(Timeout)
+    def _read_until_prompt(self, output=None, prompt=None):
+        &#34;&#34;&#34;
+        Read the channel until the desired prompt is seen
+
+        Args:
+            output: bytes of previously seen output if any
+            prompt: string of prompt to look for; refactor to prefer regex
+
+        Returns:
+            output: bytes of any channel reads after prompt has been seen
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if not output:
+            output = b&#34;&#34;
+        # do not like the non regex stuff... would rather regex all of it
+        if not prompt:
+            prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        else:
+            prompt_pattern = prompt
+
+        # disabling session blocking means the while loop will actually iterate
+        # without this iteration we can never properly check for prompts
+        self.session.set_blocking(False)
+        while True:
+            output += self.channel.read()[1]
+            # we dont need to deal w/ line replacement for the actual output, only for
+            # parsing if a prompt-like thing is at the end of the output
+            output_copy = output
+            output_copy = re.sub(&#34;\r&#34;, &#34;\n&#34;, output_copy.decode(&#34;unicode_escape&#34;).strip())
+            if not prompt:
+                channel_match = re.search(prompt_pattern, output_copy)
+            elif prompt in output_copy:
+                channel_match = True
+            else:
+                channel_match = False
+            if channel_match:
+                output = self._rstrip_all_lines(output)
+                self.session.set_blocking(True)
+                return output
+
+    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    def _send_input(self, channel_input: str, strip_prompt: bool):
+        &#34;&#34;&#34;
+        Send input to device and return results
+
+        Args:
+            channel_input: string input to write to channel
+            strip_prompt: bool True/False for whether or not to strip prompt
+
+        Returns:
+            output: string of cleaned channel data
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        self.channel.flush()
+        self.channel.write(channel_input)
+        self._read_until_input(channel_input)
+        output = self._read_until_prompt()
+        return self._restructure_output(output, strip_prompt=strip_prompt)
+
+    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    def _send_input_interact(
+        self, channel_input: str, expectation: str, response: str, finale: str
+    ) -&gt; str:
+        &#34;&#34;&#34;
+        Respond to a single &#34;staged&#34; prompt and return results
+
+        Args:
+            channel_input: string input to write to channel
+            expectation: string of what to expect from channel
+            response: string what to respond to the &#34;expectation&#34;
+            finale: string of prompt to look for to know when &#34;done&#34;
+
+        Returns:
+            output: string of cleaned channel data
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        self.channel.flush()
+        self.channel.write(channel_input)
+        self._read_until_input(channel_input)
+        output = self._read_until_prompt(prompt=expectation)
+        # if response is simply a return; add that so it shows in output
+        # otherwise it would get stripped out
+        if not response:
+            output += self.comms_return_char
+        self.channel.write(response)
+        self.channel.write(self.comms_return_char)
+        output += self._read_until_prompt(prompt=finale)
+        return self._restructure_output(output)
+
+    def open_and_execute(self, command: str):
+        &#34;&#34;&#34;
+        Open ssh channel and execute a command; closes channel when done.
+
+        &#34;one time use&#34; method -- best for running one command then moving on; otherwise
+        use &#34;open_shell&#34; instead, though this will likely be substantially faster for &#34;single&#34;
+        operations.
+
+        Args:
+            command: string input to write to channel
+
+        Returns:
+            result: tuple of command sent and resulting output
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if self._shell:
+            self._channel_close()
+        self._channel_open()
+        results = []
+        output = b&#34;&#34;
+        channel_buff = 1
+        self.channel.execute(command)
+        while channel_buff &gt; 0:
+            try:
+                channel_buff, data = self.channel.read()
+                output += data
+            except SocketRecvError:
+                break
+        output = self._rstrip_all_lines(output)
+        output = self._restructure_output(output)
+        results.append((command, output))
+        self.close()
+        return results
+
+    def open_shell(self) -&gt; None:
+        &#34;&#34;&#34;
+        Open and prepare interactive SSH shell
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        # open the channel itself
+        self._channel_open()
+        # invoke a shell on the channel
+        self._channel_invoke_shell()
+        # pre-login handling if needed for things like wlc
+        if self.comms_pre_login_handler:
+            self.comms_pre_login_handler(self)
+        # send disable paging if needed
+        if self.comms_disable_paging:
+            if callable(self.comms_disable_paging):
+                self.comms_disable_paging(self)
+            else:
+                self.send_inputs(self.comms_disable_paging)
+
+    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+        &#34;&#34;&#34;
+        Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+
+        Args:
+            inputs: list of strings or string of inputs to send to channel
+
+        Returns:
+            result: list of tuples of command sent and resulting output
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if isinstance(inputs, str):
+            inputs = [inputs]
+        results = []
+        for channel_input in inputs:
+            output = self._send_input(channel_input, strip_prompt)
+            results.append((channel_input, output))
+        return results
+
+    def send_inputs_interact(self, inputs) -&gt; List[Tuple[str, bytes]]:
+        &#34;&#34;&#34;
+        Primary entrypoint to interact with devices in shell mode
+
+        accepts inputs and looks for expected prompt;
+        sends the appropriate response, then waits for the &#34;finale&#34;
+        returns the results of the interaction
+
+        could be &#34;chained&#34; together to respond to more than a &#34;single&#34; staged prompt
+
+        Args:
+            inputs: list of strings or string of inputs to send to channel
+
+        Returns:
+            result: list of tuples of command sent and resulting output
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if isinstance(inputs, tuple):
+            inputs = [inputs]
+        results = []
+        for channel_input, expectation, response, finale in inputs:
+            output = self._send_input_interact(channel_input, expectation, response, finale)
+            results.append((channel_input, output))
+        return results</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="ssh2net.channel.SSH2NetChannel.open_and_execute"><code class="name flex">
+<span>def <span class="ident">open_and_execute</span></span>(<span>self, command)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Open ssh channel and execute a command; closes channel when done.</p>
+<p>"one time use" method &ndash; best for running one command then moving on; otherwise
+use "open_shell" instead, though this will likely be substantially faster for "single"
+operations.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>command</code></strong></dt>
+<dd>string input to write to channel</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>result</code></strong></dt>
+<dd>tuple of command sent and resulting output</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def open_and_execute(self, command: str):
+    &#34;&#34;&#34;
+    Open ssh channel and execute a command; closes channel when done.
+
+    &#34;one time use&#34; method -- best for running one command then moving on; otherwise
+    use &#34;open_shell&#34; instead, though this will likely be substantially faster for &#34;single&#34;
+    operations.
+
+    Args:
+        command: string input to write to channel
+
+    Returns:
+        result: tuple of command sent and resulting output
+
+    Raises:
+        N/A
+
+    &#34;&#34;&#34;
+    if self._shell:
+        self._channel_close()
+    self._channel_open()
+    results = []
+    output = b&#34;&#34;
+    channel_buff = 1
+    self.channel.execute(command)
+    while channel_buff &gt; 0:
+        try:
+            channel_buff, data = self.channel.read()
+            output += data
+        except SocketRecvError:
+            break
+    output = self._rstrip_all_lines(output)
+    output = self._restructure_output(output)
+    results.append((command, output))
+    self.close()
+    return results</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.channel.SSH2NetChannel.open_shell"><code class="name flex">
+<span>def <span class="ident">open_shell</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Open and prepare interactive SSH shell</p>
+<h2 id="args">Args</h2>
+<p>N/A</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def open_shell(self) -&gt; None:
+    &#34;&#34;&#34;
+    Open and prepare interactive SSH shell
+
+    Args:
+        N/A
+
+    Returns:
+        N/A
+
+    Raises:
+        N/A
+
+    &#34;&#34;&#34;
+    # open the channel itself
+    self._channel_open()
+    # invoke a shell on the channel
+    self._channel_invoke_shell()
+    # pre-login handling if needed for things like wlc
+    if self.comms_pre_login_handler:
+        self.comms_pre_login_handler(self)
+    # send disable paging if needed
+    if self.comms_disable_paging:
+        if callable(self.comms_disable_paging):
+            self.comms_disable_paging(self)
+        else:
+            self.send_inputs(self.comms_disable_paging)</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.channel.SSH2NetChannel.send_inputs"><code class="name flex">
+<span>def <span class="ident">send_inputs</span></span>(<span>self, inputs, strip_prompt=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Primary entrypoint to send data to devices in shell mode; accept inputs and return results</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>list of strings or string of inputs to send to channel</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>result</code></strong></dt>
+<dd>list of tuples of command sent and resulting output</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+    &#34;&#34;&#34;
+    Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+
+    Args:
+        inputs: list of strings or string of inputs to send to channel
+
+    Returns:
+        result: list of tuples of command sent and resulting output
+
+    Raises:
+        N/A
+
+    &#34;&#34;&#34;
+    if isinstance(inputs, str):
+        inputs = [inputs]
+    results = []
+    for channel_input in inputs:
+        output = self._send_input(channel_input, strip_prompt)
+        results.append((channel_input, output))
+    return results</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.channel.SSH2NetChannel.send_inputs_interact"><code class="name flex">
+<span>def <span class="ident">send_inputs_interact</span></span>(<span>self, inputs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Primary entrypoint to interact with devices in shell mode</p>
+<p>accepts inputs and looks for expected prompt;
+sends the appropriate response, then waits for the "finale"
+returns the results of the interaction</p>
+<p>could be "chained" together to respond to more than a "single" staged prompt</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>list of strings or string of inputs to send to channel</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>result</code></strong></dt>
+<dd>list of tuples of command sent and resulting output</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def send_inputs_interact(self, inputs) -&gt; List[Tuple[str, bytes]]:
+    &#34;&#34;&#34;
+    Primary entrypoint to interact with devices in shell mode
+
+    accepts inputs and looks for expected prompt;
+    sends the appropriate response, then waits for the &#34;finale&#34;
+    returns the results of the interaction
+
+    could be &#34;chained&#34; together to respond to more than a &#34;single&#34; staged prompt
+
+    Args:
+        inputs: list of strings or string of inputs to send to channel
+
+    Returns:
+        result: list of tuples of command sent and resulting output
+
+    Raises:
+        N/A
+
+    &#34;&#34;&#34;
+    if isinstance(inputs, tuple):
+        inputs = [inputs]
+    results = []
+    for channel_input, expectation, response, finale in inputs:
+        output = self._send_input_interact(channel_input, expectation, response, finale)
+        results.append((channel_input, output))
+    return results</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="ssh2net" href="index.html">ssh2net</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ssh2net.channel.SSH2NetChannel" href="#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></code></h4>
+<ul class="">
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_and_execute" href="#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_shell" href="#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs" href="#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs_interact" href="#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>ssh2net.base API documentation</title>
+<meta name="description" content="ssh2net.base" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ssh2net.base</code></h1>
+</header>
+<section id="section-intro">
+<p>ssh2net.base</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;ssh2net.base&#34;&#34;&#34;
+from typing import Callable, Optional, Union
+import ipaddress
+import re
+import socket
+
+from ssh2net.channel import SSH2NetChannel
+from ssh2net.exceptions import ValidationError, SetupTimeout
+from ssh2net.helper import validate_external_function
+from ssh2net.session import SSH2NetSession
+
+
+class SSH2Net(SSH2NetChannel, SSH2NetSession):
+    def __init__(
+        self,
+        setup_host: str = &#34;&#34;,
+        setup_validate_host: Optional[bool] = False,
+        setup_port: Optional[int] = 22,
+        setup_timeout: Optional[int] = 5,
+        session_keepalive: Optional[bool] = False,
+        session_keepalive_interval: Optional[int] = 10,
+        session_timeout: Optional[int] = 5000,
+        auth_user: str = &#34;&#34;,
+        auth_password: Optional[Union[str]] = None,
+        auth_public_key: Optional[Union[str]] = None,
+        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;,
+        comms_prompt_timeout: Optional[int] = 10,
+        comms_return_char: Optional[str] = &#34;\n&#34;,
+        comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
+        comms_disable_paging: Optional[Union[str, Callable]] = &#34;term length 0&#34;,
+    ):
+        r&#34;&#34;&#34;
+        Initialize SSH2Net Object
+
+        Setup basic parameters required to connect to devices via ssh. Pay extra attention
+        to the &#34;comms_prompt_regex&#34; as this is highly critical to this tool working well!
+
+        Args:
+            setup_host: ip address or hostname to connect to
+            setup_validate_host: whether or not to validate ip address is valid or dns is resolvable
+            setup_port: port to open ssh session to
+            setup_timeout: timeout in seconds for opening underlying socket to host
+            session_keepalive: FUTURE USE: whether or not to try to keep session alive
+            session_keepalive_interval: FUTURE USE: interval to use for session keepalives
+            session_timeout: time in ms for session read operations; 0 is &#34;forever&#34; and will block
+            auth_user: username to use to connect to host
+            auth_password: password to use to connect to host
+            auth_public_key: path to ssh public key to use to connect to host
+            comms_prompt_regex: regex pattern to use for prompt matching.
+                this is the single most important attribute here! if this does not match a prompt,
+                ssh2net will not work!
+
+                the base pattern is:
+                &#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;
+
+                if you do not wish to match cisco &#34;config&#34; level prompts you can use:
+                &#34;^[a-z0-9.-@]{1,20}[#&gt;$]$&#34;.
+
+                IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
+                for highly reliably matching for prompts after stripping trailling white space,
+                case insensetive is just a conveinence factor so i can be lazy.
+            comms_prompt_timeout: timeout in seconds for waiting for channel operations.
+                this is NOT the &#34;read&#34; timeout. this is the timeout for the entire operation
+                sent to send_inputs/send_inputs_interact
+            comms_return_char: character to use to send returns to host
+            comms_pre_login_handler: callable or string that resolves to an importable function to
+                handle pre-login (pre disable paging) operations
+            comms_disable_paging: callable, string that resolves to an importable function, or
+                string to send to device to disable paging
+
+        Returns:
+            N/A
+
+        Raises:
+            ValueError: in the following situations:
+                - setup_port is not an integer
+                - setup_timeout is not an integer
+                - session_keepalive is not an integer
+                - session_keepalive_interval is not an integer
+                - session_timeout is not an integer
+                - comms_prompt_timeout is not an integer
+                - comms_return_char is not a string
+            TypeError: if comms_regex_prompt is not compilable regex
+
+        &#34;&#34;&#34;
+        # set a flag to indicate if a shell has been invoked
+        self._shell: bool = False
+
+        # pre socket setup
+        self.host = setup_host.strip()
+        if setup_validate_host:
+            self._validate_host()
+        self.port = int(setup_port)
+
+        # socket setup
+        self.setup_timeout = int(setup_timeout)
+
+        # session setup
+        self.session_keepalive = int(session_keepalive)
+        self.session_keepalive_interval = int(session_keepalive_interval)
+        self.session_timeout = int(session_timeout)
+
+        # auth setup
+        self.auth_user = auth_user.strip()
+        if auth_public_key:
+            self.auth_public_key = auth_public_key.strip()
+        elif auth_password:
+            self.auth_password = auth_password.strip()
+
+        # comms setup
+        # try to compile prompt to raise TypeError before opening any connections
+        re.compile(comms_prompt_regex, flags=re.M | re.I)
+        self.comms_prompt_regex = comms_prompt_regex
+        self.comms_prompt_timeout = int(comms_prompt_timeout)
+
+        # validate that the return character set is a string
+        if isinstance(comms_return_char, str):
+            self.comms_return_char = comms_return_char
+        else:
+            raise ValueError(
+                f&#34;{comms_return_char} is an invalid comms_return_char; must be string.&#34;
+            )
+
+        self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
+        self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
+
+    def __enter__(self):
+        &#34;&#34;&#34;Enter method for context manager&#34;&#34;&#34;
+        self.open_shell()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        &#34;&#34;&#34;Exit method to cleanup for context manager&#34;&#34;&#34;
+        self.close()
+
+    def __str__(self):
+        &#34;&#34;&#34;Magic str method for SSH2Net class&#34;&#34;&#34;
+        return f&#34;SSH2Net Connection Object for host {self.host}&#34;
+
+    def __repr__(self):
+        &#34;&#34;&#34;Magic repr method for SSH2Net class; for now just returns str&#34;&#34;&#34;
+        return str(self)
+
+    def __bool__(self):
+        &#34;&#34;&#34;Magic bool method based on result of session_alive&#34;&#34;&#34;
+        return self._session_alive()
+
+    @staticmethod
+    def _set_comms_pre_login_handler(
+        comms_pre_login_handler: Union[Callable, str]
+    ) -&gt; Union[Callable, str]:
+        &#34;&#34;&#34;
+        Return comms_pre_login_handler argument
+
+        Args:
+            comms_pre_login_handler: callable function, or string representing a path to
+                a callable
+
+        Returns:
+            comms_pre_login_handler: callable or default empty string value
+
+        Raises:
+            ValueError: if provided string does not result in a callable
+
+        &#34;&#34;&#34;
+        if comms_pre_login_handler:
+            if callable(comms_pre_login_handler):
+                return comms_pre_login_handler
+            else:
+                ext_func = validate_external_function(comms_pre_login_handler)
+                if ext_func:
+                    return ext_func
+                else:
+                    raise ValueError(
+                        f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
+                        &#34;or path to a function.&#34;
+                    )
+        return comms_pre_login_handler
+
+    @staticmethod
+    def _set_comms_disable_paging(
+        comms_disable_paging: Union[Callable, str]
+    ) -&gt; Union[Callable, str]:
+        &#34;&#34;&#34;
+        Return comms_disable_paging argument
+
+        Args:
+            comms_disable_paging: callable function, string representing a path to
+                a callable, or a string to send to device to disable paging
+
+        Returns:
+            comms_disable_paging: callable or string to use to disable paging
+
+        Raises:
+            ValueError: if provided string does not result in a callable
+
+        &#34;&#34;&#34;
+        if comms_disable_paging != &#34;term length 0&#34;:
+            if callable(comms_disable_paging):
+                return comms_disable_paging
+            else:
+                ext_func = validate_external_function(comms_disable_paging)
+                if ext_func:
+                    return ext_func
+                else:
+                    if isinstance(comms_disable_paging, str):
+                        return comms_disable_paging
+                    else:
+                        raise ValueError(
+                            f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
+                            &#34;path to a function, or is not a string.&#34;
+                        )
+        return comms_disable_paging
+
+    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;
+
+    def _validate_host(self) -&gt; None:
+        &#34;&#34;&#34;
+        Validate host is valid IP or resolvable DNS name
+
+        Args:
+            N/A
+
+        Returns:
+            None
+
+        Raises:
+            ValidationError: if host is invalid IP and is non resolvable
+
+        &#34;&#34;&#34;
+        try:
+            ipaddress.ip_address(self.host)
+            return
+        except ValueError:
+            pass
+        try:
+            socket.gethostbyname(self.host)
+            return
+        except socket.gaierror:
+            pass
+        raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)
+
+    &#34;&#34;&#34; socket setup &#34;&#34;&#34;
+
+    def _socket_alive(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if underlying socket is alive
+
+        Args:
+            N/A
+
+        Returns:
+            bool True/False if socket is alive
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        try:
+            self.sock.send(b&#34;&#34;)
+            return True
+        except OSError:
+            # socket is not alive
+            return False
+        except AttributeError:
+            # socket never created yet
+            return False
+
+    def _socket_open(self) -&gt; None:
+        &#34;&#34;&#34;
+        Open underyling socket
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            SetupTimeout: if socket connection times out
+
+        &#34;&#34;&#34;
+        if not self._socket_alive():
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(self.setup_timeout)
+            try:
+                self.sock.connect((self.host, self.port))
+            except socket.timeout:
+                raise SetupTimeout(
+                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
+                )
+
+    def _socket_close(self) -&gt; None:
+        &#34;&#34;&#34;
+        Close underyling socket
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if self._socket_alive():
+            self.sock.close()
+
+    def close(self) -&gt; None:
+        &#34;&#34;&#34;
+        Fully close scoket, session, and channel
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        self._channel_close()
+        self._session_close()
+        self._socket_close()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ssh2net.base.SSH2Net"><code class="flex name class">
+<span>class <span class="ident">SSH2Net</span></span>
+<span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, session_keepalive=False, session_keepalive_interval=10, session_timeout=5000, auth_user='', auth_password=None, auth_public_key=None, comms_prompt_regex='^[a-z0-9.\\-@()]{1,20}[#>$]$', comms_prompt_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='term length 0')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net Object</p>
+<p>Setup basic parameters required to connect to devices via ssh. Pay extra attention
+to the "comms_prompt_regex" as this is highly critical to this tool working well!</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>setup_host</code></strong></dt>
+<dd>ip address or hostname to connect to</dd>
+<dt><strong><code>setup_validate_host</code></strong></dt>
+<dd>whether or not to validate ip address is valid or dns is resolvable</dd>
+<dt><strong><code>setup_port</code></strong></dt>
+<dd>port to open ssh session to</dd>
+<dt><strong><code>setup_timeout</code></strong></dt>
+<dd>timeout in seconds for opening underlying socket to host</dd>
+<dt><strong><code>session_keepalive</code></strong></dt>
+<dd>FUTURE USE: whether or not to try to keep session alive</dd>
+<dt><strong><code>session_keepalive_interval</code></strong></dt>
+<dd>FUTURE USE: interval to use for session keepalives</dd>
+<dt><strong><code>session_timeout</code></strong></dt>
+<dd>time in ms for session read operations; 0 is "forever" and will block</dd>
+<dt><strong><code>auth_user</code></strong></dt>
+<dd>username to use to connect to host</dd>
+<dt><strong><code>auth_password</code></strong></dt>
+<dd>password to use to connect to host</dd>
+<dt><strong><code>auth_public_key</code></strong></dt>
+<dd>path to ssh public key to use to connect to host</dd>
+<dt><strong><code>comms_prompt_regex</code></strong></dt>
+<dd>
+<p>regex pattern to use for prompt matching.
+this is the single most important attribute here! if this does not match a prompt,
+ssh2net will not work!</p>
+<p>the base pattern is:
+"^[a-z0-9.-@()]{1,20}[#&gt;$]$"</p>
+<p>if you do not wish to match cisco "config" level prompts you can use:
+"^[a-z0-9.-@]{1,20}[#&gt;$]$".</p>
+<p>IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
+for highly reliably matching for prompts after stripping trailling white space,
+case insensetive is just a conveinence factor so i can be lazy.</p>
+</dd>
+<dt><strong><code>comms_prompt_timeout</code></strong></dt>
+<dd>timeout in seconds for waiting for channel operations.
+this is NOT the "read" timeout. this is the timeout for the entire operation
+sent to send_inputs/send_inputs_interact</dd>
+<dt><strong><code>comms_return_char</code></strong></dt>
+<dd>character to use to send returns to host</dd>
+<dt><strong><code>comms_pre_login_handler</code></strong></dt>
+<dd>callable or string that resolves to an importable function to
+handle pre-login (pre disable paging) operations</dd>
+<dt><strong><code>comms_disable_paging</code></strong></dt>
+<dd>callable, string that resolves to an importable function, or
+string to send to device to disable paging</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>ValueError</code></strong></dt>
+<dd>in the following situations:
+- setup_port is not an integer
+- setup_timeout is not an integer
+- session_keepalive is not an integer
+- session_keepalive_interval is not an integer
+- session_timeout is not an integer
+- comms_prompt_timeout is not an integer
+- comms_return_char is not a string</dd>
+<dt><strong><code>TypeError</code></strong></dt>
+<dd>if comms_regex_prompt is not compilable regex</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SSH2Net(SSH2NetChannel, SSH2NetSession):
+    def __init__(
+        self,
+        setup_host: str = &#34;&#34;,
+        setup_validate_host: Optional[bool] = False,
+        setup_port: Optional[int] = 22,
+        setup_timeout: Optional[int] = 5,
+        session_keepalive: Optional[bool] = False,
+        session_keepalive_interval: Optional[int] = 10,
+        session_timeout: Optional[int] = 5000,
+        auth_user: str = &#34;&#34;,
+        auth_password: Optional[Union[str]] = None,
+        auth_public_key: Optional[Union[str]] = None,
+        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;,
+        comms_prompt_timeout: Optional[int] = 10,
+        comms_return_char: Optional[str] = &#34;\n&#34;,
+        comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
+        comms_disable_paging: Optional[Union[str, Callable]] = &#34;term length 0&#34;,
+    ):
+        r&#34;&#34;&#34;
+        Initialize SSH2Net Object
+
+        Setup basic parameters required to connect to devices via ssh. Pay extra attention
+        to the &#34;comms_prompt_regex&#34; as this is highly critical to this tool working well!
+
+        Args:
+            setup_host: ip address or hostname to connect to
+            setup_validate_host: whether or not to validate ip address is valid or dns is resolvable
+            setup_port: port to open ssh session to
+            setup_timeout: timeout in seconds for opening underlying socket to host
+            session_keepalive: FUTURE USE: whether or not to try to keep session alive
+            session_keepalive_interval: FUTURE USE: interval to use for session keepalives
+            session_timeout: time in ms for session read operations; 0 is &#34;forever&#34; and will block
+            auth_user: username to use to connect to host
+            auth_password: password to use to connect to host
+            auth_public_key: path to ssh public key to use to connect to host
+            comms_prompt_regex: regex pattern to use for prompt matching.
+                this is the single most important attribute here! if this does not match a prompt,
+                ssh2net will not work!
+
+                the base pattern is:
+                &#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;
+
+                if you do not wish to match cisco &#34;config&#34; level prompts you can use:
+                &#34;^[a-z0-9.-@]{1,20}[#&gt;$]$&#34;.
+
+                IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
+                for highly reliably matching for prompts after stripping trailling white space,
+                case insensetive is just a conveinence factor so i can be lazy.
+            comms_prompt_timeout: timeout in seconds for waiting for channel operations.
+                this is NOT the &#34;read&#34; timeout. this is the timeout for the entire operation
+                sent to send_inputs/send_inputs_interact
+            comms_return_char: character to use to send returns to host
+            comms_pre_login_handler: callable or string that resolves to an importable function to
+                handle pre-login (pre disable paging) operations
+            comms_disable_paging: callable, string that resolves to an importable function, or
+                string to send to device to disable paging
+
+        Returns:
+            N/A
+
+        Raises:
+            ValueError: in the following situations:
+                - setup_port is not an integer
+                - setup_timeout is not an integer
+                - session_keepalive is not an integer
+                - session_keepalive_interval is not an integer
+                - session_timeout is not an integer
+                - comms_prompt_timeout is not an integer
+                - comms_return_char is not a string
+            TypeError: if comms_regex_prompt is not compilable regex
+
+        &#34;&#34;&#34;
+        # set a flag to indicate if a shell has been invoked
+        self._shell: bool = False
+
+        # pre socket setup
+        self.host = setup_host.strip()
+        if setup_validate_host:
+            self._validate_host()
+        self.port = int(setup_port)
+
+        # socket setup
+        self.setup_timeout = int(setup_timeout)
+
+        # session setup
+        self.session_keepalive = int(session_keepalive)
+        self.session_keepalive_interval = int(session_keepalive_interval)
+        self.session_timeout = int(session_timeout)
+
+        # auth setup
+        self.auth_user = auth_user.strip()
+        if auth_public_key:
+            self.auth_public_key = auth_public_key.strip()
+        elif auth_password:
+            self.auth_password = auth_password.strip()
+
+        # comms setup
+        # try to compile prompt to raise TypeError before opening any connections
+        re.compile(comms_prompt_regex, flags=re.M | re.I)
+        self.comms_prompt_regex = comms_prompt_regex
+        self.comms_prompt_timeout = int(comms_prompt_timeout)
+
+        # validate that the return character set is a string
+        if isinstance(comms_return_char, str):
+            self.comms_return_char = comms_return_char
+        else:
+            raise ValueError(
+                f&#34;{comms_return_char} is an invalid comms_return_char; must be string.&#34;
+            )
+
+        self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
+        self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
+
+    def __enter__(self):
+        &#34;&#34;&#34;Enter method for context manager&#34;&#34;&#34;
+        self.open_shell()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        &#34;&#34;&#34;Exit method to cleanup for context manager&#34;&#34;&#34;
+        self.close()
+
+    def __str__(self):
+        &#34;&#34;&#34;Magic str method for SSH2Net class&#34;&#34;&#34;
+        return f&#34;SSH2Net Connection Object for host {self.host}&#34;
+
+    def __repr__(self):
+        &#34;&#34;&#34;Magic repr method for SSH2Net class; for now just returns str&#34;&#34;&#34;
+        return str(self)
+
+    def __bool__(self):
+        &#34;&#34;&#34;Magic bool method based on result of session_alive&#34;&#34;&#34;
+        return self._session_alive()
+
+    @staticmethod
+    def _set_comms_pre_login_handler(
+        comms_pre_login_handler: Union[Callable, str]
+    ) -&gt; Union[Callable, str]:
+        &#34;&#34;&#34;
+        Return comms_pre_login_handler argument
+
+        Args:
+            comms_pre_login_handler: callable function, or string representing a path to
+                a callable
+
+        Returns:
+            comms_pre_login_handler: callable or default empty string value
+
+        Raises:
+            ValueError: if provided string does not result in a callable
+
+        &#34;&#34;&#34;
+        if comms_pre_login_handler:
+            if callable(comms_pre_login_handler):
+                return comms_pre_login_handler
+            else:
+                ext_func = validate_external_function(comms_pre_login_handler)
+                if ext_func:
+                    return ext_func
+                else:
+                    raise ValueError(
+                        f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
+                        &#34;or path to a function.&#34;
+                    )
+        return comms_pre_login_handler
+
+    @staticmethod
+    def _set_comms_disable_paging(
+        comms_disable_paging: Union[Callable, str]
+    ) -&gt; Union[Callable, str]:
+        &#34;&#34;&#34;
+        Return comms_disable_paging argument
+
+        Args:
+            comms_disable_paging: callable function, string representing a path to
+                a callable, or a string to send to device to disable paging
+
+        Returns:
+            comms_disable_paging: callable or string to use to disable paging
+
+        Raises:
+            ValueError: if provided string does not result in a callable
+
+        &#34;&#34;&#34;
+        if comms_disable_paging != &#34;term length 0&#34;:
+            if callable(comms_disable_paging):
+                return comms_disable_paging
+            else:
+                ext_func = validate_external_function(comms_disable_paging)
+                if ext_func:
+                    return ext_func
+                else:
+                    if isinstance(comms_disable_paging, str):
+                        return comms_disable_paging
+                    else:
+                        raise ValueError(
+                            f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
+                            &#34;path to a function, or is not a string.&#34;
+                        )
+        return comms_disable_paging
+
+    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;
+
+    def _validate_host(self) -&gt; None:
+        &#34;&#34;&#34;
+        Validate host is valid IP or resolvable DNS name
+
+        Args:
+            N/A
+
+        Returns:
+            None
+
+        Raises:
+            ValidationError: if host is invalid IP and is non resolvable
+
+        &#34;&#34;&#34;
+        try:
+            ipaddress.ip_address(self.host)
+            return
+        except ValueError:
+            pass
+        try:
+            socket.gethostbyname(self.host)
+            return
+        except socket.gaierror:
+            pass
+        raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)
+
+    &#34;&#34;&#34; socket setup &#34;&#34;&#34;
+
+    def _socket_alive(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if underlying socket is alive
+
+        Args:
+            N/A
+
+        Returns:
+            bool True/False if socket is alive
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        try:
+            self.sock.send(b&#34;&#34;)
+            return True
+        except OSError:
+            # socket is not alive
+            return False
+        except AttributeError:
+            # socket never created yet
+            return False
+
+    def _socket_open(self) -&gt; None:
+        &#34;&#34;&#34;
+        Open underyling socket
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            SetupTimeout: if socket connection times out
+
+        &#34;&#34;&#34;
+        if not self._socket_alive():
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(self.setup_timeout)
+            try:
+                self.sock.connect((self.host, self.port))
+            except socket.timeout:
+                raise SetupTimeout(
+                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
+                )
+
+    def _socket_close(self) -&gt; None:
+        &#34;&#34;&#34;
+        Close underyling socket
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        if self._socket_alive():
+            self.sock.close()
+
+    def close(self) -&gt; None:
+        &#34;&#34;&#34;
+        Fully close scoket, session, and channel
+
+        Args:
+            N/A
+
+        Returns:
+            N/A
+
+        Raises:
+            N/A
+
+        &#34;&#34;&#34;
+        self._channel_close()
+        self._session_close()
+        self._socket_close()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="ssh2net.base.SSH2Net.close"><code class="name flex">
+<span>def <span class="ident">close</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Fully close scoket, session, and channel</p>
+<h2 id="args">Args</h2>
+<p>N/A</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def close(self) -&gt; None:
+    &#34;&#34;&#34;
+    Fully close scoket, session, and channel
+
+    Args:
+        N/A
+
+    Returns:
+        N/A
+
+    Raises:
+        N/A
+
+    &#34;&#34;&#34;
+    self._channel_close()
+    self._session_close()
+    self._socket_close()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="ssh2net" href="index.html">ssh2net</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ssh2net.base.SSH2Net" href="#ssh2net.base.SSH2Net">SSH2Net</a></code></h4>
+<ul class="">
+<li><code><a title="ssh2net.base.SSH2Net.close" href="#ssh2net.base.SSH2Net.close">close</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

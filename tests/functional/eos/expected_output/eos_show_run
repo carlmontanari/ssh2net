@@ -1,0 +1,57 @@
+! Command: show running-config
+! device: arista9-napalm (vEOS, EOS-4.20.10M)
+!
+! boot system flash:/vEOS-lab.swi
+!
+transceiver qsfp default-mode 4x10G
+!
+hostname arista9-napalm
+!
+spanning-tree mode rapid-pvst
+!
+aaa authorization exec default local
+!
+no aaa root
+!
+username admin privilege 15 role network-admin secret 5 $1$aM6w809x$tgkc6ZGhcScvELVKVHq3n0
+username admin1 privilege 15 secret 5 $1$7kD0oS/t$wXhtTFwnWwnlPFKWwXoJ70
+username pyclass privilege 15 secret 5 $1$C3VfUfcO$86t4iqCX60yW.NIR8d2Lh0
+!
+clock timezone America/Los_Angeles
+!
+interface Ethernet1
+   spanning-tree portfast
+   spanning-tree cost 1
+!
+interface Ethernet2
+   shutdown
+!
+interface Ethernet3
+   shutdown
+!
+interface Ethernet4
+   shutdown
+!
+interface Ethernet5
+   shutdown
+!
+interface Ethernet6
+   shutdown
+!
+interface Ethernet7
+   shutdown
+!
+interface Management1
+   shutdown
+!
+interface Vlan1
+   ip address 10.220.88.43/24
+!
+ip route 0.0.0.0/0 10.220.88.1
+!
+ip routing
+!
+management api http-commands
+   no shutdown
+!
+end

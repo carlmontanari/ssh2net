@@ -1,0 +1,13 @@
+ssh2-python>=0.18.0-1
+
+
+#to install ssh2-python from source:
+#had to install git lfs
+#had to brew install cmake
+#then pip install git+https://github.com/ParallelSSH/ssh2-python
+#
+#on ubuntu had to:
+#sudo apt-get install libssl-dev
+#sudo apt-get install zlib1g-dev
+#
+#^ w/ these i still cant get the keyboardinteractiveauth to work

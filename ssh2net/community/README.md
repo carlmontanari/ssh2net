@@ -1,0 +1,1 @@
+placeholder dir for community added things; nothing will ever exist here in the repo but can maybe have this be a folder that is auto searched for ext functions for stuff like login handler, disable paging, whatever else
