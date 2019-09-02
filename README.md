@@ -41,11 +41,25 @@ As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and U
 
 # Installation
 
-TODO
+To install from this repository:
+
+```
+pip install git+https://github.com/carlmontanari/ssh2net
+```
+
+To install from source:
+
+```
+git clone https://github.com/carlmontanari/ssh2net
+cd ssh2net
+python setup.py install
+```
+
+I will also add this to PyPI shortly!
 
 # Examples
 
-TODO create some basic examples and link here
+TODO
 
 # FAQ
 
