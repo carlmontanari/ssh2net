@@ -26,9 +26,9 @@ make docs
 
 In theory ssh2net should be able to connect to lots of different network devices. At the moment the following devices are included in the "functional" tests and should be pretty reliable:
 
-- Cisco IOS-XE
-- Cisco NX-OS
-- Juniper JunOS
+- Cisco IOS-XE (tested on: 16.04.01)
+- Cisco NX-OS (tested on: 9.2.4)
+- Juniper JunOS (tested on: 17.3R2.10)
 
 I would like to add functional tests for:
 
@@ -68,12 +68,6 @@ TODO
 # FAQ
 
 TBA, probably things though!
-
-# Contributing
-
-This was created as a learning project, so contributions are not expected, but are very welcome! Feel free to open PRs or Issues as needed. Any contributions would need to at a minimum successfully complete a tox run since there is no CI at this point.
-
-Between tox and the Makefile, I hope that testing should be pretty easy, with a big caveat that you will need to get vrnetlab setup and working for functional testing to occur in a reasonable and repeatable fashion.
 
 # Linting and Testing
 
@@ -150,6 +144,7 @@ telnet 172.18.0.11 5000
 Credentials for all devices use the default vrnetlab credentials:
 
 Username: vrnetlab
+
 Password: VR-netlab9
 
 Once the containers are ready, you can use the make commands to execute tests as needed:
