@@ -55,7 +55,11 @@ cd ssh2net
 python setup.py install
 ```
 
-I will also add this to PyPI shortly!
+I've also attempted to add this to PyPI, so you should be able to pip install it "normally":
+
+```
+pip install ssh2net
+```
 
 # Examples
 
