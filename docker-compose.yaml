@@ -18,6 +18,14 @@ services:
       net1:
         ipv4_address: 172.18.0.12
 
+  iosxr:
+    hostname: iosxr
+    privileged: true
+    image: ssh2netiosxr
+    networks:
+      net1:
+        ipv4_address: 172.18.0.13
+
   junos:
     hostname: junos
     privileged: true

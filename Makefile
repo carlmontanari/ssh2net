@@ -6,6 +6,27 @@ start_dev_env:
 		up -d \
 		iosxe \
 		nxos \
+		junos \
+		iosxr
+
+start_dev_env_iosxe:
+	${DOCKER_COMPOSE} \
+		up -d \
+		iosxe
+
+start_dev_env_nxos:
+	${DOCKER_COMPOSE} \
+		up -d \
+		nxos
+
+start_dev_env_iosxr:
+	${DOCKER_COMPOSE} \
+		up -d \
+		iosxr
+
+start_dev_env_junos:
+	${DOCKER_COMPOSE} \
+		up -d \
 		junos
 
 stop_dev_env:

@@ -133,7 +133,7 @@ The containers don't take too long to fire up, maybe a few minutes (running on m
 | nxos          | 172.18.0.12   |
 | iosxr (future)| 172.18.0.13   |
 | eos   (future)| 172.18.0.14   |
-| junos (future)| 172.18.0.15   |
+| junos         | 172.18.0.15   |
 
 The console port for all devices is 5000, so to connect to the console of the iosxe device you can simply telnet to that port locally:
 
