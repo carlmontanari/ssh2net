@@ -2,6 +2,8 @@ black>=19.3b0
 pytest>=5.0.1
 pytest-cov>=2.7.1
 pylama>=7.6.6
+pycodestyle>=2.5.0
+pydocstyel>=4.0.1
 pdoc3>=0.6.2
 netmiko>=2.4.1
 -r requirements.txt
