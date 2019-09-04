@@ -69,7 +69,8 @@ def test_send_inputs_interact():
     with ssh2net.SSH2Net(**JUNOS_TEST, comms_disable_paging="set cli screen-length 0") as conn:
         conn._set_prompt()
         interactive = conn.send_inputs_interact(
-            ("start shell user root", "Password:", JUNOS_TEST["auth_password"], "root@%")
+            ("start shell user root", "Password:", JUNOS_TEST["auth_password"], "root@%"),
+            hidden_response=True,
         )[0][1]
     with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
         expected_interactive = f.read().strip()
