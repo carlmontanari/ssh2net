@@ -1,7 +1,6 @@
 DOCKER_COMPOSE_FILE=docker-compose.yaml
 DOCKER_COMPOSE=docker-compose -f ${DOCKER_COMPOSE_FILE}
 
-.PHONY: start_dev_env
 start_dev_env:
 	${DOCKER_COMPOSE} \
 		up -d \
@@ -9,12 +8,10 @@ start_dev_env:
 		nxos \
 		junos
 
-.PHONY: stop_dev_env
 stop_dev_env:
 	${DOCKER_COMPOSE} \
 		down
 
-.PHONY: test_unit
 test_unit:
 	python -m pytest \
 	--cov=ssh2net \
@@ -22,7 +19,6 @@ test_unit:
 	--cov-report term \
 	tests/unit/.
 
-.PHONY: test_functional
 test_functional:
 	python -m pytest \
 	--cov=ssh2net \
@@ -33,7 +29,6 @@ test_functional:
 	--ignore tests/functional/eos \
 	--ignore tests/functional/comparison_tests
 
-.PHONY: test_all
 test_all:
 	python -m pytest \
 	--cov=ssh2net \
@@ -44,7 +39,6 @@ test_all:
 	--ignore tests/functional/eos \
 	--ignore tests/functional/comparison_tests
 
-.PHONY: test_iosxe
 test_iosxe:
 	python -m pytest \
 	--cov=ssh2net \
@@ -56,7 +50,6 @@ test_iosxe:
 	--ignore tests/functional/eos \
 	--ignore tests/functional/comparison_tests
 
-.PHONY: test_nxos
 test_nxos:
 	python -m pytest \
 	--cov=ssh2net \
@@ -68,7 +61,7 @@ test_nxos:
 	--ignore tests/functional/eos \
 	--ignore tests/functional/comparison_tests
 
-.PHONEY: docs
+.PHONY: docs
 docs:
 	python -m pdoc \
 	--html \

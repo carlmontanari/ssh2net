@@ -202,7 +202,12 @@ class SSH2NetChannel:
 
     @operation_timeout(&#34;comms_prompt_timeout&#34;)
     def _send_input_interact(
-        self, channel_input: str, expectation: str, response: str, finale: str
+        self,
+        channel_input: str,
+        expectation: str,
+        response: str,
+        finale: str,
+        hidden_response: bool = False,
     ) -&gt; str:
         &#34;&#34;&#34;
         Respond to a single &#34;staged&#34; prompt and return results
@@ -212,6 +217,7 @@ class SSH2NetChannel:
             expectation: string of what to expect from channel
             response: string what to respond to the &#34;expectation&#34;
             finale: string of prompt to look for to know when &#34;done&#34;
+            hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
             output: string of cleaned channel data
@@ -225,8 +231,11 @@ class SSH2NetChannel:
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
-        # otherwise it would get stripped out
+        # likewise if response is &#34;hidden&#34; (i.e. password input), add return
+        # otherwise, skip
         if not response:
+            output += self.comms_return_char
+        elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
         self.channel.write(self.comms_return_char)
@@ -320,7 +329,7 @@ class SSH2NetChannel:
             results.append((channel_input, output))
         return results
 
-    def send_inputs_interact(self, inputs) -&gt; List[Tuple[str, bytes]]:
+    def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
         &#34;&#34;&#34;
         Primary entrypoint to interact with devices in shell mode
 
@@ -331,7 +340,12 @@ class SSH2NetChannel:
         could be &#34;chained&#34; together to respond to more than a &#34;single&#34; staged prompt
 
         Args:
-            inputs: list of strings or string of inputs to send to channel
+            inputs: tuple containing strings representing:
+                initial input
+                expectation (what should ssh2net expect after input)
+                response (response to expecation)
+                finale (what should ssh2net expect when &#34;done&#34;)
+            hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
             result: list of tuples of command sent and resulting output
@@ -344,7 +358,9 @@ class SSH2NetChannel:
             inputs = [inputs]
         results = []
         for channel_input, expectation, response, finale in inputs:
-            output = self._send_input_interact(channel_input, expectation, response, finale)
+            output = self._send_input_interact(
+                channel_input, expectation, response, finale, hidden_response
+            )
             results.append((channel_input, output))
         return results</code></pre>
 </details>
@@ -536,7 +552,12 @@ class SSH2NetChannel:
 
     @operation_timeout(&#34;comms_prompt_timeout&#34;)
     def _send_input_interact(
-        self, channel_input: str, expectation: str, response: str, finale: str
+        self,
+        channel_input: str,
+        expectation: str,
+        response: str,
+        finale: str,
+        hidden_response: bool = False,
     ) -&gt; str:
         &#34;&#34;&#34;
         Respond to a single &#34;staged&#34; prompt and return results
@@ -546,6 +567,7 @@ class SSH2NetChannel:
             expectation: string of what to expect from channel
             response: string what to respond to the &#34;expectation&#34;
             finale: string of prompt to look for to know when &#34;done&#34;
+            hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
             output: string of cleaned channel data
@@ -559,8 +581,11 @@ class SSH2NetChannel:
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
-        # otherwise it would get stripped out
+        # likewise if response is &#34;hidden&#34; (i.e. password input), add return
+        # otherwise, skip
         if not response:
+            output += self.comms_return_char
+        elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
         self.channel.write(self.comms_return_char)
@@ -654,7 +679,7 @@ class SSH2NetChannel:
             results.append((channel_input, output))
         return results
 
-    def send_inputs_interact(self, inputs) -&gt; List[Tuple[str, bytes]]:
+    def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
         &#34;&#34;&#34;
         Primary entrypoint to interact with devices in shell mode
 
@@ -665,7 +690,12 @@ class SSH2NetChannel:
         could be &#34;chained&#34; together to respond to more than a &#34;single&#34; staged prompt
 
         Args:
-            inputs: list of strings or string of inputs to send to channel
+            inputs: tuple containing strings representing:
+                initial input
+                expectation (what should ssh2net expect after input)
+                response (response to expecation)
+                finale (what should ssh2net expect when &#34;done&#34;)
+            hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
             result: list of tuples of command sent and resulting output
@@ -678,7 +708,9 @@ class SSH2NetChannel:
             inputs = [inputs]
         results = []
         for channel_input, expectation, response, finale in inputs:
-            output = self._send_input_interact(channel_input, expectation, response, finale)
+            output = self._send_input_interact(
+                channel_input, expectation, response, finale, hidden_response
+            )
             results.append((channel_input, output))
         return results</code></pre>
 </details>
@@ -845,7 +877,7 @@ operations.</p>
 </details>
 </dd>
 <dt id="ssh2net.channel.SSH2NetChannel.send_inputs_interact"><code class="name flex">
-<span>def <span class="ident">send_inputs_interact</span></span>(<span>self, inputs)</span>
+<span>def <span class="ident">send_inputs_interact</span></span>(<span>self, inputs, hidden_response=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Primary entrypoint to interact with devices in shell mode</p>
@@ -856,7 +888,13 @@ returns the results of the interaction</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>inputs</code></strong></dt>
-<dd>list of strings or string of inputs to send to channel</dd>
+<dd>tuple containing strings representing:
+initial input
+expectation (what should ssh2net expect after input)
+response (response to expecation)
+finale (what should ssh2net expect when "done")</dd>
+<dt><strong><code>hidden_response</code></strong></dt>
+<dd>True/False response is hidden (i.e. password input)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -870,7 +908,7 @@ returns the results of the interaction</p>
 </dl></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def send_inputs_interact(self, inputs) -&gt; List[Tuple[str, bytes]]:
+<pre><code class="python">def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
     &#34;&#34;&#34;
     Primary entrypoint to interact with devices in shell mode
 
@@ -881,7 +919,12 @@ returns the results of the interaction</p>
     could be &#34;chained&#34; together to respond to more than a &#34;single&#34; staged prompt
 
     Args:
-        inputs: list of strings or string of inputs to send to channel
+        inputs: tuple containing strings representing:
+            initial input
+            expectation (what should ssh2net expect after input)
+            response (response to expecation)
+            finale (what should ssh2net expect when &#34;done&#34;)
+        hidden_response: True/False response is hidden (i.e. password input)
 
     Returns:
         result: list of tuples of command sent and resulting output
@@ -894,7 +937,9 @@ returns the results of the interaction</p>
         inputs = [inputs]
     results = []
     for channel_input, expectation, response, finale in inputs:
-        output = self._send_input_interact(channel_input, expectation, response, finale)
+        output = self._send_input_interact(
+            channel_input, expectation, response, finale, hidden_response
+        )
         results.append((channel_input, output))
     return results</code></pre>
 </details>
