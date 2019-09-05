@@ -1,10 +1,14 @@
 """ssh2net.channel"""
+import logging
 from typing import List, Optional, Tuple
 import re
 
+from ssh2net.decorators import operation_timeout, channel_timeout
 from ssh2.exceptions import SocketRecvError, Timeout
 
-from ssh2net.decorators import operation_timeout, channel_timeout
+
+channel_log = logging.getLogger("ssh2net_channel")
+session_log = logging.getLogger("ssh2net_session")
 
 
 class SSH2NetChannel:
@@ -86,7 +90,7 @@ class SSH2NetChannel:
                 return
 
     @channel_timeout(Timeout)
-    def _read_until_input(self, channel_input: str):
+    def _read_until_input(self, channel_input: str) -> None:
         """
         Read until all input has been entered, then send return.
 
@@ -105,9 +109,11 @@ class SSH2NetChannel:
         output = b""
         while channel_input.encode() not in output:
             output += self.channel.read()[1]
+        channel_log.debug(f"Read: {repr(output)}")
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f"Read: {repr(self.comms_return_char)}")
 
     @channel_timeout(Timeout)
     def _read_until_prompt(self, output=None, prompt=None):
@@ -138,6 +144,7 @@ class SSH2NetChannel:
         self.session.set_blocking(False)
         while True:
             output += self.channel.read()[1]
+            channel_log.debug(f"Read: {repr(output)}")
             # we dont need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
@@ -169,8 +176,12 @@ class SSH2NetChannel:
             N/A
 
         """
+        session_log.debug(
+            f"Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}"
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f"Write: {repr(channel_input)}")
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         return self._restructure_output(output, strip_prompt=strip_prompt)
@@ -201,8 +212,14 @@ class SSH2NetChannel:
             N/A
 
         """
+        session_log.debug(
+            f"Attempting to send input interact: {channel_input}; "
+            f"expecting: {expectation}; responding: {response}; "
+            f"with a finale: {finale}; hidden_response: {hidden_response}"
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f"Write: {repr(channel_input)}")
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
@@ -213,7 +230,9 @@ class SSH2NetChannel:
         elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
+        channel_log.debug(f"Write: {repr(channel_input)}")
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f"Write: {repr(self.comms_return_char)}")
         output += self._read_until_prompt(prompt=finale)
         return self._restructure_output(output)
 
@@ -235,12 +254,14 @@ class SSH2NetChannel:
             N/A
 
         """
+        session_log.info(f"Attempting to open channel for command execution")
         if self._shell:
             self._channel_close()
         self._channel_open()
         results = []
         output = b""
         channel_buff = 1
+        session_log.debug(f"Channel open, executing command: {command}")
         self.channel.execute(command)
         while channel_buff > 0:
             try:
@@ -252,6 +273,7 @@ class SSH2NetChannel:
         output = self._restructure_output(output)
         results.append((command, output))
         self.close()
+        session_log.info(f"Command executed, channel closed")
         return results
 
     def open_shell(self) -> None:
@@ -268,6 +290,7 @@ class SSH2NetChannel:
             N/A
 
         """
+        session_log.info(f"Attempting to open interactive shell")
         # open the channel itself
         self._channel_open()
         # invoke a shell on the channel
@@ -281,6 +304,7 @@ class SSH2NetChannel:
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
+        session_log.info(f"Interactive shell opened")
 
     def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -> List[Tuple[str, bytes]]:
         """
