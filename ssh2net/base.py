@@ -1,4 +1,5 @@
 """ssh2net.base"""
+import logging
 from typing import Callable, Optional, Union
 import ipaddress
 import re
@@ -8,6 +9,9 @@ from ssh2net.channel import SSH2NetChannel
 from ssh2net.exceptions import ValidationError, SetupTimeout
 from ssh2net.helper import validate_external_function
 from ssh2net.session import SSH2NetSession
+
+
+session_log = logging.getLogger("ssh2net_session")
 
 
 class SSH2Net(SSH2NetChannel, SSH2NetSession):
@@ -114,15 +118,20 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self.comms_prompt_timeout = int(comms_prompt_timeout)
 
         # validate that the return character set is a string
+        # do this to ensure provided value is a string; this prevents an int being cast to string
+        # making it look like things are ok
         if isinstance(comms_return_char, str):
             self.comms_return_char = comms_return_char
         else:
+            session_log.critical(f"Invalid comms_return_char: {comms_return_char}")
             raise ValueError(
                 f"{comms_return_char} is an invalid comms_return_char; must be string."
             )
 
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
+
+        session_log.info(f"{str(self)}; {repr(self)}")
 
     def __enter__(self):
         """Enter method for context manager"""
@@ -138,8 +147,10 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         return f"SSH2Net Connection Object for host {self.host}"
 
     def __repr__(self):
-        """Magic repr method for SSH2Net class; for now just returns str"""
-        return str(self)
+        """Magic repr method for SSH2Net class"""
+        class_dict = self.__dict__.copy()
+        class_dict["auth_password"] = "********"
+        return f"SSH2Net {class_dict}"
 
     def __bool__(self):
         """Magic bool method based on result of session_alive"""
@@ -171,6 +182,9 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                 if ext_func:
                     return ext_func
                 else:
+                    session_log.critical(
+                        f"Invalid comms_pre_login_handler: {comms_pre_login_handler}"
+                    )
                     raise ValueError(
                         f"{comms_pre_login_handler} is an invalid comms_pre_login_handler function "
                         "or path to a function."
@@ -206,6 +220,9 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                     if isinstance(comms_disable_paging, str):
                         return comms_disable_paging
                     else:
+                        session_log.critical(
+                            f"Invalid comms_disable_paging: {comms_disable_paging}"
+                        )
                         raise ValueError(
                             f"{comms_disable_paging} is an invalid comms_disable_paging function, "
                             "path to a function, or is not a string."
@@ -232,11 +249,13 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             ipaddress.ip_address(self.host)
             return
         except ValueError:
+            session_log.info(f"Failed to validate host {self.host} as an ip address")
             pass
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
+            session_log.info(f"Failed to validate host {self.host} as a resovable dns name")
             pass
         raise ValidationError(f"Host {self.host} is not an IP or resolvable DNS name.")
 
@@ -261,9 +280,11 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             return True
         except OSError:
             # socket is not alive
+            session_log.debug(f"Socket to host {self.host} is not alive")
             return False
         except AttributeError:
             # socket never created yet
+            session_log.debug(f"Socket to host {self.host} has never been created")
             return False
 
     def _socket_open(self) -> None:
@@ -286,9 +307,13 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             try:
                 self.sock.connect((self.host, self.port))
             except socket.timeout:
+                session_log.critical(
+                    f"Timed out trying to open socket to {self.host} on port {self.port}"
+                )
                 raise SetupTimeout(
                     f"Timed out trying to open socket to {self.host} on port {self.port}"
                 )
+            session_log.debug(f"Socket to host {self.host} opened")
 
     def _socket_close(self) -> None:
         """
@@ -306,6 +331,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         """
         if self._socket_alive():
             self.sock.close()
+            session_log.debug(f"Socket to host {self.host} closed")
 
     def close(self) -> None:
         """
@@ -324,3 +350,4 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self._channel_close()
         self._session_close()
         self._socket_close()
+        session_log.info(f"{str(self)}; Closed")

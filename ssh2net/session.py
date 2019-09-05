@@ -1,4 +1,6 @@
 """ssh2net.session"""
+import logging
+
 from ssh2.session import Session
 from ssh2.exceptions import AuthenticationError
 
@@ -23,6 +25,7 @@ class SSH2NetSession:
             return self.session.userauth_authenticated()
         except AttributeError:
             # session never created yet; there may be other exceptions we need to catch here
+            logging.debug(f"Session to host {self.host} has never been created")
             return False
 
     def _session_open(self) -> None:
@@ -50,8 +53,12 @@ class SSH2NetSession:
             try:
                 self.session.handshake(self.sock)
             except Exception as e:
+                logging.critical(
+                    f"Failed to complete handshake with host {self.host}; " f"Exception: {e}"
+                )
                 raise e
         # authenticate -- think about preferred order: key -> pass -> interactive?
+        logging.debug(f"Session to host {self.host} opened")
         self._session_password_auth()
 
     def _session_password_auth(self) -> None:
@@ -72,7 +79,10 @@ class SSH2NetSession:
         try:
             self.session.userauth_password(self.auth_user, self.auth_password)
         except AuthenticationError as e:
-            print(f"Password authenticaiton failed, trying keyboardinteractive. {e}")
+            logging.critical(
+                f"Password authentication with host {self.host} failed. "
+                f"Exception: {e}. Trying keyboard interactive auth..."
+            )
             try:
                 self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
             except AuthenticationError as e:
@@ -80,6 +90,10 @@ class SSH2NetSession:
             except Exception as e:
                 raise e
         except Exception as e:
+            logging.critical(
+                "Unkown error occured during password authentication with host "
+                f"{self.host}; Exception: {e}"
+            )
             raise e
 
     def _session_close(self) -> None:
@@ -99,6 +113,7 @@ class SSH2NetSession:
         if self.session is not None:
             self.session.disconnect()
             self.session = None
+            logging.debug(f"Session to host {self.host} closed")
 
     """ channel setup """
 
@@ -121,6 +136,7 @@ class SSH2NetSession:
                 return True
         except AttributeError:
             # channel not created or closed
+            logging.debug(f"Channel to host {self.host} has never been created")
             return False
         return False
 
@@ -143,6 +159,7 @@ class SSH2NetSession:
         if not self._channel_alive():
             self.channel = self.session.open_session()
             self.channel.pty()
+            logging.debug(f"Channel to host {self.host} opened")
 
     def _channel_close(self) -> None:
         """
@@ -161,6 +178,7 @@ class SSH2NetSession:
         if self.channel is not None:
             self.channel.close
             self.channel = None
+            logging.debug(f"Channel to host {self.host} closed")
 
     def _channel_invoke_shell(self) -> None:
         """

@@ -350,13 +350,21 @@ def test_init_invalid_comms_disable_paging_str():
 def test_str():
     test_host = {"setup_host": "1.2.3.4", "auth_user": "username", "auth_password": "password"}
     conn = SSH2Net(**test_host)
-    assert repr(conn) == f"SSH2Net Connection Object for host {test_host['setup_host']}"
+    assert str(conn) == f"SSH2Net Connection Object for host {test_host['setup_host']}"
 
 
 def test_repr():
     test_host = {"setup_host": "1.2.3.4", "auth_user": "username", "auth_password": "password"}
     conn = SSH2Net(**test_host)
-    assert repr(conn) == f"SSH2Net Connection Object for host {test_host['setup_host']}"
+    assert repr(conn) == (
+        f"SSH2Net {{'_shell': False, 'host': '{test_host['setup_host']}', 'port': 22, "
+        "'setup_timeout': 5, 'session_keepalive': 0, 'session_keepalive_interval'"
+        f": 10, 'session_timeout': 5000, 'auth_user': '{test_host['auth_user']}', 'auth_password':"
+        r" '********', 'comms_prompt_regex': '^[a-z0-9.\\-@()]{1,20}[#>$]$', "
+        r"'comms_prompt_timeout': 10, 'comms_return_char': '\n', "
+        "'comms_pre_login_handler': '', 'comms_disable_paging': "
+        "'term length 0'}"
+    )
 
 
 def test_bool():
