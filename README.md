@@ -125,6 +125,14 @@ Conversely you can terminate the containers:
 make stop_dev_env
 ```
 
+To start a specific platform container:
+
+```
+make start_dev_env_iosxe
+```
+
+Substitute "iosxe" for the platform type you want to start.
+
 The containers don't take too long to fire up, maybe a few minutes (running on my old macmini with Ubuntu, so not exactly a powerhouse!). Once booted up you can connect to their console or via SSH:
 
 | Device        | Local IP      |
@@ -147,9 +155,10 @@ Username: vrnetlab
 
 Password: VR-netlab9
 
-Once the containers are ready, you can use the make commands to execute tests as needed:
+Once the container(s) are ready, you can use the make commands to execute tests as needed:
 
-`test_functional` will execute all currently implemented functional tests
-`test_all` will execute all currently implemented functional tests as well as the unit tests
-`test_iosxe` will execute all unit tests and iosxe functional tests
-`test_nxos` will execute all unit tests and nxos functional tests
+- `test_functional` will execute all currently implemented functional tests
+- `test_all` will execute all currently implemented functional tests as well as the unit tests
+- `test_iosxe` will execute all unit tests and iosxe functional tests
+- `test_nxos` will execute all unit tests and nxos functional tests
+- `test_junos` will execute all unit tests and junos functional tests
