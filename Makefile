@@ -29,6 +29,11 @@ start_dev_env_junos:
 		up -d \
 		junos
 
+start_dev_env_eos:
+	${DOCKER_COMPOSE} \
+		up -d \
+		eos
+
 stop_dev_env:
 	${DOCKER_COMPOSE} \
 		down
@@ -46,7 +51,7 @@ test_functional:
 	--cov-report html \
 	--cov-report term \
 	tests/functional/. \
-	--ignore tests/functional/junos \
+	--ignore tests/functional/iosxr \
 	--ignore tests/functional/eos \
 	--ignore tests/functional/comparison_tests
 
@@ -56,7 +61,7 @@ test_all:
 	--cov-report html \
 	--cov-report term \
 	tests/. \
-	--ignore tests/functional/junos \
+	--ignore tests/functional/iosxr \
 	--ignore tests/functional/eos \
 	--ignore tests/functional/comparison_tests
 
@@ -65,22 +70,40 @@ test_iosxe:
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
-	tests/. \
-	--ignore tests/functional/nxos \
-	--ignore tests/functional/junos \
-	--ignore tests/functional/eos \
-	--ignore tests/functional/comparison_tests
+	tests/unit \
+	tests/functional/iosxe
 
 test_nxos:
 	python -m pytest \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
-	tests/. \
-	--ignore tests/functional/iosxe \
-	--ignore tests/functional/junos \
-	--ignore tests/functional/eos \
-	--ignore tests/functional/comparison_tests
+	tests/unit \
+	tests/functional/nxos
+
+test_iosxr:
+	python -m pytest \
+	--cov=ssh2net \
+	--cov-report html \
+	--cov-report term \
+	tests/unit \
+	tests/functional/iosxr
+
+test_junos:
+	python -m pytest \
+	--cov=ssh2net \
+	--cov-report html \
+	--cov-report term \
+	tests/unit \
+	tests/functional/junos
+
+test_eos:
+	python -m pytest \
+	--cov=ssh2net \
+	--cov-report html \
+	--cov-report term \
+	tests/unit \
+	tests/functional/eos
 
 .PHONY: docs
 docs:

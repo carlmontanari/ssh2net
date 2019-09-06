@@ -31,7 +31,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         comms_prompt_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = "\n",
         comms_pre_login_handler: Optional[Union[str, Callable]] = "",
-        comms_disable_paging: Optional[Union[str, Callable]] = "term length 0",
+        comms_disable_paging: Optional[Union[str, Callable]] = "terminal length 0",
     ):
         r"""
         Initialize SSH2Net Object

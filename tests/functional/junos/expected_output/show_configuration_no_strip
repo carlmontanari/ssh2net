@@ -1,0 +1,115 @@
+## Last commit: 2019-09-04 00:07:59 UTC by root
+version 17.3R2.10;
+system {
+    root-authentication {
+        encrypted-password "$6$H3raU2MQ$9y6Tm/QPYA9Um2U2UuajFp1RcSIs7q8i9q/9CBmQK1FZQMGqYeMtSlgrYlH2x/FS/703Z5hRyDTUQQDvvYaA9/"; ## SECRET-DATA
+    }
+    login {
+        user vrnetlab {
+            uid 2000;
+            class super-user;
+            authentication {
+                encrypted-password "$6$ay21MJjL$mFcINECEm2FXQZsTp4gnMmvYiaUo1KplHYuGJLKN0B0qVCW8N0M4ZN5Aci/JCwJbgM57b9Zs/sELszBra7O5C."; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            protocol-version v2;
+        }
+        netconf {
+            ssh;
+        }
+        web-management {
+            http {
+                interface fxp0.0;
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any any;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+}
+security {
+    screen {
+        ids-option untrust-screen {
+            icmp {
+                ping-death;
+            }
+            ip {
+                source-route-option;
+                tear-drop;
+            }
+            tcp {
+                syn-flood {
+                    alarm-threshold 1024;
+                    attack-threshold 200;
+                    source-threshold 1024;
+                    destination-threshold 2048;
+                    queue-size 2000; ## Warning: 'queue-size' is deprecated
+                    timeout 20;
+                }
+                land;
+            }
+        }
+    }
+    policies {
+        from-zone trust to-zone trust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone trust to-zone untrust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+    }
+    zones {
+        security-zone trust {
+            tcp-rst;
+        }
+        security-zone untrust {
+            screen untrust-screen;
+        }
+    }
+}
+interfaces {
+    fxp0 {
+        unit 0 {
+            family inet {
+                address 10.0.0.15/24;
+            }
+        }
+    }
+}
+
+vrnetlab>

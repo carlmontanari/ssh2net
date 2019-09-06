@@ -80,6 +80,7 @@ class SSH2NetChannel:
         self.session.set_timeout(1000)
         self.channel.flush()
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
         while True:
             output = self.channel.read()[1].rstrip(b"\\")
             output = output.decode("unicode_escape").strip()
@@ -113,7 +114,7 @@ class SSH2NetChannel:
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f"Read: {repr(self.comms_return_char)}")
+        channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
 
     @channel_timeout(Timeout)
     def _read_until_prompt(self, output=None, prompt=None):
@@ -232,7 +233,7 @@ class SSH2NetChannel:
         self.channel.write(response)
         channel_log.debug(f"Write: {repr(channel_input)}")
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f"Write: {repr(self.comms_return_char)}")
+        channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
         output += self._read_until_prompt(prompt=finale)
         return self._restructure_output(output)
 

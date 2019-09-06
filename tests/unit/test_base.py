@@ -321,7 +321,7 @@ def test_init_invalid_comms_disable_paging_ext_func():
 def test_init_valid_comms_disable_paging_default():
     test_host = {"setup_host": "my_device", "auth_user": "username", "auth_password": "password"}
     conn = SSH2Net(**test_host)
-    assert conn.comms_disable_paging == "term length 0"
+    assert conn.comms_disable_paging == "terminal length 0"
 
 
 def test_init_invalid_comms_disable_paging_str():
@@ -363,7 +363,7 @@ def test_repr():
         r" '********', 'comms_prompt_regex': '^[a-z0-9.\\-@()]{1,20}[#>$]$', "
         r"'comms_prompt_timeout': 10, 'comms_return_char': '\n', "
         "'comms_pre_login_handler': '', 'comms_disable_paging': "
-        "'term length 0'}"
+        "'terminal length 0'}"
     )
 
 
