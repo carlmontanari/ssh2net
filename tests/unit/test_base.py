@@ -360,7 +360,7 @@ def test_repr():
         f"SSH2Net {{'_shell': False, 'host': '{test_host['setup_host']}', 'port': 22, "
         "'setup_timeout': 5, 'session_keepalive': 0, 'session_keepalive_interval'"
         f": 10, 'session_timeout': 5000, 'auth_user': '{test_host['auth_user']}', 'auth_password':"
-        r" '********', 'comms_prompt_regex': '^[a-z0-9.\\-@()]{1,20}[#>$]$', "
+        r" '********', 'comms_prompt_regex': '^[a-z0-9.\\-@()/:]{1,20}[#>$]$', "
         r"'comms_prompt_timeout': 10, 'comms_return_char': '\n', "
         "'comms_pre_login_handler': '', 'comms_disable_paging': "
         "'terminal length 0'}"
