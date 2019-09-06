@@ -139,7 +139,7 @@ The containers don't take too long to fire up, maybe a few minutes (running on m
 | --------------|---------------|
 | iosxe         | 172.18.0.11   |
 | nxos          | 172.18.0.12   |
-| iosxr (future)| 172.18.0.13   |
+| iosxr         | 172.18.0.13   |
 | eos   (future)| 172.18.0.14   |
 | junos         | 172.18.0.15   |
 
