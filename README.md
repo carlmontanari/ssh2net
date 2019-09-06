@@ -39,6 +39,20 @@ Any additional platforms would likely not be included in the "core" platform (an
 
 As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and Ubuntu regularly and should work on any POSIX system. It has never been tested on Windows, but I don't see any reason it should not work, however I have no plans on supporting Windows as I don't have access or desire to do so.
 
+## Platform Regex
+
+The `comms_prompt_regex` is perhaps the most important argument to getting SSH2Net working.
+
+The "base" pattern is:
+
+`"^[a-z0-9.\-@()/:]{1,20}[#>$]$"`
+
+This pattern works for (tested on show commands only, but shoudl work on config commands for at leaset IOS-XE, and NX-OS) IOS-XE, NX-OS, JunOS, and IOS-XR.
+
+If you do not wish to match cisco "config" level prompts you can use:
+
+`"^[a-z0-9.-@]{1,20}[#>$]$"`
+
 # Installation
 
 To install from this repository:

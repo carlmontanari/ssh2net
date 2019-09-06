@@ -6,7 +6,7 @@ import setuptools
 __author__ = "Carl Montanari"
 
 with open("README.md", "r") as f:
-    readme = f.read()
+    README = f.read()
 
 setuptools.setup(
     name="ssh2net",
@@ -14,7 +14,7 @@ setuptools.setup(
     author=__author__,
     author_email="carl.r.montanari@gmail.com",
     description="SSH client for network devices built on ssh2-python",
-    long_description=readme,
+    long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/carlmontanari/ssh2net",
     packages=setuptools.find_packages(),

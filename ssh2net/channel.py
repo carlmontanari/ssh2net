@@ -3,8 +3,9 @@ import logging
 from typing import List, Optional, Tuple
 import re
 
-from ssh2net.decorators import operation_timeout, channel_timeout
 from ssh2.exceptions import SocketRecvError, Timeout
+
+from ssh2net.decorators import operation_timeout, channel_timeout
 
 
 channel_log = logging.getLogger("ssh2net_channel")
@@ -24,7 +25,7 @@ class SSH2NetChannel:
             output: bytes object with each line right stripped
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         output = output.decode("unicode_escape").strip().splitlines()
@@ -44,7 +45,7 @@ class SSH2NetChannel:
             output: string of joined output lines
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         output = output.splitlines()
@@ -67,13 +68,13 @@ class SSH2NetChannel:
         Read from shell and set the current shell prompt
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
@@ -101,10 +102,10 @@ class SSH2NetChannel:
             channel_input: string to write to channel
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         output = b""
@@ -129,7 +130,7 @@ class SSH2NetChannel:
             output: bytes of any channel reads after prompt has been seen
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if not output:
@@ -174,7 +175,7 @@ class SSH2NetChannel:
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         session_log.debug(
@@ -210,7 +211,7 @@ class SSH2NetChannel:
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         session_log.debug(
@@ -252,7 +253,7 @@ class SSH2NetChannel:
             result: tuple of command sent and resulting output
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         session_log.info(f"Attempting to open channel for command execution")
@@ -282,13 +283,13 @@ class SSH2NetChannel:
         Open and prepare interactive SSH shell
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         session_log.info(f"Attempting to open interactive shell")
@@ -318,7 +319,7 @@ class SSH2NetChannel:
             result: list of tuples of command sent and resulting output
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if isinstance(inputs, str):
@@ -351,7 +352,7 @@ class SSH2NetChannel:
             result: list of tuples of command sent and resulting output
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if isinstance(inputs, tuple):

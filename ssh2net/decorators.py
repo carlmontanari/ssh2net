@@ -40,12 +40,12 @@ def operation_timeout(attribute):
     return decorate
 
 
-def channel_timeout(ExceptionToCheck, attempts=5, starting_delay=0.1, backoff=2):
+def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=2):
     """
     Decorate read operations; basic backoff timer to try to read channel for reasonable time
 
     Args:
-        ExceptionToCheck: Exception to handle; basically if this exception is seen, try again
+        exception_to_check: Exception to handle; basically if this exception is seen, try again
         attempts: number of attempts to make to retry
         starting_delay: initial backoff delay
         backoff: backoff multiplier
@@ -54,7 +54,7 @@ def channel_timeout(ExceptionToCheck, attempts=5, starting_delay=0.1, backoff=2)
         decorate: wrapped function
 
     Raises:
-        N/A
+        N/A  # noqa
 
     """
 
@@ -64,7 +64,7 @@ def channel_timeout(ExceptionToCheck, attempts=5, starting_delay=0.1, backoff=2)
             while attempt > 1:
                 try:
                     return wrapped_func(self, *args, **kwargs)
-                except ExceptionToCheck:
+                except exception_to_check:
                     print(f"Retrying in {delay} seconds...")
                     time.sleep(delay)
                     attempt -= 1

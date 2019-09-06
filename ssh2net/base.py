@@ -53,13 +53,6 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
-
-                the base pattern is:
-                "^[a-z0-9.\-@()]{1,20}[#>$]$"
-
-                if you do not wish to match cisco "config" level prompts you can use:
-                "^[a-z0-9.-@]{1,20}[#>$]$".
-
                 IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
                 for highly reliably matching for prompts after stripping trailling white space,
                 case insensetive is just a conveinence factor so i can be lazy.
@@ -73,7 +66,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                 string to send to device to disable paging
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             ValueError: in the following situations:
@@ -84,7 +77,6 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                 - session_timeout is not an integer
                 - comms_prompt_timeout is not an integer
                 - comms_return_char is not a string
-            TypeError: if comms_regex_prompt is not compilable regex
 
         """
         # set a flag to indicate if a shell has been invoked
@@ -134,26 +126,88 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         session_log.info(f"{str(self)}; {repr(self)}")
 
     def __enter__(self):
-        """Enter method for context manager"""
+        """
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        """
         self.open_shell()
         return self
 
-    def __exit__(self, type, value, traceback):
-        """Exit method to cleanup for context manager"""
+    def __exit__(self, exception_type, exception_value, traceback):
+        """
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: execption type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
         self.close()
 
     def __str__(self):
-        """Magic str method for SSH2Net class"""
+        """
+        Magic str method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
         return f"SSH2Net Connection Object for host {self.host}"
 
     def __repr__(self):
-        """Magic repr method for SSH2Net class"""
+        """
+        Magic repr method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            repr: repr for class object
+
+        Raises:
+            N/A  # noqa
+
+        """
         class_dict = self.__dict__.copy()
         class_dict["auth_password"] = "********"
         return f"SSH2Net {class_dict}"
 
     def __bool__(self):
-        """Magic bool method based on result of session_alive"""
+        """
+        Magic bool method based on result of session_alive
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            bool: True/False if session is alive or not
+
+        Raises:
+            N/A  # noqa
+
+        """
         return self._session_alive()
 
     @staticmethod
@@ -177,18 +231,14 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         if comms_pre_login_handler:
             if callable(comms_pre_login_handler):
                 return comms_pre_login_handler
-            else:
-                ext_func = validate_external_function(comms_pre_login_handler)
-                if ext_func:
-                    return ext_func
-                else:
-                    session_log.critical(
-                        f"Invalid comms_pre_login_handler: {comms_pre_login_handler}"
-                    )
-                    raise ValueError(
-                        f"{comms_pre_login_handler} is an invalid comms_pre_login_handler function "
-                        "or path to a function."
-                    )
+            ext_func = validate_external_function(comms_pre_login_handler)
+            if ext_func:
+                return ext_func
+            session_log.critical(f"Invalid comms_pre_login_handler: {comms_pre_login_handler}")
+            raise ValueError(
+                f"{comms_pre_login_handler} is an invalid comms_pre_login_handler function "
+                "or path to a function."
+            )
         return comms_pre_login_handler
 
     @staticmethod
@@ -212,34 +262,29 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         if comms_disable_paging != "term length 0":
             if callable(comms_disable_paging):
                 return comms_disable_paging
-            else:
-                ext_func = validate_external_function(comms_disable_paging)
-                if ext_func:
-                    return ext_func
-                else:
-                    if isinstance(comms_disable_paging, str):
-                        return comms_disable_paging
-                    else:
-                        session_log.critical(
-                            f"Invalid comms_disable_paging: {comms_disable_paging}"
-                        )
-                        raise ValueError(
-                            f"{comms_disable_paging} is an invalid comms_disable_paging function, "
-                            "path to a function, or is not a string."
-                        )
+            ext_func = validate_external_function(comms_disable_paging)
+            if ext_func:
+                return ext_func
+            if isinstance(comms_disable_paging, str):
+                return comms_disable_paging
+            session_log.critical(f"Invalid comms_disable_paging: {comms_disable_paging}")
+            raise ValueError(
+                f"{comms_disable_paging} is an invalid comms_disable_paging function, "
+                "path to a function, or is not a string."
+            )
         return comms_disable_paging
 
-    """ pre socket setup """
+    """ pre socket setup """  # noqa
 
     def _validate_host(self) -> None:
         """
         Validate host is valid IP or resolvable DNS name
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            None
+            N/A  # noqa
 
         Raises:
             ValidationError: if host is invalid IP and is non resolvable
@@ -250,29 +295,27 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             return
         except ValueError:
             session_log.info(f"Failed to validate host {self.host} as an ip address")
-            pass
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
             session_log.info(f"Failed to validate host {self.host} as a resovable dns name")
-            pass
         raise ValidationError(f"Host {self.host} is not an IP or resolvable DNS name.")
 
-    """ socket setup """
+    """ socket setup """  # noqa
 
     def _socket_alive(self) -> bool:
         """
         Check if underlying socket is alive
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False if socket is alive
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         try:
@@ -292,10 +335,10 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         Open underyling socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             SetupTimeout: if socket connection times out
@@ -320,13 +363,13 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         Close underyling socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if self._socket_alive():
@@ -338,13 +381,13 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         Fully close scoket, session, and channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         self._channel_close()

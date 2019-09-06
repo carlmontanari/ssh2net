@@ -11,13 +11,13 @@ class SSH2NetSession:
         Check if session is alive and authenticated
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False session is alive and authenticated
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         try:
@@ -33,13 +33,13 @@ class SSH2NetSession:
         Open SSH session
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if not self._socket_alive():
@@ -52,11 +52,11 @@ class SSH2NetSession:
                 self.session.set_timeout(self.session_timeout)
             try:
                 self.session.handshake(self.sock)
-            except Exception as e:
+            except Exception as exc:
                 logging.critical(
-                    f"Failed to complete handshake with host {self.host}; " f"Exception: {e}"
+                    f"Failed to complete handshake with host {self.host}; " f"Exception: {exc}"
                 )
-                raise e
+                raise exc
         # authenticate -- think about preferred order: key -> pass -> interactive?
         logging.debug(f"Session to host {self.host} opened")
         self._session_password_auth()
@@ -66,10 +66,10 @@ class SSH2NetSession:
         Perform password based auth on SSH2NetSession
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             AuthenticationError: if authentication fails
@@ -78,36 +78,36 @@ class SSH2NetSession:
         """
         try:
             self.session.userauth_password(self.auth_user, self.auth_password)
-        except AuthenticationError as e:
+        except AuthenticationError as exc:
             logging.critical(
                 f"Password authentication with host {self.host} failed. "
-                f"Exception: {e}. Trying keyboard interactive auth..."
+                f"Exception: {exc}. Trying keyboard interactive auth..."
             )
             try:
                 self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
-            except AuthenticationError as e:
-                raise e
-            except Exception as e:
-                raise e
-        except Exception as e:
+            except AuthenticationError as exc:
+                raise exc
+            except Exception as exc:
+                raise exc
+        except Exception as exc:
             logging.critical(
                 "Unkown error occured during password authentication with host "
-                f"{self.host}; Exception: {e}"
+                f"{self.host}; Exception: {exc}"
             )
-            raise e
+            raise exc
 
     def _session_close(self) -> None:
         """
         Close SSH SSH2NetSession
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if self.session is not None:
@@ -115,20 +115,20 @@ class SSH2NetSession:
             self.session = None
             logging.debug(f"Session to host {self.host} closed")
 
-    """ channel setup """
+    """ channel setup """  # noqa
 
     def _channel_alive(self) -> bool:
         """
         Check if channel is alive
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False channel is alive
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         try:
@@ -145,13 +145,13 @@ class SSH2NetSession:
         Open channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if not self._session_alive():
@@ -166,17 +166,17 @@ class SSH2NetSession:
         Close channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         if self.channel is not None:
-            self.channel.close
+            self.channel.close  # noqa
             self.channel = None
             logging.debug(f"Channel to host {self.host} closed")
 
@@ -185,13 +185,13 @@ class SSH2NetSession:
         Invoke shell on channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         """
         self._shell = True

@@ -3,7 +3,9 @@ pytest>=5.0.1
 pytest-cov>=2.7.1
 pylama>=7.6.6
 pycodestyle>=2.5.0
-pydocstyel>=4.0.1
+pydocstyle>=4.0.1
+pylint>=2.3.1
+darglint>=0.6.1
 pdoc3>=0.6.2
 netmiko>=2.4.1
 -r requirements.txt
