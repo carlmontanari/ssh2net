@@ -81,9 +81,9 @@ def test_show_run_inputs_no_strip():
 
 def test_send_inputs_interact():
     with ssh2net.SSH2Net(**IOSXR_TEST) as conn:
-        conn._set_prompt()
+        current_prompt = conn.get_prompt()
         interactive = conn.send_inputs_interact(
-            ("clear logg", "Clear logging buffer [confirm] [y/n] :", "y", conn.current_prompt)
+            ("clear logg", "Clear logging buffer [confirm] [y/n] :", "y", current_prompt)
         )[0][1]
     with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
         expected_interactive = f.read().strip()

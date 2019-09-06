@@ -61,36 +61,6 @@ class SSH2NetChannel:
         output = "\n".join(output)
         return output
 
-    # this is useless now; change it to a "find prompt" in case people care
-    @channel_timeout(Timeout)
-    def _set_prompt(self) -> bool:
-        """
-        Read from shell and set the current shell prompt
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        """
-        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
-        self.session.set_timeout(1000)
-        self.channel.flush()
-        self.channel.write(self.comms_return_char)
-        channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
-        while True:
-            output = self.channel.read()[1].rstrip(b"\\")
-            output = output.decode("unicode_escape").strip()
-            channel_match = re.search(pattern, output)
-            if channel_match:
-                self.current_prompt = channel_match.group(0)
-                self.session.set_timeout(self.session_timeout)
-                return
-
     @channel_timeout(Timeout)
     def _read_until_input(self, channel_input: str) -> None:
         """
@@ -307,6 +277,35 @@ class SSH2NetChannel:
             else:
                 self.send_inputs(self.comms_disable_paging)
         session_log.info(f"Interactive shell opened")
+
+    @channel_timeout(Timeout)
+    def get_prompt(self) -> bool:
+        """
+        Read from shell and get the current shell prompt
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        self.session.set_timeout(1000)
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+        channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
+        while True:
+            output = self.channel.read()[1].rstrip(b"\\")
+            output = output.decode("unicode_escape").strip()
+            channel_match = re.search(pattern, output)
+            if channel_match:
+                self.session.set_timeout(self.session_timeout)
+                current_prompt = channel_match.group(0)
+                return current_prompt
 
     def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -> List[Tuple[str, bytes]]:
         """

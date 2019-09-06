@@ -87,14 +87,9 @@ def test_send_inputs_interact():
     i think given that this is just for interactive "solivng" these problems is not worht it
     """
     with ssh2net.SSH2Net(**NXOS_TEST) as conn:
-        conn._set_prompt()
+        current_prompt = conn.get_prompt()
         interactive = conn.send_inputs_interact(
-            (
-                "delete bootflash:virtual-instance.conf",
-                "(yes/no/abort)   [y]",
-                "n",
-                conn.current_prompt,
-            )
+            ("delete bootflash:virtual-instance.conf", "(yes/no/abort)   [y]", "n", current_prompt)
         )[0][1]
     with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
         expected_interactive = f.read().strip()
