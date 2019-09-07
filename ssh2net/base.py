@@ -101,8 +101,12 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self.auth_user = auth_user.strip()
         if auth_public_key:
             self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
-        elif auth_password:
+        else:
+            self.auth_public_key = auth_public_key
+        if auth_password:
             self.auth_password = auth_password.strip()
+        else:
+            self.auth_password = auth_password
 
         # comms setup
         # try to compile prompt to raise TypeError before opening any connections
