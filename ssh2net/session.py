@@ -57,9 +57,38 @@ class SSH2NetSession:
                     f"Failed to complete handshake with host {self.host}; " f"Exception: {exc}"
                 )
                 raise exc
-        # authenticate -- think about preferred order: key -> pass -> interactive?
+
         logging.debug(f"Session to host {self.host} opened")
+        if self.auth_public_key:
+            self._session_public_key_auth()
+            if self._session_alive():
+                return
         self._session_password_auth()
+
+    def _session_public_key_auth(self) -> None:
+        """
+        Perform public key based auth on SSH2NetSession
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            Exception: catch all for unhandled exceptions
+
+        """
+        try:
+            self.session.userauth_publickey_fromfile(self.auth_user, self.auth_public_key)
+        except AuthenticationError:
+            logging.critical(f"Public key authentication with host {self.host} failed. ")
+        except Exception as exc:
+            logging.critical(
+                "Unkown error occured during public key authentication with host "
+                f"{self.host}; Exception: {exc}"
+            )
+            raise exc
 
     def _session_password_auth(self) -> None:
         """
@@ -86,8 +115,16 @@ class SSH2NetSession:
             try:
                 self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
             except AuthenticationError as exc:
+                logging.critical(
+                    f"Keyboard interactive authentication with host {self.host} failed. "
+                    f"Exception: {exc}."
+                )
                 raise exc
             except Exception as exc:
+                logging.critical(
+                    "Unkown error occured during keyboard interactive authentication with host "
+                    f"{self.host}; Exception: {exc}"
+                )
                 raise exc
         except Exception as exc:
             logging.critical(

@@ -156,7 +156,7 @@ def test_init_ssh_key_strip():
         "auth_public_key": "/some/public/key  ",
     }
     conn = SSH2Net(**test_host)
-    assert conn.auth_public_key == "/some/public/key"
+    assert conn.auth_public_key == b"/some/public/key"
 
 
 def test_init_valid_comms_prompt_regex():

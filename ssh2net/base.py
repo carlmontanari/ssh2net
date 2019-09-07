@@ -99,7 +99,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         # auth setup
         self.auth_user = auth_user.strip()
         if auth_public_key:
-            self.auth_public_key = auth_public_key.strip()
+            self.auth_public_key = auth_public_key.strip().encode()
         elif auth_password:
             self.auth_password = auth_password.strip()
 
