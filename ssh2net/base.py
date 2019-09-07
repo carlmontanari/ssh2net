@@ -1,9 +1,10 @@
 """ssh2net.base"""
-import logging
-from typing import Callable, Optional, Union
 import ipaddress
+import logging
+import os
 import re
 import socket
+from typing import Callable, Optional, Union
 
 from ssh2net.channel import SSH2NetChannel
 from ssh2net.exceptions import ValidationError, SetupTimeout
@@ -99,7 +100,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         # auth setup
         self.auth_user = auth_user.strip()
         if auth_public_key:
-            self.auth_public_key = auth_public_key.strip().encode()
+            self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
         elif auth_password:
             self.auth_password = auth_password.strip()
 

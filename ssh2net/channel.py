@@ -1,7 +1,7 @@
 """ssh2net.channel"""
 import logging
-from typing import List, Optional, Tuple
 import re
+from typing import List, Optional, Tuple
 
 from ssh2.exceptions import SocketRecvError, Timeout
 
