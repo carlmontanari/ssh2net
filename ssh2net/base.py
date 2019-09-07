@@ -27,7 +27,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         auth_user: str = "",
         auth_password: Optional[Union[str]] = None,
         auth_public_key: Optional[Union[str]] = None,
-        comms_prompt_regex: Optional[str] = r"^[a-z0-9.\-@()/:]{1,20}[#>$]$",
+        comms_prompt_regex: Optional[str] = r"^[a-z0-9.\-@()/:]{1,32}[#>$]$",
         comms_prompt_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = "\n",
         comms_pre_login_handler: Optional[Union[str, Callable]] = "",

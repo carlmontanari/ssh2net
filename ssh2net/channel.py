@@ -105,11 +105,19 @@ class SSH2NetChannel:
         """
         if not output:
             output = b""
-        # do not like the non regex stuff... would rather regex all of it
+
+        # prefer to use regex match where possible; assume pattern is regex if starting with
+        # ^ or ending with $ -- this works as we always use multiline search
         if not prompt:
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+            prompt_regex = True
         else:
-            prompt_pattern = prompt
+            if prompt.startswith("^") or prompt.endswith("$"):
+                prompt_pattern = re.compile(prompt, flags=re.M | re.I)
+                prompt_regex = True
+            else:
+                prompt_pattern = prompt
+                prompt_regex = False
 
         # disabling session blocking means the while loop will actually iterate
         # without this iteration we can never properly check for prompts
@@ -121,7 +129,7 @@ class SSH2NetChannel:
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
             output_copy = re.sub("\r", "\n", output_copy.decode("unicode_escape").strip())
-            if not prompt:
+            if prompt_regex:
                 channel_match = re.search(prompt_pattern, output_copy)
             elif prompt in output_copy:
                 channel_match = True
@@ -202,7 +210,7 @@ class SSH2NetChannel:
         elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
-        channel_log.debug(f"Write: {repr(channel_input)}")
+        channel_log.debug(f"Write: {repr(response)}")
         self.channel.write(self.comms_return_char)
         channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
         output += self._read_until_prompt(prompt=finale)
