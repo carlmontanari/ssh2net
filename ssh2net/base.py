@@ -10,6 +10,7 @@ from ssh2net.channel import SSH2NetChannel
 from ssh2net.exceptions import ValidationError, SetupTimeout
 from ssh2net.helper import validate_external_function
 from ssh2net.session import SSH2NetSession
+from ssh2net.ssh_config import SSH2NetSSHConfig
 
 
 session_log = logging.getLogger("ssh2net_session")
@@ -22,6 +23,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         setup_validate_host: Optional[bool] = False,
         setup_port: Optional[int] = 22,
         setup_timeout: Optional[int] = 5,
+        setup_ssh_config_file: Optional[Union[str, bool]] = False,
         session_keepalive: Optional[bool] = False,
         session_keepalive_interval: Optional[int] = 10,
         session_timeout: Optional[int] = 5000,
@@ -45,6 +47,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             setup_validate_host: whether or not to validate ip address is valid or dns is resolvable
             setup_port: port to open ssh session to
             setup_timeout: timeout in seconds for opening underlying socket to host
+            setup_ssh_config_file: ssh config file to use or True to try system default files
             session_keepalive: FUTURE USE: whether or not to try to keep session alive
             session_keepalive_interval: FUTURE USE: interval to use for session keepalives
             session_timeout: time in ms for session read operations; 0 is "forever" and will block
@@ -101,8 +104,12 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self.auth_user = auth_user.strip()
         if auth_public_key:
             self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
-        elif auth_password:
+        else:
+            self.auth_public_key = auth_public_key
+        if auth_password:
             self.auth_password = auth_password.strip()
+        else:
+            self.auth_password = auth_password
 
         # comms setup
         # try to compile prompt to raise TypeError before opening any connections
@@ -123,6 +130,9 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
 
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
+
+        if setup_ssh_config_file:
+            self._setup_ssh_config_args()
 
         session_log.info(f"{str(self)}; {repr(self)}")
 
@@ -274,6 +284,29 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                 "path to a function, or is not a string."
             )
         return comms_disable_paging
+
+    def _setup_ssh_config_args(self):
+        """
+        Set any args from ssh config file to override existing settings
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        ssh_config = SSH2NetSSHConfig()
+        host_config = ssh_config.lookup(self.host)
+        if host_config.port:
+            self.setup_port = host_config.port
+        if host_config.user:
+            self.auth_user = host_config.user
+        if host_config.identity_file:
+            self.auth_public_key = os.path.expanduser(host_config.identity_file.strip().encode())
 
     """ pre socket setup """  # noqa
 

@@ -63,7 +63,8 @@ class SSH2NetSession:
             self._session_public_key_auth()
             if self._session_alive():
                 return
-        self._session_password_auth()
+        if self.auth_password:
+            self._session_password_auth()
 
     def _session_public_key_auth(self) -> None:
         """
