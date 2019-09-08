@@ -1,7 +1,13 @@
+from pathlib import Path
 import pytest
 
+import ssh2net
 from ssh2net import SSH2Net
 from ssh2net.exceptions import ValidationError, SetupTimeout
+
+
+NET2_DIR = ssh2net.__file__
+UNIT_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/unit/"
 
 
 def test_init__shell():
@@ -337,6 +343,15 @@ def test_init_invalid_comms_disable_paging_str():
         str(e.value)
         == f"{test_host['comms_disable_paging']} is an invalid comms_disable_paging function, path to a function, or is not a string."
     )
+
+
+def test_init_ssh_config_file():
+    test_host = {
+        "setup_host": "someswitch1",
+        "setup_ssh_config_file": f"{UNIT_TEST_DIR}_ssh_config",
+    }
+    conn = SSH2Net(**test_host)
+    assert conn.auth_user == "carl"
 
 
 # will fail without mocking or a real host

@@ -132,7 +132,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
         if setup_ssh_config_file:
-            self._setup_ssh_config_args()
+            self._setup_ssh_config_args(setup_ssh_config_file)
 
         session_log.info(f"{str(self)}; {repr(self)}")
 
@@ -285,12 +285,12 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             )
         return comms_disable_paging
 
-    def _setup_ssh_config_args(self):
+    def _setup_ssh_config_args(self, setup_ssh_config_file):
         """
         Set any args from ssh config file to override existing settings
 
         Args:
-            N/A  # noqa
+            setup_ssh_config_file: string of path to ssh config file, or bool True
 
         Returns:
             N/A  # noqa
@@ -299,7 +299,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             N/A  # noqa
 
         """
-        ssh_config = SSH2NetSSHConfig()
+        ssh_config = SSH2NetSSHConfig(setup_ssh_config_file)
         host_config = ssh_config.lookup(self.host)
         if host_config.port:
             self.setup_port = host_config.port
