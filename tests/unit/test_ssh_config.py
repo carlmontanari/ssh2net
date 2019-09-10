@@ -17,7 +17,8 @@ def test_init_ssh_config_file_explicit():
     assert ssh_conf.ssh_config_file == ssh_config_file
 
 
-def test_init_ssh_config_file_user():
+def test_init_ssh_config_file_user(fs):
+    fs.add_real_file("/etc/ssh/ssh_config", target_path=f"{os.path.expanduser('~')}/.ssh/config")
     ssh_conf = SSH2NetSSHConfig()
     with open(f"{os.path.expanduser('~')}/.ssh/config", "r") as f:
         ssh_config_file = f.read()
