@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: [ubuntu-latest, ubuntu-18.04, ubuntu-16.04, macOS-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: run tox
