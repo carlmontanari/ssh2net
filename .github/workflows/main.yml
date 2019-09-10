@@ -10,4 +10,4 @@ jobs:
       - name: install tox
         run: python3 -m pip install tox
       - name: run tox
-        run: tox
+        run: python3 -m tox
