@@ -7,5 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: install tox
+        run: python3 -m pip install tox
       - name: run tox
         run: tox
