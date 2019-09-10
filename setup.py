@@ -10,7 +10,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="ssh2net",
-    version="2019.09.02",
+    version="2019.09.10",
     author=__author__,
     author_email="carl.r.montanari@gmail.com",
     description="SSH client for network devices built on ssh2-python",
