@@ -20,4 +20,4 @@ jobs:
           python -m pip install setuptools
           python -m pip install tox
       - name: run tox
-        run: python -m tox
+        run: python -m tox skip_missing_interpreters=true
