@@ -132,6 +132,8 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
         if setup_ssh_config_file:
+            if isinstance(setup_ssh_config_file, bool) and setup_ssh_config_file:
+                setup_ssh_config_file = ""
             self._setup_ssh_config_args(setup_ssh_config_file)
 
         session_log.info(f"{str(self)}; {repr(self)}")

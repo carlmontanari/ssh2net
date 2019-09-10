@@ -12,7 +12,7 @@ ssh2net is focused on being lightweight and pluggable so that it *should* be fle
 
 # Documentation
 
-Documentation is auto-generated [using pdoc3](https://github.com/pdoc3/pdoc). Documentation is linted (see Linting and Testing section) via pydocstyle.
+Documentation is auto-generated [using pdoc3](https://github.com/pdoc3/pdoc). Documentation is linted (see Linting and Testing section) via [pydocstyle](https://github.com/PyCQA/pydocstyle/) and [darglint](https://github.com/terrencepreilly/darglint).
 
 Documentation is hosted via GitHub Pages and can be found [here.](https://carlmontanari.github.io/ssh2net/docs/ssh2net/index.html) You can also view the readme as a webpage [here.](https://carlmontanari.github.io/ssh2net/)
 
@@ -30,11 +30,11 @@ In theory ssh2net should be able to connect to lots of different network devices
 - Cisco IOS-XE (tested on: 16.04.01)
 - Cisco NX-OS (tested on: 9.2.4)
 - Juniper JunOS (tested on: 17.3R2.10)
+- Cisco IOS-XR (tested on: 6.5.3)
 
 I would like to add functional tests for:
 
-- Cisco IOS-XR
-- Arista EOS
+- Arista EOS (currently blocked - at least for password based auth via keyboard_interactive)
 
 Any additional platforms would likely not be included in the "core" platform (and therefore functional testing). Additional platforms could be considered, however a pre-requisite for additional platforms would be the capability to create vrnetlab containers for that platform.
 
@@ -88,7 +88,7 @@ TBA, probably things though!
 
 ## Linting
 
-This project uses [black](https://github.com/psf/black) for auto-formatting. In addition to black, tox will execute [pylama](https://github.com/klen/pylama), and [pydocstyle](https://github.com/PyCQA/pydocstyle) for linting purposes. I have began playing with adding type hinting and testing this with [mypy](https://github.com/python/mypy), however I've not added this to tox at this point.
+This project uses [black](https://github.com/psf/black) for auto-formatting. In addition to black, tox will execute [pylama](https://github.com/klen/pylama), and [pydocstyle](https://github.com/PyCQA/pydocstyle) for linting purposes. I have began playing with adding type hinting and testing this with [mypy](https://github.com/python/mypy), however I've not added this to tox at this point. I've also added docstring linting with [darglint](https://github.com/terrencepreilly/darglint) which has been quite handy!
 
 ## Testing
 
@@ -109,7 +109,7 @@ This will also print out a coverage report as well as create an html coverage re
 
 Executing the functional tests is a bit more complicated! First, thank you to Kristian Larsson for his great tool [vrnetlab](https://github.com/plajjan/vrnetlab)! All functional tests are built on this awesome platform that allows for easy creation of containerized network devices.
 
-So far, basic functional tests exist for Cisco IOS-XE and Cisco NX-OS, these use the CSR1000v and Nexus 9000v virtual platforms respectively. vrnetlab currently only supports the older emulation style NX-OS devices, and *not* the newer VM image n9kv. I have made some very minor tweaks to vrnetlab locally in order to get the n9kv image running -- I hope to raise a PR to add this to vrnetlab in the near future. Minus the n9kv tweaks, getting going with vrnetlab is fairly straightforward -- simply follow Kristian's great readme docs. After creating the image(s) that you wish to test, rename the image to the following format:
+So far, basic functional tests exist for Cisco IOS-XE and Cisco NX-OS, these use the CSR1000v and Nexus 9000v virtual platforms respectively. vrnetlab currently only supports the older emulation style NX-OS devices, and *not* the newer VM image n9kv. I have made some very minor tweaks to vrnetlab locally in order to get the n9kv image running -- I have raised a PR to add this to vrnetlab proper. Minus the n9kv tweaks, getting going with vrnetlab is fairly straightforward -- simply follow Kristian's great readme docs. After creating the image(s) that you wish to test, rename the image to the following format:
 
 ```
 ssh2net[PLATFORM]
