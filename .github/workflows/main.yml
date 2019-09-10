@@ -1,15 +1,23 @@
-name: GitHub Actions CI
+name: github actions ci
 
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        python-version: [3.6, 3.7]    
     steps:
       - uses: actions/checkout@v1
-      - name: install setuptools
-        run: python3 -m pip install setuptools
-      - name: install tox
-        run: python3 -m pip install tox
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}      
+      - name: setup test env
+        run: |
+          python -m pip install setuptools
+          python -m pip install tox
       - name: run tox
-        run: python3 -m tox
+        run: python -m tox
