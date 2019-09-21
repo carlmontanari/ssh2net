@@ -14,7 +14,7 @@ NXOS_TEST = {
     "test_commands": ["show run", "show version"],
 }
 
-# need to get iosxr image in vrnetlab for testing
+# need to get cisco_iosxr image in vrnetlab for testing
 # IOSXR_TEST = {
 #    "host": "172.18.0.13",
 #    "username": "vrnetlab",
@@ -23,7 +23,7 @@ NXOS_TEST = {
 #    "test_commands": ["show run", "show version"],
 # }
 
-# need to get eos image in vrnetlab for testing + fix libssh2 keyboard interactive auth issue
+# need to get arista_eos image in vrnetlab for testing + fix libssh2 keyboard interactive auth issue
 # EOS_TEST = {
 #    "host": "172.18.0.14",
 #    "username": "vrnetlab",

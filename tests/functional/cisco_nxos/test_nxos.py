@@ -6,7 +6,7 @@ import ssh2net
 
 
 NET2_DIR = ssh2net.__file__
-FUNC_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/functional/nxos/"
+FUNC_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/functional/cisco_nxos/"
 
 NXOS_TEST = {"setup_host": "172.18.0.12", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
@@ -84,7 +84,7 @@ def test_send_inputs_interact():
     expected output for this test is somewhat massaged to make this test pass
     in "real" device ssh session there aren't new lines between response and the prompt
     there is also a space after the prompt and before the "n"
-    i think given that this is just for interactive "solivng" these problems is not worht it
+    i think given that this is just for interactive "solving" these problems is not worht it
     """
     with ssh2net.SSH2Net(**NXOS_TEST) as conn:
         current_prompt = conn.get_prompt()
@@ -134,7 +134,8 @@ def test_disable_paging_function():
 
 def test_disable_paging_external_function():
     with ssh2net.SSH2Net(
-        **NXOS_TEST, comms_disable_paging="tests.functional.nxos.ext_test_funcs.nxos_disable_paging"
+        **NXOS_TEST,
+        comms_disable_paging="tests.functional.cisco_nxos.ext_test_funcs.nxos_disable_paging",
     ) as conn:
         show_run = conn.send_inputs("show run")[0][1].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:

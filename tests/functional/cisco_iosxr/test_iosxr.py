@@ -15,7 +15,7 @@ PRE_LOGIN_HANDLER = iosxr_pre_login_handler
 
 
 NET2_DIR = ssh2net.__file__
-FUNC_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/functional/iosxr/"
+FUNC_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/functional/cisco_iosxr/"
 
 IOSXR_TEST = {
     "setup_host": "172.18.0.13",
@@ -95,7 +95,7 @@ def test_send_inputs_interact():
         print(diff)
 
     assert len(interactive.splitlines()) == len(expected_interactive.splitlines())
-    # iosxr prints date/time before this prompt; strip that so things match
+    # cisco_iosxr prints date/time before this prompt; strip that so things match
     assert interactive.splitlines()[1:] == expected_interactive.splitlines()[1:]
 
 
@@ -126,7 +126,7 @@ def test_disable_paging_function():
 def test_disable_paging_external_function():
     with ssh2net.SSH2Net(
         **IOSXR_TEST,
-        comms_disable_paging="tests.functional.iosxr.ext_test_funcs.iosxr_disable_paging",
+        comms_disable_paging="tests.functional.cisco_iosxr.ext_test_funcs.iosxr_disable_paging",
     ) as conn:
         show_run = conn.send_inputs("show run")[0][1]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:

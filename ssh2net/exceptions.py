@@ -7,3 +7,7 @@ class ValidationError(Exception):
 
 class SetupTimeout(Exception):
     pass
+
+
+class UnknownPrivLevel(Exception):
+    pass

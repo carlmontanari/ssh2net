@@ -107,7 +107,7 @@ class SSH2NetChannel:
             output = b""
 
         # prefer to use regex match where possible; assume pattern is regex if starting with
-        # ^ or ending with $ -- this works as we always use multiline search
+        # ^ or ending with $ -- this works as we always use multi line search
         if not prompt:
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
             prompt_regex = True
@@ -321,6 +321,7 @@ class SSH2NetChannel:
 
         Args:
             inputs: list of strings or string of inputs to send to channel
+            strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
             result: list of tuples of command sent and resulting output

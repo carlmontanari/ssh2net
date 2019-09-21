@@ -3,7 +3,7 @@ version: "3.3"
 
 services:
   iosxe:
-    hostname: iosxe
+    hostname: cisco_iosxe
     privileged: true
     image: ssh2netiosxe
     networks:
@@ -11,7 +11,7 @@ services:
         ipv4_address: 172.18.0.11
 
   nxos:
-    hostname: nxos
+    hostname: cisco_nxos
     privileged: true
     image: ssh2netnxos
     networks:
@@ -19,7 +19,7 @@ services:
         ipv4_address: 172.18.0.12
 
   iosxr:
-    hostname: iosxr
+    hostname: cisco_iosxr
     privileged: true
     image: ssh2netiosxr
     networks:
@@ -27,7 +27,7 @@ services:
         ipv4_address: 172.18.0.13
 
   eos:
-    hostname: eos
+    hostname: arista_eos
     privileged: true
     image: ssh2neteos
     networks:
@@ -35,7 +35,7 @@ services:
         ipv4_address: 172.18.0.14
 
   junos:
-    hostname: junos
+    hostname: juniper_junos
     privileged: true
     image: ssh2netjunos
     networks:

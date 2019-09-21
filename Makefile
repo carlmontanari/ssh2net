@@ -51,8 +51,8 @@ test_functional:
 	--cov-report html \
 	--cov-report term \
 	tests/functional/. \
-	--ignore tests/functional/iosxr \
-	--ignore tests/functional/eos \
+	--ignore tests/functional/cisco_iosxr \
+	--ignore tests/functional/arista_eos \
 	--ignore tests/functional/comparison_tests
 
 test_all:
@@ -61,8 +61,8 @@ test_all:
 	--cov-report html \
 	--cov-report term \
 	tests/. \
-	--ignore tests/functional/iosxr \
-	--ignore tests/functional/eos \
+	--ignore tests/functional/cisco_iosxr \
+	--ignore tests/functional/arista_eos \
 	--ignore tests/functional/comparison_tests
 
 test_iosxe:
@@ -71,7 +71,7 @@ test_iosxe:
 	--cov-report html \
 	--cov-report term \
 	tests/unit \
-	tests/functional/iosxe
+	tests/functional/cisco_iosxe
 
 test_nxos:
 	python -m pytest \
@@ -79,7 +79,7 @@ test_nxos:
 	--cov-report html \
 	--cov-report term \
 	tests/unit \
-	tests/functional/nxos
+	tests/functional/cisco_nxos
 
 test_iosxr:
 	python -m pytest \
@@ -87,7 +87,7 @@ test_iosxr:
 	--cov-report html \
 	--cov-report term \
 	tests/unit \
-	tests/functional/iosxr
+	tests/functional/cisco_iosxr
 
 test_junos:
 	python -m pytest \
@@ -95,7 +95,7 @@ test_junos:
 	--cov-report html \
 	--cov-report term \
 	tests/unit \
-	tests/functional/junos
+	tests/functional/juniper_junos
 
 test_eos:
 	python -m pytest \
@@ -103,7 +103,7 @@ test_eos:
 	--cov-report html \
 	--cov-report term \
 	tests/unit \
-	tests/functional/eos
+	tests/functional/arista_eos
 
 .PHONY: docs
 docs:

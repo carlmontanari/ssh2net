@@ -6,7 +6,7 @@ import ssh2net
 
 
 NET2_DIR = ssh2net.__file__
-FUNC_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/functional/iosxe/"
+FUNC_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/functional/cisco_iosxe/"
 
 IOSXE_TEST = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
@@ -121,7 +121,7 @@ def test_disable_paging_function():
 def test_disable_paging_external_function():
     with ssh2net.SSH2Net(
         **IOSXE_TEST,
-        comms_disable_paging="tests.functional.iosxe.ext_test_funcs.iosxe_disable_paging",
+        comms_disable_paging="tests.functional.cisco_iosxe.ext_test_funcs.iosxe_disable_paging",
     ) as conn:
         show_run = conn.send_inputs("show run")[0][1]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
@@ -141,14 +141,3 @@ def test_disable_paging_external_function():
 
     assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
     assert show_run.splitlines()[7:] == expected_show_run.splitlines()[7:]
-
-
-# need to dial this in more
-# def test_iosxe_session_timeout():
-#    with pytest.raises(SetupTimeout):
-#        conn = ssh2net.SSH2Net(
-#            **IOSXE_TEST,
-#            setup_timeout=0.00001
-#        )
-#        conn.open_shell()
-#
