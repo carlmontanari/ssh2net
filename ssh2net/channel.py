@@ -338,7 +338,7 @@ class SSH2NetChannel:
 
     def send_inputs_interact(self, inputs, hidden_response=False) -> List[Tuple[str, bytes]]:
         """
-        Primary entry point to interact with devices in shell mode; accept inputs and respond to results
+        Primary entry point to interact with devices in shell mode; used to handle prompts
 
         accepts inputs and looks for expected prompt;
         sends the appropriate response, then waits for the "finale"
