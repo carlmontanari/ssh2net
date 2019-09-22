@@ -11,6 +11,7 @@ Library focusing on connecting to and communicating with network devices via SSH
 
 ssh2net is focused on being lightweight and pluggable so that it *should* be flexible enough to be adapted to handle connecting to, sending commands, and reading output from most network devices.
 
+
 # Documentation
 
 Documentation is auto-generated [using pdoc3](https://github.com/pdoc3/pdoc). Documentation is linted (see Linting and Testing section) via [pydocstyle](https://github.com/PyCQA/pydocstyle/) and [darglint](https://github.com/terrencepreilly/darglint).
@@ -41,6 +42,34 @@ Any additional platforms would likely not be included in the "core" platform (an
 
 As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and Ubuntu regularly and should work on any POSIX system. It has never been tested on Windows, but I don't see any reason it should not work, however I have no plans on supporting Windows as I don't have access or desire to do so.
 
+
+## Platform Drivers
+
+SSH2Net supports "core" and "community" platform drivers. This is similar to a "device_type" in Netmiko, for example. The intent of a "driver" is to handle device specific operations, to include privilege escalation and deescalation. The "core" drivers will support Cisco IOS-XE, NX-OS and IOS-XR, Juniper JunOS, and hopefully/eventually Arista EOS. Community drivers can be merged in for other platforms but will not be tested or supported officially.
+
+Example IOS-XE driver setup:
+
+```
+from ssh2net import SSH2Net
+from ssh2net.core.cisco_iosxe.driver import IOSXEDriver
+
+my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+with SSH2Net(**my_device) as conn:
+    driver = IOSXEDriver(conn)
+```
+
+Once the driver is setup, "netmiko-like" operations are supported:
+
+```
+    version = driver.send_command("show version")
+    print(version[0])
+    results = driver.send_config_set("["interface loopback123", "description ssh2net was here"])
+    print(results)
+```
+
+The major caveat here is that SSH2Net returns a LIST of results (hence the "version[0]" above) as all operations support passing lists of commands.
+
+
 ## Platform Regex
 
 The `comms_prompt_regex` is perhaps the most important argument to getting SSH2Net working.
@@ -55,9 +84,19 @@ If you do not wish to match cisco "config" level prompts you can use:
 
 `"^[a-z0-9.-@]{1,20}[#>$]$"`
 
+If you use a platform driver, the base prompt is set in the driver so you don't really need to worry about this!
+
+
 # Installation
 
-To install from this repository:
+
+You should be able to pip install it "normally":
+
+```
+pip install ssh2net
+```
+
+To install from this repositories master branch:
 
 ```
 pip install git+https://github.com/carlmontanari/ssh2net
@@ -71,25 +110,34 @@ cd ssh2net
 python setup.py install
 ```
 
-I've also attempted to add this to PyPI, so you should be able to pip install it "normally":
-
-```
-pip install ssh2net
-```
-
 # Examples
 
-TODO
+- [Basic "native" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_native_style.py)
+- [Basic "driver" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_driver_style.py)
+- [Basic "ConnectHandler" (i.e. Netmiko) SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_connecthandler_style.py)
+- [Setting session and channel logging](/examples/logging/session_and_channel_log_diff_files.py)
+- [Using SSH Key for authentication](/examples/ssh_keys/ssh_key_basic.py)
+
 
 # FAQ
 
-TBA, probably things though!
+- Question: Why build this? Netmiko exists, Paramiko exists, Ansible exists, etc...?
+  - Answer: To learn and build hopefully a really cool thing!
+- Question: Is this better than Netmiko/Paramiko/Ansible?
+  - Answer: Nope! It is different though! The main focus is just to be stupid fast. It is very much that. It *should* be super reliable too as the timeouts are very easy/obvious to control, but that said it for sure has not been tested thoroughly with latent devices.
+- Question: Is this is to use?
+  - Answer: Yep! The "native" usage is pretty straight forward -- the thing to remember is that it doesn't do "things" for you like Netmiko does for example, so its a lot more like Paramiko in that regard. That said you can use one of the available drivers to have a Netmiko-like experience -OR- write your own driver as this has been built with the thought of being easily extended.
+- Other questions? Ask away!
+
 
 # Linting and Testing
 
 ## Linting
 
 This project uses [black](https://github.com/psf/black) for auto-formatting. In addition to black, tox will execute [pylama](https://github.com/klen/pylama), and [pydocstyle](https://github.com/PyCQA/pydocstyle) for linting purposes. I have began playing with adding type hinting and testing this with [mypy](https://github.com/python/mypy), however I've not added this to tox at this point. I've also added docstring linting with [darglint](https://github.com/terrencepreilly/darglint) which has been quite handy!
+
+All commits to this repository will trigger a GitHub action which runs tox, but of course its nicer to just run that before making a commit to ensure that it will pass all tests!
+
 
 ## Testing
 
@@ -116,11 +164,13 @@ So far, basic functional tests exist for Cisco IOS-XE and Cisco NX-OS, these use
 ssh2net[PLATFORM]
 ```
 
-The docker-compose file here will be looking for the container images matching this pattern, so this is an important bit! Right now for IOS-XE and NX-OS the container image names need to be:
+The docker-compose file here will be looking for the container images matching this pattern, so this is an important bit! The container image names should be:
 
 ```
 ssh2netiosxe
 ssh2netnxos
+ssh2netiosxr
+ssh2netjunos
 ```
 
 You can tag the image names on creation (following the vrnetlab readme docs), or create a new tag once the image is built:
@@ -149,7 +199,7 @@ make start_dev_env_iosxe
 
 Substitute "iosxe" for the platform type you want to start.
 
-The containers don't take too long to fire up, maybe a few minutes (running on my old macmini with Ubuntu, so not exactly a powerhouse!). Once booted up you can connect to their console or via SSH:
+Most of the containers don't take too long to fire up, maybe a few minutes (running on my old macmini with Ubuntu, so not exactly a powerhouse!). That said, the IOS-XR device takes about 15 minutes to go to "healthy" status. Once booted up you can connect to their console or via SSH:
 
 | Device        | Local IP      |
 | --------------|---------------|
@@ -177,4 +227,7 @@ Once the container(s) are ready, you can use the make commands to execute tests 
 - `test_all` will execute all currently implemented functional tests as well as the unit tests
 - `test_iosxe` will execute all unit tests and iosxe functional tests
 - `test_nxos` will execute all unit tests and nxos functional tests
+- `test_iosxr` will execute all unit tests and iosxr functional tests
 - `test_junos` will execute all unit tests and junos functional tests
+
+**Note** - the functional tests test the "native" SSH2Net functionality, but as of now do *not* test the "driver" functionality (i.e. it does not test anything in ssh2net/core/). 

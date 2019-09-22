@@ -27,7 +27,7 @@ IOSXR_TEST = {
 
 def test_show_run_execute():
     conn = ssh2net.SSH2Net(**IOSXR_TEST)
-    show_run = conn.open_and_execute("show run")[0]
+    show_run = conn.open_and_execute("show run")
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read()
 
