@@ -241,7 +241,7 @@ class SSH2NetSSHConfig:
                 host_pattern = (
                     host_pattern.replace(".", r"\.").replace("*", r"(.*)").replace("?", r"(.)")
                 )
-                # compile with case insensetive
+                # compile with case insensitive
                 host_pattern = re.compile(host_pattern, flags=re.I)
                 result = re.search(host_pattern, host)
                 # if we get a result, append it and the original pattern to the possible matches
