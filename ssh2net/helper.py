@@ -2,11 +2,13 @@
 import importlib
 
 from ssh2net.core.cisco_iosxe.driver import IOSXEDriver, IOSXE_ARG_MAPPER
+from ssh2net.core.cisco_nxos.driver import NXOSDriver, NXOS_ARG_MAPPER
 from ssh2net.core.juniper_junos.driver import JunosDriver, JUNOS_ARG_MAPPER
 
 NETMIKO_DEVICE_TYPE_MAPPER = {
     "cisco_ios": {"driver": IOSXEDriver, "arg_mapper": IOSXE_ARG_MAPPER},
     "cisco_xe": {"driver": IOSXEDriver, "arg_mapper": IOSXE_ARG_MAPPER},
+    "cisco_nxos": {"driver": NXOSDriver, "arg_mapper": NXOS_ARG_MAPPER},
     "juniper_junos": {"driver": JunosDriver, "arg_mapper": JUNOS_ARG_MAPPER},
 }
 
