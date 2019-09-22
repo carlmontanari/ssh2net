@@ -13,7 +13,7 @@ IOSXE_TEST = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_passwo
 
 def test_show_run_execute():
     conn = ssh2net.SSH2Net(**IOSXE_TEST)
-    show_run = conn.open_and_execute("show run")[0][1]
+    show_run = conn.open_and_execute("show run")
     with open(f"{FUNC_TEST_DIR}expected_output/show_run_execute", "r") as f:
         expected_show_run = f.read()
 
@@ -31,7 +31,7 @@ def test_show_run_execute():
 
 def test_show_run_inputs():
     with ssh2net.SSH2Net(**IOSXE_TEST) as conn:
-        show_run = conn.send_inputs("show run")[0][1]
+        show_run = conn.send_inputs("show run")[0]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read()
 
@@ -53,7 +53,7 @@ def test_show_run_inputs():
 
 def test_show_run_inputs_no_strip_prompt():
     with ssh2net.SSH2Net(**IOSXE_TEST) as conn:
-        show_run = conn.send_inputs("show run", strip_prompt=False)[0][1]
+        show_run = conn.send_inputs("show run", strip_prompt=False)[0]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run_no_strip", "r") as f:
         expected_show_run = f.read().strip()  # strip off extra space after prompt to match ssh2net
 
@@ -78,7 +78,7 @@ def test_send_inputs_interact():
         current_prompt = conn.get_prompt()
         interactive = conn.send_inputs_interact(
             ("clear logg", "Clear logging buffer [confirm]", "", current_prompt)
-        )[0][1]
+        )[0]
     with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
         expected_interactive = f.read().strip()
 
@@ -98,7 +98,7 @@ def test_disable_paging_function():
 
     disable_paging = disable_paging_func
     with ssh2net.SSH2Net(**IOSXE_TEST, comms_disable_paging=disable_paging) as conn:
-        show_run = conn.send_inputs("show run")[0][1]
+        show_run = conn.send_inputs("show run")[0]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read()
 
@@ -123,7 +123,7 @@ def test_disable_paging_external_function():
         **IOSXE_TEST,
         comms_disable_paging="tests.functional.cisco_iosxe.ext_test_funcs.iosxe_disable_paging",
     ) as conn:
-        show_run = conn.send_inputs("show run")[0][1]
+        show_run = conn.send_inputs("show run")[0]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read()
 

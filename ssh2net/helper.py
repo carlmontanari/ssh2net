@@ -106,11 +106,7 @@ def transform_netmiko_kwargs(kwargs):
     kwargs["setup_host"] = kwargs.pop("host")
     kwargs["setup_validate_host"] = False
     kwargs["setup_port"] = kwargs.pop("port", 22)
-    if "global_delay_factor" in kwargs.keys():
-        kwargs["setup_timeout"] = kwargs["global_delay_factor"] * 5
-        kwargs.pop("global_delay_factor")
-    else:
-        kwargs["setup_timeout"] = 5
+    kwargs["setup_timeout"] = 5
     kwargs["setup_ssh_config_file"] = kwargs.pop("ssh_config_file", False)
     kwargs["session_keepalive"] = False
     kwargs["session_keepalive_interval"] = 10
@@ -119,6 +115,11 @@ def transform_netmiko_kwargs(kwargs):
     kwargs["auth_public_key"] = kwargs.pop("key_file", None)
     kwargs["comms_prompt_regex"] = ""
     kwargs["comms_prompt_timeout"] = 10
+    if "global_delay_factor" in kwargs.keys():
+        kwargs["comms_prompt_timeout"] = kwargs["global_delay_factor"] * 10
+        kwargs.pop("global_delay_factor")
+    else:
+        kwargs["setup_timeout"] = 5
     kwargs["comms_return_char"] = ""
     kwargs["comms_pre_login_handler"] = ""
     kwargs["comms_disable_paging"] = ""

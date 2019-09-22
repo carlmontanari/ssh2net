@@ -27,7 +27,7 @@ IOSXR_TEST = {
 
 def test_show_run_execute():
     conn = ssh2net.SSH2Net(**IOSXR_TEST)
-    show_run = conn.open_and_execute("show run")[0][1]
+    show_run = conn.open_and_execute("show run")[0]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read()
 
@@ -41,7 +41,7 @@ def test_show_run_execute():
 
 def test_show_run_inputs():
     with ssh2net.SSH2Net(**IOSXR_TEST) as conn:
-        show_run = conn.send_inputs("show run")[0][1].strip()
+        show_run = conn.send_inputs("show run")[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read().strip()
 
@@ -61,7 +61,7 @@ def test_show_run_inputs():
 
 def test_show_run_inputs_no_strip():
     with ssh2net.SSH2Net(**IOSXR_TEST) as conn:
-        show_run = conn.send_inputs("show run", strip_prompt=False)[0][1].strip()
+        show_run = conn.send_inputs("show run", strip_prompt=False)[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run_no_strip", "r") as f:
         expected_show_run = f.read().strip()
 
@@ -84,7 +84,7 @@ def test_send_inputs_interact():
         current_prompt = conn.get_prompt()
         interactive = conn.send_inputs_interact(
             ("clear logg", "Clear logging buffer [confirm] [y/n] :", "y", current_prompt)
-        )[0][1]
+        )[0]
     with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
         expected_interactive = f.read().strip()
 
@@ -105,7 +105,7 @@ def test_disable_paging_function():
 
     disable_paging = disable_paging_func
     with ssh2net.SSH2Net(**IOSXR_TEST, comms_disable_paging=disable_paging) as conn:
-        show_run = conn.send_inputs("show run")[0][1]
+        show_run = conn.send_inputs("show run")[0]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read()
 
@@ -128,7 +128,7 @@ def test_disable_paging_external_function():
         **IOSXR_TEST,
         comms_disable_paging="tests.functional.cisco_iosxr.ext_test_funcs.iosxr_disable_paging",
     ) as conn:
-        show_run = conn.send_inputs("show run")[0][1]
+        show_run = conn.send_inputs("show run")[0]
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read()
 

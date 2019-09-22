@@ -13,7 +13,7 @@ NXOS_TEST = {"setup_host": "172.18.0.12", "auth_user": "vrnetlab", "auth_passwor
 
 def test_show_run_execute():
     conn = ssh2net.SSH2Net(**NXOS_TEST)
-    show_run = conn.open_and_execute("show run")[0][1].strip()
+    show_run = conn.open_and_execute("show run").strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read().strip()
 
@@ -32,7 +32,7 @@ def test_show_run_execute():
 def test_show_run_inputs():
     conn = ssh2net.SSH2Net(**NXOS_TEST)
     conn.open_shell()
-    show_run = conn.send_inputs("show run")[0][1].strip()
+    show_run = conn.send_inputs("show run")[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read().strip()
 
@@ -57,7 +57,7 @@ def test_show_run_inputs():
 def test_show_run_inputs_no_strip_prompt():
     conn = ssh2net.SSH2Net(**NXOS_TEST)
     conn.open_shell()
-    show_run = conn.send_inputs("show run", strip_prompt=False)[0][1].strip()
+    show_run = conn.send_inputs("show run", strip_prompt=False)[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run_no_strip", "r") as f:
         expected_show_run = f.read().strip()
 
@@ -90,7 +90,7 @@ def test_send_inputs_interact():
         current_prompt = conn.get_prompt()
         interactive = conn.send_inputs_interact(
             ("delete bootflash:virtual-instance.conf", "(yes/no/abort)   [y]", "n", current_prompt)
-        )[0][1]
+        )[0]
     with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
         expected_interactive = f.read().strip()
 
@@ -110,7 +110,7 @@ def test_disable_paging_function():
 
     disable_paging = disable_paging_func
     with ssh2net.SSH2Net(**NXOS_TEST, comms_disable_paging=disable_paging) as conn:
-        show_run = conn.send_inputs("show run")[0][1].strip()
+        show_run = conn.send_inputs("show run")[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read().strip()
 
@@ -137,7 +137,7 @@ def test_disable_paging_external_function():
         **NXOS_TEST,
         comms_disable_paging="tests.functional.cisco_nxos.ext_test_funcs.nxos_disable_paging",
     ) as conn:
-        show_run = conn.send_inputs("show run")[0][1].strip()
+        show_run = conn.send_inputs("show run")[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
         expected_show_run = f.read().strip()
 

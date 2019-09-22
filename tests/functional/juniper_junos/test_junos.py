@@ -13,7 +13,7 @@ JUNOS_TEST = {"setup_host": "172.18.0.15", "auth_user": "vrnetlab", "auth_passwo
 
 def test_show_run_inputs():
     with ssh2net.SSH2Net(**JUNOS_TEST, comms_disable_paging="set cli screen-length 0") as conn:
-        show_configuration = conn.send_inputs("show configuration")[0][1].strip()
+        show_configuration = conn.send_inputs("show configuration")[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_configuration", "r") as f:
         expected_show_configuration = f.read().strip()
 
@@ -39,9 +39,7 @@ def test_show_run_inputs():
 
 def test_show_run_inputs_no_strip_prompt():
     with ssh2net.SSH2Net(**JUNOS_TEST, comms_disable_paging="set cli screen-length 0") as conn:
-        show_configuration = conn.send_inputs("show configuration", strip_prompt=False)[0][
-            1
-        ].strip()
+        show_configuration = conn.send_inputs("show configuration", strip_prompt=False)[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_configuration_no_strip", "r") as f:
         expected_show_configuration = f.read().strip()
 
@@ -70,7 +68,7 @@ def test_send_inputs_interact():
         interactive = conn.send_inputs_interact(
             ("start shell user root", "Password:", JUNOS_TEST["auth_password"], r"^root@%$"),
             hidden_response=True,
-        )[0][1]
+        )[0]
     with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
         expected_interactive = f.read().strip()
 
@@ -90,7 +88,7 @@ def test_disable_paging_function():
 
     disable_paging = disable_paging_func
     with ssh2net.SSH2Net(**JUNOS_TEST, comms_disable_paging=disable_paging) as conn:
-        show_configuration = conn.send_inputs("show configuration")[0][1].strip()
+        show_configuration = conn.send_inputs("show configuration")[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_configuration", "r") as f:
         expected_show_configuration = f.read().strip()
 
@@ -119,7 +117,7 @@ def test_disable_paging_external_function():
         **JUNOS_TEST,
         comms_disable_paging="tests.functional.juniper_junos.ext_test_funcs.junos_disable_paging",
     ) as conn:
-        show_configuration = conn.send_inputs("show configuration")[0][1].strip()
+        show_configuration = conn.send_inputs("show configuration")[0].strip()
     with open(f"{FUNC_TEST_DIR}expected_output/show_configuration", "r") as f:
         expected_show_configuration = f.read().strip()
 

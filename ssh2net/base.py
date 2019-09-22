@@ -59,7 +59,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                 ssh2net will not work!
                 IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
                 for highly reliably matching for prompts after stripping trailling white space,
-                case insensetive is just a conveinence factor so i can be lazy.
+                case insensetive is just a convenience factor so i can be lazy.
             comms_prompt_timeout: timeout in seconds for waiting for channel operations.
                 this is NOT the "read" timeout. this is the timeout for the entire operation
                 sent to send_inputs/send_inputs_interact

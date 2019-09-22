@@ -228,7 +228,7 @@ class SSH2NetChannel:
             command: string input to write to channel
 
         Returns:
-            result: tuple of command sent and resulting output
+            result: output from command sent over the channel
 
         Raises:
             N/A  # noqa
@@ -238,7 +238,6 @@ class SSH2NetChannel:
         if self._shell:
             self._channel_close()
         self._channel_open()
-        results = []
         output = b""
         channel_buff = 1
         session_log.debug(f"Channel open, executing command: {command}")
@@ -250,11 +249,10 @@ class SSH2NetChannel:
             except SocketRecvError:
                 break
         output = self._rstrip_all_lines(output)
-        output = self._restructure_output(output)
-        results.append((command, output))
+        result = self._restructure_output(output)
         self.close()
         session_log.info(f"Command executed, channel closed")
-        return results
+        return result
 
     def open_shell(self) -> None:
         """
@@ -315,16 +313,16 @@ class SSH2NetChannel:
                 current_prompt = channel_match.group(0)
                 return current_prompt
 
-    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -> List[Tuple[str, bytes]]:
+    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -> List[bytes]:
         """
-        Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+        Primary entry point to send data to devices in shell mode; accept inputs and return results
 
         Args:
             inputs: list of strings or string of inputs to send to channel
             strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
             N/A  # noqa
@@ -335,12 +333,12 @@ class SSH2NetChannel:
         results = []
         for channel_input in inputs:
             output = self._send_input(channel_input, strip_prompt)
-            results.append((channel_input, output))
+            results.append(output)
         return results
 
     def send_inputs_interact(self, inputs, hidden_response=False) -> List[Tuple[str, bytes]]:
         """
-        Primary entrypoint to interact with devices in shell mode
+        Primary entry point to interact with devices in shell mode
 
         accepts inputs and looks for expected prompt;
         sends the appropriate response, then waits for the "finale"
@@ -352,12 +350,12 @@ class SSH2NetChannel:
             inputs: tuple containing strings representing:
                 initial input
                 expectation (what should ssh2net expect after input)
-                response (response to expecation)
+                response (response to expectation)
                 finale (what should ssh2net expect when "done")
             hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
             N/A  # noqa
@@ -370,5 +368,5 @@ class SSH2NetChannel:
             output = self._send_input_interact(
                 channel_input, expectation, response, finale, hidden_response
             )
-            results.append((channel_input, output))
+            results.append(output)
         return results
