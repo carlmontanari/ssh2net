@@ -35,7 +35,7 @@ class SSH2NetChannel:
     @staticmethod
     def _restructure_output(output: str, strip_prompt: bool = False) -> str:
         """
-        Clean up preceeding empty lines, and strip prompt if desired
+        Clean up preceding empty lines, and strip prompt if desired
 
         Args:
             output: list of strings to parse
@@ -338,7 +338,7 @@ class SSH2NetChannel:
 
     def send_inputs_interact(self, inputs, hidden_response=False) -> List[Tuple[str, bytes]]:
         """
-        Primary entry point to interact with devices in shell mode
+        Primary entry point to interact with devices in shell mode; accept inputs and respond to results
 
         accepts inputs and looks for expected prompt;
         sends the appropriate response, then waits for the "finale"

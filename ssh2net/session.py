@@ -103,7 +103,7 @@ class SSH2NetSession:
 
         Raises:
             AuthenticationError: if authentication fails
-            Exception: catch all for uknown other exceptions
+            Exception: catch all for unknown other exceptions
 
         """
         try:
@@ -123,13 +123,13 @@ class SSH2NetSession:
                 raise exc
             except Exception as exc:
                 logging.critical(
-                    "Unkown error occured during keyboard interactive authentication with host "
+                    "Unknown error occurred during keyboard interactive authentication with host "
                     f"{self.host}; Exception: {exc}"
                 )
                 raise exc
         except Exception as exc:
             logging.critical(
-                "Unkown error occured during password authentication with host "
+                "Unknown error occurred during password authentication with host "
                 f"{self.host}; Exception: {exc}"
             )
             raise exc

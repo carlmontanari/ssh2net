@@ -57,9 +57,9 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
-                IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
-                for highly reliably matching for prompts after stripping trailling white space,
-                case insensetive is just a convenience factor so i can be lazy.
+                IMPORTANT: regex search uses multiline and case insensitive flags. multiline allows
+                for highly reliably matching for prompts after stripping trailing white space,
+                case insensitive is just a convenience factor so i can be lazy.
             comms_prompt_timeout: timeout in seconds for waiting for channel operations.
                 this is NOT the "read" timeout. this is the timeout for the entire operation
                 sent to send_inputs/send_inputs_interact
@@ -160,7 +160,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         Exit method to cleanup for context manager
 
         Args:
-            exception_type: execption type being raised
+            exception_type: exception type being raised
             exception_value: message from exception being raised
             traceback: traceback from exception being raised
 
@@ -368,7 +368,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
 
     def _socket_open(self) -> None:
         """
-        Open underyling socket
+        Open underlying socket
 
         Args:
             N/A  # noqa
@@ -396,7 +396,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
 
     def _socket_close(self) -> None:
         """
-        Close underyling socket
+        Close underlying socket
 
         Args:
             N/A  # noqa
@@ -414,7 +414,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
 
     def close(self) -> None:
         """
-        Fully close scoket, session, and channel
+        Fully close socket, session, and channel
 
         Args:
             N/A  # noqa
