@@ -41,6 +41,7 @@ class BaseDriver:
         self.send_inputs_interact = conn.send_inputs_interact
         self.privs = PRIVS
         self.default_desired_priv = None
+        self.textfsm_platform = None
 
     def _determine_current_priv(self, current_prompt):
         """
@@ -132,7 +133,7 @@ class BaseDriver:
             else:
                 self._escalate()
 
-    def send_command(self, commands) -> None:
+    def send_command(self, commands):
         """
         Send command(s)
 
@@ -149,7 +150,7 @@ class BaseDriver:
         result = self.send_inputs(commands)
         return result
 
-    def send_config_set(self, configs) -> None:
+    def send_config_set(self, configs):
         """
         Send configuration(s)
 
@@ -163,5 +164,28 @@ class BaseDriver:
             N/A  # noqa
         """
         self.attain_priv("configuration")
-        self.send_inputs(configs)
+        result = self.send_inputs(configs)
         self.attain_priv(self.default_desired_priv)
+        return result
+
+    def textfsm_parse_output(self, command: str, output: str) -> str:
+        """
+        Parse output with TextFSM and ntc-templates
+
+        Args:
+            command: command used to get output
+            output: output from command
+
+        Returns:
+            output: parsed output
+
+        Raises:
+            N/A  # noqa
+        """
+        # only import when necessary to avoid circular import; because helper imports base driver
+        from ssh2net.helper import _textfsm_get_template, textfsm_parse
+
+        template = _textfsm_get_template(self.textfsm_platform, command)
+        if template:
+            output = textfsm_parse(template, output)
+        return output

@@ -1,5 +1,8 @@
 """ssh2net.helper"""
 import importlib
+from io import TextIOWrapper
+import pkg_resources  # pylint: disable=C0411
+import warnings
 
 from ssh2net.core.cisco_iosxe.driver import IOSXEDriver, IOSXE_ARG_MAPPER
 from ssh2net.core.cisco_nxos.driver import NXOSDriver, NXOS_ARG_MAPPER
@@ -121,7 +124,7 @@ def transform_netmiko_kwargs(kwargs):
         kwargs["comms_prompt_timeout"] = kwargs["global_delay_factor"] * 10
         kwargs.pop("global_delay_factor")
     else:
-        kwargs["setup_timeout"] = 5
+        kwargs["comms_prompt_timeout"] = 5
     kwargs["comms_return_char"] = ""
     kwargs["comms_pre_login_handler"] = ""
     kwargs["comms_disable_paging"] = ""
@@ -129,3 +132,65 @@ def transform_netmiko_kwargs(kwargs):
     transformed_kwargs = {k: v for (k, v) in kwargs.items() if k in VALID_SSH2NET_KWARGS}
 
     return transformed_kwargs
+
+
+def _textfsm_get_template(platform: str, command: str):
+    """
+    Find correct TextFSM template based on platform and command executed
+
+    Args:
+        platform: ntc-templates device type; i.e. cisco_ios, arista_eos, etc.
+        command: string of command that was executed (to find appropriate template)
+
+    Returns:
+        None or TextIOWrapper of opened template
+
+    """
+    try:
+        from textfsm.clitable import CliTable
+        import ntc_templates  # pylint: disable=W0611
+    except ModuleNotFoundError as e:
+        err = f"Module '{e.name}' not installed!"
+        msg = f"***** {err} {'*' * (80 - len(err))}"
+        fix = (
+            f"To resolve this issue, install '{e.name}'. You can do this in one of the following"
+            " ways:\n"
+            "1: 'pip install -r requirements-textfsm.txt'\n"
+            "2: 'pip install ssh2net[textfsm]'"
+        )
+        warning = "\n" + msg + "\n" + fix + "\n" + msg
+        warnings.warn(warning)
+        return None
+    template_dir = pkg_resources.resource_filename("ntc_templates", "templates")
+    cli_table = CliTable("index", template_dir)
+    template_index = cli_table.index.GetRowMatch({"Platform": platform, "Command": command})
+    if not template_index:
+        return None
+    template_name = cli_table.index.index[template_index]["Template"]
+    template = open(f"{template_dir}/{template_name}")
+    return template
+
+
+def textfsm_parse(template, output):
+    """
+    Parse output with TextFSM and ntc-templates, try to return structured output
+
+    Args:
+        template: TextIOWrapper or string path to template to use to parse data
+        output: unstructured output from device to parse
+
+    Returns:
+        output: structured data
+
+    """
+    import textfsm  # pylint: disable=E0611
+
+    if not isinstance(template, TextIOWrapper):
+        template = open(template)
+    re_table = textfsm.TextFSM(template)
+    try:
+        output = re_table.ParseText(output)
+        return output
+    except textfsm.parser.TextFSMError:
+        pass
+    return output

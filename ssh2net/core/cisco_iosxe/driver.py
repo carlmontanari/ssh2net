@@ -92,3 +92,4 @@ class IOSXEDriver(BaseDriver):
         self.send_inputs_interact = conn.send_inputs_interact
         self.privs = PRIVS
         self.default_desired_priv = "privilege_exec"
+        self.textfsm_platform = "cisco_ios"
