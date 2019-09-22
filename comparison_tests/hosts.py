@@ -32,12 +32,10 @@ NXOS_TEST = {
 #    "test_commands": ["show run", "show version"],
 # }
 
-
-# need to get vsrx/vmx image in vrnetlab for testing
-# JUNOS_TEST = {
-#    "host": "172.18.0.15",
-#    "username": "vrnetlab",
-#    "password": "VR-netlab9",
-#    "device_type": "juniper_junos",
-#    "test_commands": ["show configuration", "show version"],
-# }
+JUNOS_TEST = {
+    "host": "172.18.0.15",
+    "username": "vrnetlab",
+    "password": "VR-netlab9",
+    "device_type": "juniper_junos",
+    "test_commands": ["show configuration", "show version"],
+}
