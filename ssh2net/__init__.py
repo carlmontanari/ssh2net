@@ -3,12 +3,14 @@ import logging
 from logging import NullHandler
 
 from ssh2net.base import SSH2Net
+from ssh2net.channel import SSH2NetChannel
+from ssh2net.session import SSH2NetSession
 from ssh2net.helper import ConnectHandler
 from ssh2net.ssh_config import SSH2NetSSHConfig
 
 
 __version__ = "2019.09.21"
-__all__ = ("SSH2Net", "SSH2NetSSHConfig", "ConnectHandler")
+__all__ = ("SSH2Net", "SSH2NetSession", "SSH2NetChannel", "SSH2NetSSHConfig", "ConnectHandler")
 
 
 # Class to filter duplicate log entries for the channel logger
