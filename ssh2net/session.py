@@ -4,8 +4,10 @@ import logging
 from ssh2.session import Session
 from ssh2.exceptions import AuthenticationError
 
+from ssh2net.channel import SSH2NetChannel
 
-class SSH2NetSession:
+
+class SSH2NetSession(SSH2NetChannel):
     def _session_alive(self):
         """
         Check if session is alive and authenticated

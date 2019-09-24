@@ -6,17 +6,16 @@ import re
 import socket
 from typing import Callable, Optional, Union
 
-from ssh2net.channel import SSH2NetChannel
+from ssh2net.session import SSH2NetSession
 from ssh2net.exceptions import ValidationError, SetupTimeout
 from ssh2net.helper import validate_external_function
-from ssh2net.session import SSH2NetSession
 from ssh2net.ssh_config import SSH2NetSSHConfig
 
 
 session_log = logging.getLogger("ssh2net_session")
 
 
-class SSH2Net(SSH2NetChannel, SSH2NetSession):
+class SSH2Net(SSH2NetSession):
     def __init__(
         self,
         setup_host: str = "",
