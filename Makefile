@@ -38,6 +38,18 @@ stop_dev_env:
 	${DOCKER_COMPOSE} \
 		down
 
+# run with sudo!
+add_delay_dev_env:
+	tc qdisc del dev br_ssh2net root; \
+	tc qdisc add dev br_ssh2net root handle 1: prio; \
+	tc qdisc add dev br_ssh2net parent 1:3 handle 30: tbf rate 20kbit buffer 1600 limit 3000; \
+	tc qdisc add dev br_ssh2net parent 30:1 handle 31: netem  delay 1000ms 10ms distribution normal loss 10%; \
+	tc filter add dev br_ssh2net protocol ip parent 1:0 prio 3 u32 match ip dst 172.18.0.0/26 flowid 1:3
+
+# run with sudo!
+remove_delay_dev_env:
+	tc qdisc del dev br_ssh2net root
+
 test_unit:
 	python -m pytest \
 	--cov=ssh2net \
