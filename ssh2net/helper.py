@@ -148,7 +148,7 @@ def _textfsm_get_template(platform: str, command: str):
     """
     try:
         from textfsm.clitable import CliTable
-        import ntc_templates  # pylint: disable=W0611
+        import ntc_templates  # noqa
     except ModuleNotFoundError as e:
         err = f"Module '{e.name}' not installed!"
         msg = f"***** {err} {'*' * (80 - len(err))}"
@@ -183,7 +183,7 @@ def textfsm_parse(template, output):
         output: structured data
 
     """
-    import textfsm  # pylint: disable=E0611
+    import textfsm  # noqa
 
     if not isinstance(template, TextIOWrapper):
         template = open(template)
