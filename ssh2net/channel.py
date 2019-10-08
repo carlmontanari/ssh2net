@@ -125,7 +125,7 @@ class SSH2NetChannel:
         while True:
             output += self.channel.read()[1]
             channel_log.debug(f"Read: {repr(output)}")
-            # we dont need to deal w/ line replacement for the actual output, only for
+            # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
             output_copy = re.sub("\r", "\n", output_copy.decode("unicode_escape").strip())

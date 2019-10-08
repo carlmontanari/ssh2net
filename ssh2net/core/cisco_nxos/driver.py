@@ -1,7 +1,8 @@
 """ssh2net.core.cisco_nxos.driver"""
 import re
+from typing import Any, Dict
 
-from ssh2net.core.driver import BaseDriver, PrivilegeLevel
+from ssh2net.core.driver import BaseNetworkDriver, PrivilegeLevel
 
 
 NXOS_ARG_MAPPER = {
@@ -71,13 +72,13 @@ PRIVS = {
 }
 
 
-class NXOSDriver(BaseDriver):
-    def __init__(self, conn):
+class NXOSDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
         """
         Initialize SSH2Net NXOSDriver Object
 
         Args:
-            conn: ssh2net connection object
+            **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
             N/A  # noqa
@@ -85,10 +86,6 @@ class NXOSDriver(BaseDriver):
         Raises:
             N/A  # noqa
         """
-        super().__init__(conn)
-        self.base_conn = conn
-        self.get_prompt = conn.get_prompt
-        self.send_inputs = conn.send_inputs
-        self.send_inputs_interact = conn.send_inputs_interact
+        super().__init__(**kwargs)
         self.privs = PRIVS
         self.default_desired_priv = "privilege_exec"

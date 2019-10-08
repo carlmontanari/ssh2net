@@ -16,7 +16,7 @@ session_logger_file_handler = logging.FileHandler(session_log_file)
 session_logger_file_handler.setFormatter(logging.Formatter(log_format))
 # Add log handler to the session_logger
 session_logger.addHandler(session_logger_file_handler)
-# Do not propogate logs to stdout
+# Do not propagate logs to stdout
 session_logger.propagate = False
 
 # Repeat similar steps as above for channel logger; channel logger captures reads/writes
@@ -29,8 +29,8 @@ channel_logger_file_handler.setFormatter(logging.Formatter(log_format))
 channel_logger.addHandler(channel_logger_file_handler)
 channel_logger.propagate = False
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "myusername", "auth_password": "mypassword"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 with ssh2net.SSH2Net(**my_device) as conn:
     show_run = conn.send_inputs("show run")
 
-print(show_run[0][1])
+print(show_run[0])

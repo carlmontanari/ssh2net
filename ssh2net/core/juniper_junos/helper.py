@@ -7,6 +7,12 @@ def disable_paging(cls):
 
     Args:
         cls: SSH2Net connection object
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
     """
     cls.send_inputs("set cli screen-length 0")
     cls.send_inputs("set cli screen-width 511")

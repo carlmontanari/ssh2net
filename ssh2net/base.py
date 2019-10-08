@@ -56,7 +56,7 @@ class SSH2Net(SSH2NetSession):
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
-                IMPORTANT: regex search uses multiline and case insensitive flags. multiline allows
+                IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
                 for highly reliably matching for prompts after stripping trailing white space,
                 case insensitive is just a convenience factor so i can be lazy.
             comms_prompt_timeout: timeout in seconds for waiting for channel operations.
@@ -334,7 +334,7 @@ class SSH2Net(SSH2NetSession):
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
-            session_log.info(f"Failed to validate host {self.host} as a resovable dns name")
+            session_log.info(f"Failed to validate host {self.host} as a resolvable dns name")
         raise ValidationError(f"Host {self.host} is not an IP or resolvable DNS name.")
 
     """ socket setup """  # noqa

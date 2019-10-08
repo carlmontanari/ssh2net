@@ -16,7 +16,7 @@ ssh2net is focused on being lightweight and pluggable so that it *should* be fle
 
 Documentation is auto-generated [using pdoc3](https://github.com/pdoc3/pdoc). Documentation is linted (see Linting and Testing section) via [pydocstyle](https://github.com/PyCQA/pydocstyle/) and [darglint](https://github.com/terrencepreilly/darglint).
 
-Documentation is hosted via GitHub Pages and can be found [here.](https://carlmontanari.github.io/ssh2net/docs/ssh2net/index.html) You can also view the readme as a webpage [here.](https://carlmontanari.github.io/ssh2net/)
+Documentation is hosted via GitHub Pages and can be found [here.](https://carlmontanari.github.io/ssh2net/docs/ssh2net/index.html) You can also view the readme as a web page [here.](https://carlmontanari.github.io/ssh2net/)
 
 To regenerate documentation locally, use the following make command:
 
@@ -78,7 +78,7 @@ The "base" pattern is:
 
 `"^[a-z0-9.\-@()/:]{1,20}[#>$]$"`
 
-This pattern works for (tested on show commands only, but shoudl work on config commands for at leaset IOS-XE, and NX-OS) IOS-XE, NX-OS, JunOS, and IOS-XR.
+This pattern works for (tested on show commands only, but should work on config commands for at least IOS-XE, and NX-OS) IOS-XE, NX-OS, JunOS, and IOS-XR.
 
 If you do not wish to match cisco "config" level prompts you can use:
 

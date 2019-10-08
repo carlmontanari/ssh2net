@@ -13,12 +13,10 @@ class MockSSH2Net:
 
 
 def test__determine_current_priv_iosxe_exec():
-    conn = MockSSH2Net
-    driver = JunosDriver(conn)
+    driver = JunosDriver()
     assert driver._determine_current_priv("mysrx>") == PRIVS["exec"]
 
 
 def test__determine_current_priv_iosxe_privilege_exec():
-    conn = MockSSH2Net
-    driver = JunosDriver(conn)
+    driver = JunosDriver()
     assert driver._determine_current_priv("mysrx#") == PRIVS["configuration"]

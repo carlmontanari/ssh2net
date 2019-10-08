@@ -1,6 +1,11 @@
 from ssh2net import ConnectHandler
 
-my_device = {"setup_host": "IP/NAME", "auth_user": "USERNAME", "auth_password": "PASSWORD"}
+my_device = {
+    "device_type": "cisco_xe",
+    "host": "172.18.0.11",
+    "username": "vrnetlab",
+    "password": "VR-netlab9",
+}
 
 driver = ConnectHandler(**my_device)
 output = driver.send_command("show version")

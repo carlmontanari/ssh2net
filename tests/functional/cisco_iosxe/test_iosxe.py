@@ -141,3 +141,34 @@ def test_disable_paging_external_function():
 
     assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
     assert show_run.splitlines()[7:] == expected_show_run.splitlines()[7:]
+
+
+def test__determine_current_priv_exec():
+    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
+        conn.send_inputs("disable")
+        current_prompt = conn.get_prompt()
+        current_priv = conn._determine_current_priv(current_prompt)
+    assert current_priv.name == "exec"
+
+
+def test__determine_current_priv_privilege_exec():
+    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
+        current_prompt = conn.get_prompt()
+        current_priv = conn._determine_current_priv(current_prompt)
+    assert current_priv.name == "privilege_exec"
+
+
+def test__determine_current_priv_configuration():
+    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
+        conn.send_inputs("configure terminal")
+        current_prompt = conn.get_prompt()
+        current_priv = conn._determine_current_priv(current_prompt)
+    assert current_priv.name == "configuration"
+
+
+def test__determine_current_priv_special_configuration():
+    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
+        conn.send_inputs(["configure terminal", "interface GigabitEthernet1"])
+        current_prompt = conn.get_prompt()
+        current_priv = conn._determine_current_priv(current_prompt)
+    assert current_priv.name == "special_configuration"

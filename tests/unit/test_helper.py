@@ -1,33 +1,13 @@
 from io import TextIOWrapper
 import pkg_resources
 
-from ssh2net.helper import transform_netmiko_kwargs, _textfsm_get_template, textfsm_parse
+from ssh2net.helper import _textfsm_get_template, textfsm_parse
 
 
 IOS_ARP = """Protocol  Address          Age (min)  Hardware Addr   Type   Interface
 Internet  172.31.254.1            -   0000.0c07.acfe  ARPA   Vlan254
 Internet  172.31.254.2            -   c800.84b2.e9c2  ARPA   Vlan254
 """
-
-
-def test_transform_netmiko_args():
-    netmiko_args = {
-        "host": "1.2.3.4",
-        "username": "person",
-        "password": "password",
-        "port": 123,
-        "global_delay_factor": 5,
-    }
-    transformed_args = transform_netmiko_kwargs(netmiko_args)
-    assert transformed_args["setup_host"] == "1.2.3.4"
-    assert transformed_args["comms_prompt_timeout"] == 50
-
-
-def test_transform_netmiko_args_setup_timeout():
-    netmiko_args = {"host": "1.2.3.4", "username": "person", "password": "password", "port": 123}
-    transformed_args = transform_netmiko_kwargs(netmiko_args)
-    assert transformed_args["setup_host"] == "1.2.3.4"
-    assert transformed_args["comms_prompt_timeout"] == 5
 
 
 def test__textfsm_get_template_valid_template():

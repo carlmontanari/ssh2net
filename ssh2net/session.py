@@ -88,7 +88,7 @@ class SSH2NetSession(SSH2NetChannel):
             logging.critical(f"Public key authentication with host {self.host} failed. ")
         except Exception as exc:
             logging.critical(
-                "Unkown error occured during public key authentication with host "
+                "Unknown error occurred during public key authentication with host "
                 f"{self.host}; Exception: {exc}"
             )
             raise exc

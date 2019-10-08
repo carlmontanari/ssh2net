@@ -1,8 +1,12 @@
-"""ssh2net.core.base"""
+"""ssh2net.core.driver"""
 import collections
 import re
+from typing import Any, Dict, Optional, Union
 
+from ssh2net.base import SSH2Net
 from ssh2net.exceptions import UnknownPrivLevel
+from ssh2net.helper import _textfsm_get_template, textfsm_parse
+
 
 PrivilegeLevel = collections.namedtuple(
     "PrivLevel",
@@ -21,13 +25,13 @@ PrivilegeLevel = collections.namedtuple(
 PRIVS = {}
 
 
-class BaseDriver:
-    def __init__(self, conn):
+class BaseNetworkDriver(SSH2Net):
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         """
-        Initialize SSH2Net BaseDriver Object
+        Initialize SSH2Net BaseNetworkDriver Object
 
         Args:
-            conn: ssh2net connection object
+            auth_secondary: password to use for secondary authentication (enable)
 
         Returns:
             N/A  # noqa
@@ -35,15 +39,13 @@ class BaseDriver:
         Raises:
             N/A  # noqa
         """
-        self.base_conn = conn
-        self.get_prompt = conn.get_prompt
-        self.send_inputs = conn.send_inputs
-        self.send_inputs_interact = conn.send_inputs_interact
+        self.auth_secondary = auth_secondary
+        super().__init__(**kwargs)
         self.privs = PRIVS
         self.default_desired_priv = None
         self.textfsm_platform = None
 
-    def _determine_current_priv(self, current_prompt):
+    def _determine_current_priv(self, current_prompt: str):
         """
         Determine current privilege level from prompt string
 
@@ -83,7 +85,7 @@ class BaseDriver:
                     (
                         current_priv.escalate,
                         current_priv.escalate_prompt,
-                        self.base_conn.auth_enable,
+                        self.auth_enable,
                         self.privs.get("escalate_priv"),
                     ),
                     hidden_response=True,
@@ -182,9 +184,6 @@ class BaseDriver:
         Raises:
             N/A  # noqa
         """
-        # only import when necessary to avoid circular import; because helper imports base driver
-        from ssh2net.helper import _textfsm_get_template, textfsm_parse
-
         template = _textfsm_get_template(self.textfsm_platform, command)
         if template:
             output = textfsm_parse(template, output)

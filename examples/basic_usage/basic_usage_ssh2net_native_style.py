@@ -2,7 +2,7 @@ from ssh2net import SSH2Net
 
 # Example assumes IOSXE, but should work on most platform where the command syntax below is valid!
 
-my_device = {"setup_host": "IP/NAME", "auth_user": "USERNAME", "auth_password": "PASSWORD"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
 # Example with context manager:
 with SSH2Net(**my_device) as conn:
