@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.6.3" />
+<meta name="generator" content="pdoc 0.7.1" />
 <title>ssh2net.base API documentation</title>
 <meta name="description" content="ssh2net.base" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
@@ -22,37 +22,45 @@
 <section id="section-intro">
 <p>ssh2net.base</p>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.base&#34;&#34;&#34;
-from typing import Callable, Optional, Union
 import ipaddress
+import logging
+import os
 import re
 import socket
+from typing import Callable, Optional, Union
 
-from ssh2net.channel import SSH2NetChannel
+from ssh2net.session import SSH2NetSession
 from ssh2net.exceptions import ValidationError, SetupTimeout
 from ssh2net.helper import validate_external_function
-from ssh2net.session import SSH2NetSession
+from ssh2net.ssh_config import SSH2NetSSHConfig
 
 
-class SSH2Net(SSH2NetChannel, SSH2NetSession):
+session_log = logging.getLogger(&#34;ssh2net_session&#34;)
+
+
+class SSH2Net(SSH2NetSession):
     def __init__(
         self,
         setup_host: str = &#34;&#34;,
         setup_validate_host: Optional[bool] = False,
         setup_port: Optional[int] = 22,
         setup_timeout: Optional[int] = 5,
+        setup_ssh_config_file: Optional[Union[str, bool]] = False,
         session_keepalive: Optional[bool] = False,
         session_keepalive_interval: Optional[int] = 10,
         session_timeout: Optional[int] = 5000,
         auth_user: str = &#34;&#34;,
         auth_password: Optional[Union[str]] = None,
         auth_public_key: Optional[Union[str]] = None,
-        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;,
+        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
         comms_prompt_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = &#34;\n&#34;,
         comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
-        comms_disable_paging: Optional[Union[str, Callable]] = &#34;term length 0&#34;,
+        comms_disable_paging: Optional[Union[str, Callable]] = &#34;terminal length 0&#34;,
     ):
         r&#34;&#34;&#34;
         Initialize SSH2Net Object
@@ -65,6 +73,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             setup_validate_host: whether or not to validate ip address is valid or dns is resolvable
             setup_port: port to open ssh session to
             setup_timeout: timeout in seconds for opening underlying socket to host
+            setup_ssh_config_file: ssh config file to use or True to try system default files
             session_keepalive: FUTURE USE: whether or not to try to keep session alive
             session_keepalive_interval: FUTURE USE: interval to use for session keepalives
             session_timeout: time in ms for session read operations; 0 is &#34;forever&#34; and will block
@@ -74,16 +83,9 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
-
-                the base pattern is:
-                &#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;
-
-                if you do not wish to match cisco &#34;config&#34; level prompts you can use:
-                &#34;^[a-z0-9.-@]{1,20}[#&gt;$]$&#34;.
-
-                IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
-                for highly reliably matching for prompts after stripping trailling white space,
-                case insensetive is just a conveinence factor so i can be lazy.
+                IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
+                for highly reliably matching for prompts after stripping trailing white space,
+                case insensitive is just a convenience factor so i can be lazy.
             comms_prompt_timeout: timeout in seconds for waiting for channel operations.
                 this is NOT the &#34;read&#34; timeout. this is the timeout for the entire operation
                 sent to send_inputs/send_inputs_interact
@@ -94,7 +96,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                 string to send to device to disable paging
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             ValueError: in the following situations:
@@ -105,7 +107,6 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
                 - session_timeout is not an integer
                 - comms_prompt_timeout is not an integer
                 - comms_return_char is not a string
-            TypeError: if comms_regex_prompt is not compilable regex
 
         &#34;&#34;&#34;
         # set a flag to indicate if a shell has been invoked
@@ -128,9 +129,13 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         # auth setup
         self.auth_user = auth_user.strip()
         if auth_public_key:
-            self.auth_public_key = auth_public_key.strip()
-        elif auth_password:
+            self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
+        else:
+            self.auth_public_key = auth_public_key
+        if auth_password:
             self.auth_password = auth_password.strip()
+        else:
+            self.auth_password = auth_password
 
         # comms setup
         # try to compile prompt to raise TypeError before opening any connections
@@ -139,9 +144,12 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self.comms_prompt_timeout = int(comms_prompt_timeout)
 
         # validate that the return character set is a string
+        # do this to ensure provided value is a string; this prevents an int being cast to string
+        # making it look like things are ok
         if isinstance(comms_return_char, str):
             self.comms_return_char = comms_return_char
         else:
+            session_log.critical(f&#34;Invalid comms_return_char: {comms_return_char}&#34;)
             raise ValueError(
                 f&#34;{comms_return_char} is an invalid comms_return_char; must be string.&#34;
             )
@@ -149,25 +157,96 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
+        if setup_ssh_config_file:
+            if isinstance(setup_ssh_config_file, bool) and setup_ssh_config_file:
+                setup_ssh_config_file = &#34;&#34;
+            self._setup_ssh_config_args(setup_ssh_config_file)
+
+        session_log.info(f&#34;{str(self)}; {repr(self)}&#34;)
+
     def __enter__(self):
-        &#34;&#34;&#34;Enter method for context manager&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         self.open_shell()
         return self
 
-    def __exit__(self, type, value, traceback):
-        &#34;&#34;&#34;Exit method to cleanup for context manager&#34;&#34;&#34;
+    def __exit__(self, exception_type, exception_value, traceback):
+        &#34;&#34;&#34;
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         self.close()
 
     def __str__(self):
-        &#34;&#34;&#34;Magic str method for SSH2Net class&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Magic str method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         return f&#34;SSH2Net Connection Object for host {self.host}&#34;
 
     def __repr__(self):
-        &#34;&#34;&#34;Magic repr method for SSH2Net class; for now just returns str&#34;&#34;&#34;
-        return str(self)
+        &#34;&#34;&#34;
+        Magic repr method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            repr: repr for class object
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        class_dict = self.__dict__.copy()
+        class_dict[&#34;auth_password&#34;] = &#34;********&#34;
+        return f&#34;SSH2Net {class_dict}&#34;
 
     def __bool__(self):
-        &#34;&#34;&#34;Magic bool method based on result of session_alive&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Magic bool method based on result of session_alive
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            bool: True/False if session is alive or not
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         return self._session_alive()
 
     @staticmethod
@@ -191,15 +270,14 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         if comms_pre_login_handler:
             if callable(comms_pre_login_handler):
                 return comms_pre_login_handler
-            else:
-                ext_func = validate_external_function(comms_pre_login_handler)
-                if ext_func:
-                    return ext_func
-                else:
-                    raise ValueError(
-                        f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
-                        &#34;or path to a function.&#34;
-                    )
+            ext_func = validate_external_function(comms_pre_login_handler)
+            if ext_func:
+                return ext_func
+            session_log.critical(f&#34;Invalid comms_pre_login_handler: {comms_pre_login_handler}&#34;)
+            raise ValueError(
+                f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
+                &#34;or path to a function.&#34;
+            )
         return comms_pre_login_handler
 
     @staticmethod
@@ -223,31 +301,52 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
         if comms_disable_paging != &#34;term length 0&#34;:
             if callable(comms_disable_paging):
                 return comms_disable_paging
-            else:
-                ext_func = validate_external_function(comms_disable_paging)
-                if ext_func:
-                    return ext_func
-                else:
-                    if isinstance(comms_disable_paging, str):
-                        return comms_disable_paging
-                    else:
-                        raise ValueError(
-                            f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
-                            &#34;path to a function, or is not a string.&#34;
-                        )
+            ext_func = validate_external_function(comms_disable_paging)
+            if ext_func:
+                return ext_func
+            if isinstance(comms_disable_paging, str):
+                return comms_disable_paging
+            session_log.critical(f&#34;Invalid comms_disable_paging: {comms_disable_paging}&#34;)
+            raise ValueError(
+                f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
+                &#34;path to a function, or is not a string.&#34;
+            )
         return comms_disable_paging
 
-    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;
+    def _setup_ssh_config_args(self, setup_ssh_config_file):
+        &#34;&#34;&#34;
+        Set any args from ssh config file to override existing settings
+
+        Args:
+            setup_ssh_config_file: string of path to ssh config file, or bool True
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ssh_config = SSH2NetSSHConfig(setup_ssh_config_file)
+        host_config = ssh_config.lookup(self.host)
+        if host_config.port:
+            self.setup_port = host_config.port
+        if host_config.user:
+            self.auth_user = host_config.user
+        if host_config.identity_file:
+            self.auth_public_key = os.path.expanduser(host_config.identity_file.strip().encode())
+
+    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;  # noqa
 
     def _validate_host(self) -&gt; None:
         &#34;&#34;&#34;
         Validate host is valid IP or resolvable DNS name
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            None
+            N/A  # noqa
 
         Raises:
             ValidationError: if host is invalid IP and is non resolvable
@@ -257,28 +356,28 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             ipaddress.ip_address(self.host)
             return
         except ValueError:
-            pass
+            session_log.info(f&#34;Failed to validate host {self.host} as an ip address&#34;)
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
-            pass
+            session_log.info(f&#34;Failed to validate host {self.host} as a resolvable dns name&#34;)
         raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)
 
-    &#34;&#34;&#34; socket setup &#34;&#34;&#34;
+    &#34;&#34;&#34; socket setup &#34;&#34;&#34;  # noqa
 
     def _socket_alive(self) -&gt; bool:
         &#34;&#34;&#34;
         Check if underlying socket is alive
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False if socket is alive
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         try:
@@ -286,20 +385,22 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             return True
         except OSError:
             # socket is not alive
+            session_log.debug(f&#34;Socket to host {self.host} is not alive&#34;)
             return False
         except AttributeError:
             # socket never created yet
+            session_log.debug(f&#34;Socket to host {self.host} has never been created&#34;)
             return False
 
     def _socket_open(self) -&gt; None:
         &#34;&#34;&#34;
-        Open underyling socket
+        Open underlying socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             SetupTimeout: if socket connection times out
@@ -311,44 +412,50 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
             try:
                 self.sock.connect((self.host, self.port))
             except socket.timeout:
+                session_log.critical(
+                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
+                )
                 raise SetupTimeout(
                     f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
                 )
+            session_log.debug(f&#34;Socket to host {self.host} opened&#34;)
 
     def _socket_close(self) -&gt; None:
         &#34;&#34;&#34;
-        Close underyling socket
+        Close underlying socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if self._socket_alive():
             self.sock.close()
+            session_log.debug(f&#34;Socket to host {self.host} closed&#34;)
 
     def close(self) -&gt; None:
         &#34;&#34;&#34;
-        Fully close scoket, session, and channel
+        Fully close socket, session, and channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         self._channel_close()
         self._session_close()
-        self._socket_close()</code></pre>
+        self._socket_close()
+        session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -362,7 +469,7 @@ class SSH2Net(SSH2NetChannel, SSH2NetSession):
 <dl>
 <dt id="ssh2net.base.SSH2Net"><code class="flex name class">
 <span>class <span class="ident">SSH2Net</span></span>
-<span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, session_keepalive=False, session_keepalive_interval=10, session_timeout=5000, auth_user='', auth_password=None, auth_public_key=None, comms_prompt_regex='^[a-z0-9.\\-@()]{1,20}[#>$]$', comms_prompt_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='term length 0')</span>
+<span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, setup_ssh_config_file=False, session_keepalive=False, session_keepalive_interval=10, session_timeout=5000, auth_user='', auth_password=None, auth_public_key=None, comms_prompt_regex=^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$, comms_prompt_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='terminal length 0')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Initialize SSH2Net Object</p>
@@ -378,6 +485,8 @@ to the "comms_prompt_regex" as this is highly critical to this tool working well
 <dd>port to open ssh session to</dd>
 <dt><strong><code>setup_timeout</code></strong></dt>
 <dd>timeout in seconds for opening underlying socket to host</dd>
+<dt><strong><code>setup_ssh_config_file</code></strong></dt>
+<dd>ssh config file to use or True to try system default files</dd>
 <dt><strong><code>session_keepalive</code></strong></dt>
 <dd>FUTURE USE: whether or not to try to keep session alive</dd>
 <dt><strong><code>session_keepalive_interval</code></strong></dt>
@@ -391,18 +500,12 @@ to the "comms_prompt_regex" as this is highly critical to this tool working well
 <dt><strong><code>auth_public_key</code></strong></dt>
 <dd>path to ssh public key to use to connect to host</dd>
 <dt><strong><code>comms_prompt_regex</code></strong></dt>
-<dd>
-<p>regex pattern to use for prompt matching.
+<dd>regex pattern to use for prompt matching.
 this is the single most important attribute here! if this does not match a prompt,
-ssh2net will not work!</p>
-<p>the base pattern is:
-"^[a-z0-9.-@()]{1,20}[#&gt;$]$"</p>
-<p>if you do not wish to match cisco "config" level prompts you can use:
-"^[a-z0-9.-@]{1,20}[#&gt;$]$".</p>
-<p>IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
-for highly reliably matching for prompts after stripping trailling white space,
-case insensetive is just a conveinence factor so i can be lazy.</p>
-</dd>
+ssh2net will not work!
+IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
+for highly reliably matching for prompts after stripping trailing white space,
+case insensitive is just a convenience factor so i can be lazy.</dd>
 <dt><strong><code>comms_prompt_timeout</code></strong></dt>
 <dd>timeout in seconds for waiting for channel operations.
 this is NOT the "read" timeout. this is the timeout for the entire operation
@@ -418,7 +521,8 @@ string to send to device to disable paging</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="raises">Raises</h2>
@@ -432,29 +536,30 @@ string to send to device to disable paging</dd>
 - session_timeout is not an integer
 - comms_prompt_timeout is not an integer
 - comms_return_char is not a string</dd>
-<dt><strong><code>TypeError</code></strong></dt>
-<dd>if comms_regex_prompt is not compilable regex</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">class SSH2Net(SSH2NetChannel, SSH2NetSession):
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SSH2Net(SSH2NetSession):
     def __init__(
         self,
         setup_host: str = &#34;&#34;,
         setup_validate_host: Optional[bool] = False,
         setup_port: Optional[int] = 22,
         setup_timeout: Optional[int] = 5,
+        setup_ssh_config_file: Optional[Union[str, bool]] = False,
         session_keepalive: Optional[bool] = False,
         session_keepalive_interval: Optional[int] = 10,
         session_timeout: Optional[int] = 5000,
         auth_user: str = &#34;&#34;,
         auth_password: Optional[Union[str]] = None,
         auth_public_key: Optional[Union[str]] = None,
-        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;,
+        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
         comms_prompt_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = &#34;\n&#34;,
         comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
-        comms_disable_paging: Optional[Union[str, Callable]] = &#34;term length 0&#34;,
+        comms_disable_paging: Optional[Union[str, Callable]] = &#34;terminal length 0&#34;,
     ):
         r&#34;&#34;&#34;
         Initialize SSH2Net Object
@@ -467,6 +572,7 @@ string to send to device to disable paging</dd>
             setup_validate_host: whether or not to validate ip address is valid or dns is resolvable
             setup_port: port to open ssh session to
             setup_timeout: timeout in seconds for opening underlying socket to host
+            setup_ssh_config_file: ssh config file to use or True to try system default files
             session_keepalive: FUTURE USE: whether or not to try to keep session alive
             session_keepalive_interval: FUTURE USE: interval to use for session keepalives
             session_timeout: time in ms for session read operations; 0 is &#34;forever&#34; and will block
@@ -476,16 +582,9 @@ string to send to device to disable paging</dd>
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
-
-                the base pattern is:
-                &#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;
-
-                if you do not wish to match cisco &#34;config&#34; level prompts you can use:
-                &#34;^[a-z0-9.-@]{1,20}[#&gt;$]$&#34;.
-
-                IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
-                for highly reliably matching for prompts after stripping trailling white space,
-                case insensetive is just a conveinence factor so i can be lazy.
+                IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
+                for highly reliably matching for prompts after stripping trailing white space,
+                case insensitive is just a convenience factor so i can be lazy.
             comms_prompt_timeout: timeout in seconds for waiting for channel operations.
                 this is NOT the &#34;read&#34; timeout. this is the timeout for the entire operation
                 sent to send_inputs/send_inputs_interact
@@ -496,7 +595,7 @@ string to send to device to disable paging</dd>
                 string to send to device to disable paging
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             ValueError: in the following situations:
@@ -507,7 +606,6 @@ string to send to device to disable paging</dd>
                 - session_timeout is not an integer
                 - comms_prompt_timeout is not an integer
                 - comms_return_char is not a string
-            TypeError: if comms_regex_prompt is not compilable regex
 
         &#34;&#34;&#34;
         # set a flag to indicate if a shell has been invoked
@@ -530,9 +628,13 @@ string to send to device to disable paging</dd>
         # auth setup
         self.auth_user = auth_user.strip()
         if auth_public_key:
-            self.auth_public_key = auth_public_key.strip()
-        elif auth_password:
+            self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
+        else:
+            self.auth_public_key = auth_public_key
+        if auth_password:
             self.auth_password = auth_password.strip()
+        else:
+            self.auth_password = auth_password
 
         # comms setup
         # try to compile prompt to raise TypeError before opening any connections
@@ -541,9 +643,12 @@ string to send to device to disable paging</dd>
         self.comms_prompt_timeout = int(comms_prompt_timeout)
 
         # validate that the return character set is a string
+        # do this to ensure provided value is a string; this prevents an int being cast to string
+        # making it look like things are ok
         if isinstance(comms_return_char, str):
             self.comms_return_char = comms_return_char
         else:
+            session_log.critical(f&#34;Invalid comms_return_char: {comms_return_char}&#34;)
             raise ValueError(
                 f&#34;{comms_return_char} is an invalid comms_return_char; must be string.&#34;
             )
@@ -551,25 +656,96 @@ string to send to device to disable paging</dd>
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
+        if setup_ssh_config_file:
+            if isinstance(setup_ssh_config_file, bool) and setup_ssh_config_file:
+                setup_ssh_config_file = &#34;&#34;
+            self._setup_ssh_config_args(setup_ssh_config_file)
+
+        session_log.info(f&#34;{str(self)}; {repr(self)}&#34;)
+
     def __enter__(self):
-        &#34;&#34;&#34;Enter method for context manager&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         self.open_shell()
         return self
 
-    def __exit__(self, type, value, traceback):
-        &#34;&#34;&#34;Exit method to cleanup for context manager&#34;&#34;&#34;
+    def __exit__(self, exception_type, exception_value, traceback):
+        &#34;&#34;&#34;
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         self.close()
 
     def __str__(self):
-        &#34;&#34;&#34;Magic str method for SSH2Net class&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Magic str method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         return f&#34;SSH2Net Connection Object for host {self.host}&#34;
 
     def __repr__(self):
-        &#34;&#34;&#34;Magic repr method for SSH2Net class; for now just returns str&#34;&#34;&#34;
-        return str(self)
+        &#34;&#34;&#34;
+        Magic repr method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            repr: repr for class object
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        class_dict = self.__dict__.copy()
+        class_dict[&#34;auth_password&#34;] = &#34;********&#34;
+        return f&#34;SSH2Net {class_dict}&#34;
 
     def __bool__(self):
-        &#34;&#34;&#34;Magic bool method based on result of session_alive&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Magic bool method based on result of session_alive
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            bool: True/False if session is alive or not
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         return self._session_alive()
 
     @staticmethod
@@ -593,15 +769,14 @@ string to send to device to disable paging</dd>
         if comms_pre_login_handler:
             if callable(comms_pre_login_handler):
                 return comms_pre_login_handler
-            else:
-                ext_func = validate_external_function(comms_pre_login_handler)
-                if ext_func:
-                    return ext_func
-                else:
-                    raise ValueError(
-                        f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
-                        &#34;or path to a function.&#34;
-                    )
+            ext_func = validate_external_function(comms_pre_login_handler)
+            if ext_func:
+                return ext_func
+            session_log.critical(f&#34;Invalid comms_pre_login_handler: {comms_pre_login_handler}&#34;)
+            raise ValueError(
+                f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
+                &#34;or path to a function.&#34;
+            )
         return comms_pre_login_handler
 
     @staticmethod
@@ -625,31 +800,52 @@ string to send to device to disable paging</dd>
         if comms_disable_paging != &#34;term length 0&#34;:
             if callable(comms_disable_paging):
                 return comms_disable_paging
-            else:
-                ext_func = validate_external_function(comms_disable_paging)
-                if ext_func:
-                    return ext_func
-                else:
-                    if isinstance(comms_disable_paging, str):
-                        return comms_disable_paging
-                    else:
-                        raise ValueError(
-                            f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
-                            &#34;path to a function, or is not a string.&#34;
-                        )
+            ext_func = validate_external_function(comms_disable_paging)
+            if ext_func:
+                return ext_func
+            if isinstance(comms_disable_paging, str):
+                return comms_disable_paging
+            session_log.critical(f&#34;Invalid comms_disable_paging: {comms_disable_paging}&#34;)
+            raise ValueError(
+                f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
+                &#34;path to a function, or is not a string.&#34;
+            )
         return comms_disable_paging
 
-    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;
+    def _setup_ssh_config_args(self, setup_ssh_config_file):
+        &#34;&#34;&#34;
+        Set any args from ssh config file to override existing settings
+
+        Args:
+            setup_ssh_config_file: string of path to ssh config file, or bool True
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ssh_config = SSH2NetSSHConfig(setup_ssh_config_file)
+        host_config = ssh_config.lookup(self.host)
+        if host_config.port:
+            self.setup_port = host_config.port
+        if host_config.user:
+            self.auth_user = host_config.user
+        if host_config.identity_file:
+            self.auth_public_key = os.path.expanduser(host_config.identity_file.strip().encode())
+
+    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;  # noqa
 
     def _validate_host(self) -&gt; None:
         &#34;&#34;&#34;
         Validate host is valid IP or resolvable DNS name
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            None
+            N/A  # noqa
 
         Raises:
             ValidationError: if host is invalid IP and is non resolvable
@@ -659,28 +855,28 @@ string to send to device to disable paging</dd>
             ipaddress.ip_address(self.host)
             return
         except ValueError:
-            pass
+            session_log.info(f&#34;Failed to validate host {self.host} as an ip address&#34;)
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
-            pass
+            session_log.info(f&#34;Failed to validate host {self.host} as a resolvable dns name&#34;)
         raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)
 
-    &#34;&#34;&#34; socket setup &#34;&#34;&#34;
+    &#34;&#34;&#34; socket setup &#34;&#34;&#34;  # noqa
 
     def _socket_alive(self) -&gt; bool:
         &#34;&#34;&#34;
         Check if underlying socket is alive
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False if socket is alive
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         try:
@@ -688,20 +884,22 @@ string to send to device to disable paging</dd>
             return True
         except OSError:
             # socket is not alive
+            session_log.debug(f&#34;Socket to host {self.host} is not alive&#34;)
             return False
         except AttributeError:
             # socket never created yet
+            session_log.debug(f&#34;Socket to host {self.host} has never been created&#34;)
             return False
 
     def _socket_open(self) -&gt; None:
         &#34;&#34;&#34;
-        Open underyling socket
+        Open underlying socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             SetupTimeout: if socket connection times out
@@ -713,49 +911,59 @@ string to send to device to disable paging</dd>
             try:
                 self.sock.connect((self.host, self.port))
             except socket.timeout:
+                session_log.critical(
+                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
+                )
                 raise SetupTimeout(
                     f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
                 )
+            session_log.debug(f&#34;Socket to host {self.host} opened&#34;)
 
     def _socket_close(self) -&gt; None:
         &#34;&#34;&#34;
-        Close underyling socket
+        Close underlying socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if self._socket_alive():
             self.sock.close()
+            session_log.debug(f&#34;Socket to host {self.host} closed&#34;)
 
     def close(self) -&gt; None:
         &#34;&#34;&#34;
-        Fully close scoket, session, and channel
+        Fully close socket, session, and channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         self._channel_close()
         self._session_close()
-        self._socket_close()</code></pre>
+        self._socket_close()
+        session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
 <li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -763,49 +971,55 @@ string to send to device to disable paging</dd>
 <span>def <span class="ident">close</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fully close scoket, session, and channel</p>
+<section class="desc"><p>Fully close socket, session, and channel</p>
 <h2 id="args">Args</h2>
-<p>N/A</p>
+<p>N/A
+# noqa</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def close(self) -&gt; None:
     &#34;&#34;&#34;
-    Fully close scoket, session, and channel
+    Fully close socket, session, and channel
 
     Args:
-        N/A
+        N/A  # noqa
 
     Returns:
-        N/A
+        N/A  # noqa
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
     self._channel_close()
     self._session_close()
-    self._socket_close()</code></pre>
+    self._socket_close()
+    session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></b></code>:
+<li><code><b><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></b></code>:
 <ul class="hlist">
-<li><code><a title="ssh2net.channel.SSH2NetChannel.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
-<li><code><a title="ssh2net.channel.SSH2NetChannel.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
-<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
-<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
 </ul>
 </li>
 </ul>
@@ -838,7 +1052,7 @@ string to send to device to disable paging</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

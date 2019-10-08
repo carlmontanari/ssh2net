@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.6.3" />
+<meta name="generator" content="pdoc 0.7.1" />
 <title>ssh2net.channel API documentation</title>
 <meta name="description" content="ssh2net.channel" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
@@ -22,14 +22,21 @@
 <section id="section-intro">
 <p>ssh2net.channel</p>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.channel&#34;&#34;&#34;
-from typing import List, Optional, Tuple
+import logging
 import re
+from typing import List, Optional, Tuple
 
 from ssh2.exceptions import SocketRecvError, Timeout
 
 from ssh2net.decorators import operation_timeout, channel_timeout
+
+
+channel_log = logging.getLogger(&#34;ssh2net_channel&#34;)
+session_log = logging.getLogger(&#34;ssh2net_session&#34;)
 
 
 class SSH2NetChannel:
@@ -45,7 +52,7 @@ class SSH2NetChannel:
             output: bytes object with each line right stripped
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
@@ -55,7 +62,7 @@ class SSH2NetChannel:
     @staticmethod
     def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
         &#34;&#34;&#34;
-        Clean up preceeding empty lines, and strip prompt if desired
+        Clean up preceding empty lines, and strip prompt if desired
 
         Args:
             output: list of strings to parse
@@ -65,7 +72,7 @@ class SSH2NetChannel:
             output: string of joined output lines
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = output.splitlines()
@@ -81,37 +88,8 @@ class SSH2NetChannel:
         output = &#34;\n&#34;.join(output)
         return output
 
-    # this is useless now; change it to a &#34;find prompt&#34; in case people care
     @channel_timeout(Timeout)
-    def _set_prompt(self) -&gt; bool:
-        &#34;&#34;&#34;
-        Read from shell and set the current shell prompt
-
-        Args:
-            N/A
-
-        Returns:
-            N/A
-
-        Raises:
-            N/A
-
-        &#34;&#34;&#34;
-        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
-        self.session.set_timeout(1000)
-        self.channel.flush()
-        self.channel.write(self.comms_return_char)
-        while True:
-            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
-            output = output.decode(&#34;unicode_escape&#34;).strip()
-            channel_match = re.search(pattern, output)
-            if channel_match:
-                self.current_prompt = channel_match.group(0)
-                self.session.set_timeout(self.session_timeout)
-                return
-
-    @channel_timeout(Timeout)
-    def _read_until_input(self, channel_input: str):
+    def _read_until_input(self, channel_input: str) -&gt; None:
         &#34;&#34;&#34;
         Read until all input has been entered, then send return.
 
@@ -121,18 +99,20 @@ class SSH2NetChannel:
             channel_input: string to write to channel
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = b&#34;&#34;
         while channel_input.encode() not in output:
             output += self.channel.read()[1]
+        channel_log.debug(f&#34;Read: {repr(output)}&#34;)
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
 
     @channel_timeout(Timeout)
     def _read_until_prompt(self, output=None, prompt=None):
@@ -147,27 +127,36 @@ class SSH2NetChannel:
             output: bytes of any channel reads after prompt has been seen
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if not output:
             output = b&#34;&#34;
-        # do not like the non regex stuff... would rather regex all of it
+
+        # prefer to use regex match where possible; assume pattern is regex if starting with
+        # ^ or ending with $ -- this works as we always use multi line search
         if not prompt:
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+            prompt_regex = True
         else:
-            prompt_pattern = prompt
+            if prompt.startswith(&#34;^&#34;) or prompt.endswith(&#34;$&#34;):
+                prompt_pattern = re.compile(prompt, flags=re.M | re.I)
+                prompt_regex = True
+            else:
+                prompt_pattern = prompt
+                prompt_regex = False
 
         # disabling session blocking means the while loop will actually iterate
         # without this iteration we can never properly check for prompts
         self.session.set_blocking(False)
         while True:
             output += self.channel.read()[1]
-            # we dont need to deal w/ line replacement for the actual output, only for
+            channel_log.debug(f&#34;Read: {repr(output)}&#34;)
+            # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
             output_copy = re.sub(&#34;\r&#34;, &#34;\n&#34;, output_copy.decode(&#34;unicode_escape&#34;).strip())
-            if not prompt:
+            if prompt_regex:
                 channel_match = re.search(prompt_pattern, output_copy)
             elif prompt in output_copy:
                 channel_match = True
@@ -191,11 +180,15 @@ class SSH2NetChannel:
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.debug(
+            f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         return self._restructure_output(output, strip_prompt=strip_prompt)
@@ -223,11 +216,17 @@ class SSH2NetChannel:
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.debug(
+            f&#34;Attempting to send input interact: {channel_input}; &#34;
+            f&#34;expecting: {expectation}; responding: {response}; &#34;
+            f&#34;with a finale: {finale}; hidden_response: {hidden_response}&#34;
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
@@ -238,7 +237,9 @@ class SSH2NetChannel:
         elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
+        channel_log.debug(f&#34;Write: {repr(response)}&#34;)
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
         return self._restructure_output(output)
 
@@ -254,18 +255,19 @@ class SSH2NetChannel:
             command: string input to write to channel
 
         Returns:
-            result: tuple of command sent and resulting output
+            result: output from command sent over the channel
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.info(f&#34;Attempting to open channel for command execution&#34;)
         if self._shell:
             self._channel_close()
         self._channel_open()
-        results = []
         output = b&#34;&#34;
         channel_buff = 1
+        session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
         self.channel.execute(command)
         while channel_buff &gt; 0:
             try:
@@ -274,25 +276,26 @@ class SSH2NetChannel:
             except SocketRecvError:
                 break
         output = self._rstrip_all_lines(output)
-        output = self._restructure_output(output)
-        results.append((command, output))
+        result = self._restructure_output(output)
         self.close()
-        return results
+        session_log.info(f&#34;Command executed, channel closed&#34;)
+        return result
 
     def open_shell(self) -&gt; None:
         &#34;&#34;&#34;
         Open and prepare interactive SSH shell
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.info(f&#34;Attempting to open interactive shell&#34;)
         # open the channel itself
         self._channel_open()
         # invoke a shell on the channel
@@ -306,19 +309,50 @@ class SSH2NetChannel:
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
+        session_log.info(f&#34;Interactive shell opened&#34;)
 
-    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+    @channel_timeout(Timeout)
+    def get_prompt(self) -&gt; bool:
         &#34;&#34;&#34;
-        Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+        Read from shell and get the current shell prompt
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        self.session.set_timeout(1000)
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
+        while True:
+            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
+            output = output.decode(&#34;unicode_escape&#34;).strip()
+            channel_match = re.search(pattern, output)
+            if channel_match:
+                self.session.set_timeout(self.session_timeout)
+                current_prompt = channel_match.group(0)
+                return current_prompt
+
+    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+        &#34;&#34;&#34;
+        Primary entry point to send data to devices in shell mode; accept inputs and return results
 
         Args:
             inputs: list of strings or string of inputs to send to channel
+            strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if isinstance(inputs, str):
@@ -326,12 +360,12 @@ class SSH2NetChannel:
         results = []
         for channel_input in inputs:
             output = self._send_input(channel_input, strip_prompt)
-            results.append((channel_input, output))
+            results.append(output)
         return results
 
     def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
         &#34;&#34;&#34;
-        Primary entrypoint to interact with devices in shell mode
+        Primary entry point to interact with devices in shell mode; used to handle prompts
 
         accepts inputs and looks for expected prompt;
         sends the appropriate response, then waits for the &#34;finale&#34;
@@ -343,15 +377,15 @@ class SSH2NetChannel:
             inputs: tuple containing strings representing:
                 initial input
                 expectation (what should ssh2net expect after input)
-                response (response to expecation)
+                response (response to expectation)
                 finale (what should ssh2net expect when &#34;done&#34;)
             hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if isinstance(inputs, tuple):
@@ -361,7 +395,7 @@ class SSH2NetChannel:
             output = self._send_input_interact(
                 channel_input, expectation, response, finale, hidden_response
             )
-            results.append((channel_input, output))
+            results.append(output)
         return results</code></pre>
 </details>
 </section>
@@ -381,7 +415,9 @@ class SSH2NetChannel:
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class SSH2NetChannel:
     @staticmethod
     def _rstrip_all_lines(output: bytes) -&gt; str:
@@ -395,7 +431,7 @@ class SSH2NetChannel:
             output: bytes object with each line right stripped
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
@@ -405,7 +441,7 @@ class SSH2NetChannel:
     @staticmethod
     def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
         &#34;&#34;&#34;
-        Clean up preceeding empty lines, and strip prompt if desired
+        Clean up preceding empty lines, and strip prompt if desired
 
         Args:
             output: list of strings to parse
@@ -415,7 +451,7 @@ class SSH2NetChannel:
             output: string of joined output lines
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = output.splitlines()
@@ -431,37 +467,8 @@ class SSH2NetChannel:
         output = &#34;\n&#34;.join(output)
         return output
 
-    # this is useless now; change it to a &#34;find prompt&#34; in case people care
     @channel_timeout(Timeout)
-    def _set_prompt(self) -&gt; bool:
-        &#34;&#34;&#34;
-        Read from shell and set the current shell prompt
-
-        Args:
-            N/A
-
-        Returns:
-            N/A
-
-        Raises:
-            N/A
-
-        &#34;&#34;&#34;
-        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
-        self.session.set_timeout(1000)
-        self.channel.flush()
-        self.channel.write(self.comms_return_char)
-        while True:
-            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
-            output = output.decode(&#34;unicode_escape&#34;).strip()
-            channel_match = re.search(pattern, output)
-            if channel_match:
-                self.current_prompt = channel_match.group(0)
-                self.session.set_timeout(self.session_timeout)
-                return
-
-    @channel_timeout(Timeout)
-    def _read_until_input(self, channel_input: str):
+    def _read_until_input(self, channel_input: str) -&gt; None:
         &#34;&#34;&#34;
         Read until all input has been entered, then send return.
 
@@ -471,18 +478,20 @@ class SSH2NetChannel:
             channel_input: string to write to channel
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = b&#34;&#34;
         while channel_input.encode() not in output:
             output += self.channel.read()[1]
+        channel_log.debug(f&#34;Read: {repr(output)}&#34;)
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
 
     @channel_timeout(Timeout)
     def _read_until_prompt(self, output=None, prompt=None):
@@ -497,27 +506,36 @@ class SSH2NetChannel:
             output: bytes of any channel reads after prompt has been seen
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if not output:
             output = b&#34;&#34;
-        # do not like the non regex stuff... would rather regex all of it
+
+        # prefer to use regex match where possible; assume pattern is regex if starting with
+        # ^ or ending with $ -- this works as we always use multi line search
         if not prompt:
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+            prompt_regex = True
         else:
-            prompt_pattern = prompt
+            if prompt.startswith(&#34;^&#34;) or prompt.endswith(&#34;$&#34;):
+                prompt_pattern = re.compile(prompt, flags=re.M | re.I)
+                prompt_regex = True
+            else:
+                prompt_pattern = prompt
+                prompt_regex = False
 
         # disabling session blocking means the while loop will actually iterate
         # without this iteration we can never properly check for prompts
         self.session.set_blocking(False)
         while True:
             output += self.channel.read()[1]
-            # we dont need to deal w/ line replacement for the actual output, only for
+            channel_log.debug(f&#34;Read: {repr(output)}&#34;)
+            # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
             output_copy = re.sub(&#34;\r&#34;, &#34;\n&#34;, output_copy.decode(&#34;unicode_escape&#34;).strip())
-            if not prompt:
+            if prompt_regex:
                 channel_match = re.search(prompt_pattern, output_copy)
             elif prompt in output_copy:
                 channel_match = True
@@ -541,11 +559,15 @@ class SSH2NetChannel:
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.debug(
+            f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         return self._restructure_output(output, strip_prompt=strip_prompt)
@@ -573,11 +595,17 @@ class SSH2NetChannel:
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.debug(
+            f&#34;Attempting to send input interact: {channel_input}; &#34;
+            f&#34;expecting: {expectation}; responding: {response}; &#34;
+            f&#34;with a finale: {finale}; hidden_response: {hidden_response}&#34;
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
@@ -588,7 +616,9 @@ class SSH2NetChannel:
         elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
+        channel_log.debug(f&#34;Write: {repr(response)}&#34;)
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
         return self._restructure_output(output)
 
@@ -604,18 +634,19 @@ class SSH2NetChannel:
             command: string input to write to channel
 
         Returns:
-            result: tuple of command sent and resulting output
+            result: output from command sent over the channel
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.info(f&#34;Attempting to open channel for command execution&#34;)
         if self._shell:
             self._channel_close()
         self._channel_open()
-        results = []
         output = b&#34;&#34;
         channel_buff = 1
+        session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
         self.channel.execute(command)
         while channel_buff &gt; 0:
             try:
@@ -624,25 +655,26 @@ class SSH2NetChannel:
             except SocketRecvError:
                 break
         output = self._rstrip_all_lines(output)
-        output = self._restructure_output(output)
-        results.append((command, output))
+        result = self._restructure_output(output)
         self.close()
-        return results
+        session_log.info(f&#34;Command executed, channel closed&#34;)
+        return result
 
     def open_shell(self) -&gt; None:
         &#34;&#34;&#34;
         Open and prepare interactive SSH shell
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.info(f&#34;Attempting to open interactive shell&#34;)
         # open the channel itself
         self._channel_open()
         # invoke a shell on the channel
@@ -656,19 +688,50 @@ class SSH2NetChannel:
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
+        session_log.info(f&#34;Interactive shell opened&#34;)
 
-    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+    @channel_timeout(Timeout)
+    def get_prompt(self) -&gt; bool:
         &#34;&#34;&#34;
-        Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+        Read from shell and get the current shell prompt
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        self.session.set_timeout(1000)
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
+        while True:
+            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
+            output = output.decode(&#34;unicode_escape&#34;).strip()
+            channel_match = re.search(pattern, output)
+            if channel_match:
+                self.session.set_timeout(self.session_timeout)
+                current_prompt = channel_match.group(0)
+                return current_prompt
+
+    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+        &#34;&#34;&#34;
+        Primary entry point to send data to devices in shell mode; accept inputs and return results
 
         Args:
             inputs: list of strings or string of inputs to send to channel
+            strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if isinstance(inputs, str):
@@ -676,12 +739,12 @@ class SSH2NetChannel:
         results = []
         for channel_input in inputs:
             output = self._send_input(channel_input, strip_prompt)
-            results.append((channel_input, output))
+            results.append(output)
         return results
 
     def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
         &#34;&#34;&#34;
-        Primary entrypoint to interact with devices in shell mode
+        Primary entry point to interact with devices in shell mode; used to handle prompts
 
         accepts inputs and looks for expected prompt;
         sends the appropriate response, then waits for the &#34;finale&#34;
@@ -693,15 +756,15 @@ class SSH2NetChannel:
             inputs: tuple containing strings representing:
                 initial input
                 expectation (what should ssh2net expect after input)
-                response (response to expecation)
+                response (response to expectation)
                 finale (what should ssh2net expect when &#34;done&#34;)
             hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if isinstance(inputs, tuple):
@@ -711,15 +774,37 @@ class SSH2NetChannel:
             output = self._send_input_interact(
                 channel_input, expectation, response, finale, hidden_response
             )
-            results.append((channel_input, output))
+            results.append(output)
         return results</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="ssh2net.channel.SSH2NetChannel.get_prompt"><code class="name flex">
+<span>def <span class="ident">get_prompt</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def retry_wrapper(self, *args, **kwargs):
+    attempt, delay = attempts, starting_delay
+    while attempt &gt; 1:
+        try:
+            return wrapped_func(self, *args, **kwargs)
+        except exception_to_check:
+            print(f&#34;Retrying in {delay} seconds...&#34;)
+            time.sleep(delay)
+            attempt -= 1
+            delay *= backoff
+    return wrapped_func(self, *args, **kwargs)</code></pre>
+</details>
+</dd>
 <dt id="ssh2net.channel.SSH2NetChannel.open_and_execute"><code class="name flex">
 <span>def <span class="ident">open_and_execute</span></span>(<span>self, command)</span>
 </code></dt>
@@ -736,15 +821,18 @@ operations.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>result</code></strong></dt>
-<dd>tuple of command sent and resulting output</dd>
+<dd>output from command sent over the channel</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def open_and_execute(self, command: str):
     &#34;&#34;&#34;
     Open ssh channel and execute a command; closes channel when done.
@@ -757,18 +845,19 @@ operations.</p>
         command: string input to write to channel
 
     Returns:
-        result: tuple of command sent and resulting output
+        result: output from command sent over the channel
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
+    session_log.info(f&#34;Attempting to open channel for command execution&#34;)
     if self._shell:
         self._channel_close()
     self._channel_open()
-    results = []
     output = b&#34;&#34;
     channel_buff = 1
+    session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
     self.channel.execute(command)
     while channel_buff &gt; 0:
         try:
@@ -777,10 +866,10 @@ operations.</p>
         except SocketRecvError:
             break
     output = self._rstrip_all_lines(output)
-    output = self._restructure_output(output)
-    results.append((command, output))
+    result = self._restructure_output(output)
     self.close()
-    return results</code></pre>
+    session_log.info(f&#34;Command executed, channel closed&#34;)
+    return result</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.channel.SSH2NetChannel.open_shell"><code class="name flex">
@@ -789,33 +878,39 @@ operations.</p>
 <dd>
 <section class="desc"><p>Open and prepare interactive SSH shell</p>
 <h2 id="args">Args</h2>
-<p>N/A</p>
+<p>N/A
+# noqa</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def open_shell(self) -&gt; None:
     &#34;&#34;&#34;
     Open and prepare interactive SSH shell
 
     Args:
-        N/A
+        N/A  # noqa
 
     Returns:
-        N/A
+        N/A  # noqa
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
+    session_log.info(f&#34;Attempting to open interactive shell&#34;)
     # open the channel itself
     self._channel_open()
     # invoke a shell on the channel
@@ -828,43 +923,50 @@ operations.</p>
         if callable(self.comms_disable_paging):
             self.comms_disable_paging(self)
         else:
-            self.send_inputs(self.comms_disable_paging)</code></pre>
+            self.send_inputs(self.comms_disable_paging)
+    session_log.info(f&#34;Interactive shell opened&#34;)</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.channel.SSH2NetChannel.send_inputs"><code class="name flex">
 <span>def <span class="ident">send_inputs</span></span>(<span>self, inputs, strip_prompt=True)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Primary entrypoint to send data to devices in shell mode; accept inputs and return results</p>
+<section class="desc"><p>Primary entry point to send data to devices in shell mode; accept inputs and return results</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>inputs</code></strong></dt>
 <dd>list of strings or string of inputs to send to channel</dd>
+<dt><strong><code>strip_prompt</code></strong></dt>
+<dd>strip prompt or not, defaults to True (yes, strip the prompt)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>result</code></strong></dt>
-<dd>list of tuples of command sent and resulting output</dd>
+<dd>list of output from the input command(s)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
     &#34;&#34;&#34;
-    Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+    Primary entry point to send data to devices in shell mode; accept inputs and return results
 
     Args:
         inputs: list of strings or string of inputs to send to channel
+        strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
     Returns:
-        result: list of tuples of command sent and resulting output
+        result: list of output from the input command(s)
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
     if isinstance(inputs, str):
@@ -872,7 +974,7 @@ operations.</p>
     results = []
     for channel_input in inputs:
         output = self._send_input(channel_input, strip_prompt)
-        results.append((channel_input, output))
+        results.append(output)
     return results</code></pre>
 </details>
 </dd>
@@ -880,7 +982,7 @@ operations.</p>
 <span>def <span class="ident">send_inputs_interact</span></span>(<span>self, inputs, hidden_response=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Primary entrypoint to interact with devices in shell mode</p>
+<section class="desc"><p>Primary entry point to interact with devices in shell mode; used to handle prompts</p>
 <p>accepts inputs and looks for expected prompt;
 sends the appropriate response, then waits for the "finale"
 returns the results of the interaction</p>
@@ -891,7 +993,7 @@ returns the results of the interaction</p>
 <dd>tuple containing strings representing:
 initial input
 expectation (what should ssh2net expect after input)
-response (response to expecation)
+response (response to expectation)
 finale (what should ssh2net expect when "done")</dd>
 <dt><strong><code>hidden_response</code></strong></dt>
 <dd>True/False response is hidden (i.e. password input)</dd>
@@ -899,18 +1001,21 @@ finale (what should ssh2net expect when "done")</dd>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>result</code></strong></dt>
-<dd>list of tuples of command sent and resulting output</dd>
+<dd>list of output from the input command(s)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
     &#34;&#34;&#34;
-    Primary entrypoint to interact with devices in shell mode
+    Primary entry point to interact with devices in shell mode; used to handle prompts
 
     accepts inputs and looks for expected prompt;
     sends the appropriate response, then waits for the &#34;finale&#34;
@@ -922,15 +1027,15 @@ finale (what should ssh2net expect when "done")</dd>
         inputs: tuple containing strings representing:
             initial input
             expectation (what should ssh2net expect after input)
-            response (response to expecation)
+            response (response to expectation)
             finale (what should ssh2net expect when &#34;done&#34;)
         hidden_response: True/False response is hidden (i.e. password input)
 
     Returns:
-        result: list of tuples of command sent and resulting output
+        result: list of output from the input command(s)
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
     if isinstance(inputs, tuple):
@@ -940,7 +1045,7 @@ finale (what should ssh2net expect when "done")</dd>
         output = self._send_input_interact(
             channel_input, expectation, response, finale, hidden_response
         )
-        results.append((channel_input, output))
+        results.append(output)
     return results</code></pre>
 </details>
 </dd>
@@ -965,6 +1070,7 @@ finale (what should ssh2net expect when "done")</dd>
 <li>
 <h4><code><a title="ssh2net.channel.SSH2NetChannel" href="#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></code></h4>
 <ul class="">
+<li><code><a title="ssh2net.channel.SSH2NetChannel.get_prompt" href="#ssh2net.channel.SSH2NetChannel.get_prompt">get_prompt</a></code></li>
 <li><code><a title="ssh2net.channel.SSH2NetChannel.open_and_execute" href="#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.channel.SSH2NetChannel.open_shell" href="#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs" href="#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
@@ -977,7 +1083,7 @@ finale (what should ssh2net expect when "done")</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

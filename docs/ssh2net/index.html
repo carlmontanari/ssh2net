@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.6.3" />
+<meta name="generator" content="pdoc 0.7.1" />
 <title>ssh2net API documentation</title>
 <meta name="description" content="ssh2net network ssh client library" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
@@ -22,19 +22,59 @@
 <section id="section-intro">
 <p>ssh2net network ssh client library</p>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net network ssh client library&#34;&#34;&#34;
 import logging
 from logging import NullHandler
 
-from ssh2net.base import SSH2Net, SSH2NetChannel, SSH2NetSession
+from ssh2net.base import SSH2Net
+from ssh2net.channel import SSH2NetChannel
+from ssh2net.session import SSH2NetSession
+from ssh2net.netmiko_compatibility import connect_handler as ConnectHandler
+from ssh2net.ssh_config import SSH2NetSSHConfig
+from ssh2net.core.driver import BaseNetworkDriver
+from ssh2net.core.cisco_iosxe.driver import IOSXEDriver
+from ssh2net.core.cisco_nxos.driver import NXOSDriver
+from ssh2net.core.juniper_junos.driver import JunosDriver
+
+__version__ = &#34;2019.10.07&#34;
+__all__ = (
+    &#34;SSH2Net&#34;,
+    &#34;SSH2NetSession&#34;,
+    &#34;SSH2NetChannel&#34;,
+    &#34;SSH2NetSSHConfig&#34;,
+    &#34;ConnectHandler&#34;,
+    &#34;BaseNetworkDriver&#34;,
+    &#34;IOSXEDriver&#34;,
+    &#34;NXOSDriver&#34;,
+    &#34;JunosDriver&#34;,
+)
 
 
-logger = logging.getLogger(__name__)
-logging.getLogger(__name__).addHandler(NullHandler())
+# Class to filter duplicate log entries for the channel logger
+# Stolen from: https://stackoverflow.com/questions/44691558/ \
+# suppress-multiple-messages-with-same-content-in-python-logging-module-aka-log-co
+class DuplicateFilter(logging.Filter):
+    def filter(self, record):
+        # Fields to compare to previous log entry if these fields match; skip log entry
+        current_log = (record.module, record.levelno, record.msg)
+        if current_log != getattr(self, &#34;last_log&#34;, None):
+            self.last_log = current_log
+            return True
+        return False
 
-__version__ = &#34;2019.09.02&#34;
-__all__ = (&#34;SSH2Net&#34;, &#34;SSH2NetChannel&#34;, &#34;SSH2NetSession&#34;)</code></pre>
+
+# Setup session logger
+session_log = logging.getLogger(f&#34;{__name__}_session&#34;)
+logging.getLogger(f&#34;{__name__}_session&#34;).addHandler(NullHandler())
+
+# Setup channel logger
+channel_log = logging.getLogger(f&#34;{__name__}_channel&#34;)
+# Add duplicate filter to channel log
+channel_log.addFilter(DuplicateFilter())
+logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code></pre>
 </details>
 </section>
 <section>
@@ -48,6 +88,14 @@ __all__ = (&#34;SSH2Net&#34;, &#34;SSH2NetChannel&#34;, &#34;SSH2NetSession&#34;
 <dd>
 <section class="desc"><p>ssh2net.channel</p></section>
 </dd>
+<dt><code class="name"><a title="ssh2net.community" href="community/index.html">ssh2net.community</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="ssh2net.core" href="core/index.html">ssh2net.core</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
 <dt><code class="name"><a title="ssh2net.decorators" href="decorators.html">ssh2net.decorators</a></code></dt>
 <dd>
 <section class="desc"><p>ssh2net.decorators</p></section>
@@ -60,22 +108,703 @@ __all__ = (&#34;SSH2Net&#34;, &#34;SSH2NetChannel&#34;, &#34;SSH2NetSession&#34;
 <dd>
 <section class="desc"><p>ssh2net.helper</p></section>
 </dd>
+<dt><code class="name"><a title="ssh2net.netmiko_compatibility" href="netmiko_compatibility.html">ssh2net.netmiko_compatibility</a></code></dt>
+<dd>
+<section class="desc"><p>ssh2net.netmiko_compatibility</p></section>
+</dd>
 <dt><code class="name"><a title="ssh2net.session" href="session.html">ssh2net.session</a></code></dt>
 <dd>
 <section class="desc"><p>ssh2net.session</p></section>
+</dd>
+<dt><code class="name"><a title="ssh2net.ssh_config" href="ssh_config.html">ssh2net.ssh_config</a></code></dt>
+<dd>
+<section class="desc"><p>ssh2net.ssh_config</p></section>
 </dd>
 </dl>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="ssh2net.ConnectHandler"><code class="name flex">
+<span>def <span class="ident">ConnectHandler</span></span>(<span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert netmiko style "ConnectHandler" device creation to SSH2Net style</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword arguments</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>driver</code></strong></dt>
+<dd>SSH2Net connection object for specified device-type</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>TypeError</code></strong></dt>
+<dd>if unsupported netmiko device type is provided</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def connect_handler(**kwargs):
+    &#34;&#34;&#34;
+    Convert netmiko style &#34;ConnectHandler&#34; device creation to SSH2Net style
+
+    Args:
+        **kwargs: keyword arguments
+
+    Returns:
+        driver: SSH2Net connection object for specified device-type
+
+    Raises:
+        TypeError: if unsupported netmiko device type is provided
+
+    &#34;&#34;&#34;
+    if kwargs[&#34;device_type&#34;] not in NETMIKO_DEVICE_TYPE_MAPPER.keys():
+        raise TypeError(f&#34;Unsupported netmiko device type for ssh2net: {kwargs[&#39;device_type&#39;]}&#34;)
+
+    driver_info = NETMIKO_DEVICE_TYPE_MAPPER.get(kwargs[&#34;device_type&#34;])
+    driver_class = driver_info[&#34;driver&#34;]
+    driver_args = driver_info[&#34;arg_mapper&#34;]
+    kwargs.pop(&#34;device_type&#34;)
+
+    transformed_kwargs = transform_netmiko_kwargs(kwargs)
+    final_kwargs = {**transformed_kwargs, **driver_args}
+
+    driver = driver_class(**final_kwargs)
+    driver.open_shell()
+
+    return driver</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="ssh2net.BaseNetworkDriver"><code class="flex name class">
+<span>class <span class="ident">BaseNetworkDriver</span></span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net BaseNetworkDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BaseNetworkDriver(SSH2Net):
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net BaseNetworkDriver Object
+
+        Args:
+            auth_secondary: password to use for secondary authentication (enable)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        self.auth_secondary = auth_secondary
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = None
+        self.textfsm_platform = None
+
+    def _determine_current_priv(self, current_prompt: str):
+        &#34;&#34;&#34;
+        Determine current privilege level from prompt string
+
+        Args:
+            current_prompt: string of current prompt
+
+        Returns:
+            priv_level: NamedTuple of current privilege level
+
+        Raises:
+            UnknownPrivLevel: if privilege level cannot be determined
+
+        &#34;&#34;&#34;
+        for priv_level in self.privs.values():
+            if re.search(priv_level.pattern, current_prompt):
+                return priv_level
+        raise UnknownPrivLevel
+
+    def _escalate(self) -&gt; None:
+        &#34;&#34;&#34;
+        Escalate to the next privilege level up
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        current_priv = self._determine_current_priv(self.get_prompt())
+        if current_priv.escalate:
+            if current_priv.escalate_auth:
+                self.send_inputs_interact(
+                    (
+                        current_priv.escalate,
+                        current_priv.escalate_prompt,
+                        self.auth_enable,
+                        self.privs.get(&#34;escalate_priv&#34;),
+                    ),
+                    hidden_response=True,
+                )
+            else:
+                self.send_inputs(current_priv.escalate)
+
+    def _deescalate(self) -&gt; None:
+        &#34;&#34;&#34;
+        Deescalate to the next privilege level down
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        current_priv = self._determine_current_priv(self.get_prompt())
+        if current_priv.deescalate:
+            self.send_inputs(current_priv.deescalate)
+
+    def attain_priv(self, desired_priv) -&gt; None:
+        &#34;&#34;&#34;
+        Attain desired priv level
+
+        Args:
+            desired_priv: string name of desired privilege level
+                (see ssh2net.core.&lt;device_type&gt;.driver for levels)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        while True:
+            current_priv = self._determine_current_priv(self.get_prompt())
+            if current_priv == self.privs[desired_priv]:
+                return
+            if current_priv.level &gt; self.privs[desired_priv].level:
+                self._deescalate()
+            else:
+                self._escalate()
+
+    def send_command(self, commands):
+        &#34;&#34;&#34;
+        Send command(s)
+
+        Args:
+            commands: string or list of strings to send to device in privilege exec mode
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        self.attain_priv(self.default_desired_priv)
+        result = self.send_inputs(commands)
+        return result
+
+    def send_config_set(self, configs):
+        &#34;&#34;&#34;
+        Send configuration(s)
+
+        Args:
+            configs: string or list of strings to send to device in config mode
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        self.attain_priv(&#34;configuration&#34;)
+        result = self.send_inputs(configs)
+        self.attain_priv(self.default_desired_priv)
+        return result
+
+    def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+        &#34;&#34;&#34;
+        Parse output with TextFSM and ntc-templates
+
+        Args:
+            command: command used to get output
+            output: output from command
+
+        Returns:
+            output: parsed output
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        template = _textfsm_get_template(self.textfsm_platform, command)
+        if template:
+            output = textfsm_parse(template, output)
+        return output</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.cisco_iosxe.driver.IOSXEDriver" href="core/cisco_iosxe/driver.html#ssh2net.core.cisco_iosxe.driver.IOSXEDriver">IOSXEDriver</a></li>
+<li><a title="ssh2net.core.cisco_nxos.driver.NXOSDriver" href="core/cisco_nxos/driver.html#ssh2net.core.cisco_nxos.driver.NXOSDriver">NXOSDriver</a></li>
+<li><a title="ssh2net.core.juniper_junos.driver.JunosDriver" href="core/juniper_junos/driver.html#ssh2net.core.juniper_junos.driver.JunosDriver">JunosDriver</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="ssh2net.BaseNetworkDriver.attain_priv"><code class="name flex">
+<span>def <span class="ident">attain_priv</span></span>(<span>self, desired_priv)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Attain desired priv level</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>desired_priv</code></strong></dt>
+<dd>string name of desired privilege level
+(see ssh2net.core.<device_type>.driver for levels)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def attain_priv(self, desired_priv) -&gt; None:
+    &#34;&#34;&#34;
+    Attain desired priv level
+
+    Args:
+        desired_priv: string name of desired privilege level
+            (see ssh2net.core.&lt;device_type&gt;.driver for levels)
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    while True:
+        current_priv = self._determine_current_priv(self.get_prompt())
+        if current_priv == self.privs[desired_priv]:
+            return
+        if current_priv.level &gt; self.privs[desired_priv].level:
+            self._deescalate()
+        else:
+            self._escalate()</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.BaseNetworkDriver.send_command"><code class="name flex">
+<span>def <span class="ident">send_command</span></span>(<span>self, commands)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Send command(s)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>commands</code></strong></dt>
+<dd>string or list of strings to send to device in privilege exec mode</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_command(self, commands):
+    &#34;&#34;&#34;
+    Send command(s)
+
+    Args:
+        commands: string or list of strings to send to device in privilege exec mode
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    self.attain_priv(self.default_desired_priv)
+    result = self.send_inputs(commands)
+    return result</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.BaseNetworkDriver.send_config_set"><code class="name flex">
+<span>def <span class="ident">send_config_set</span></span>(<span>self, configs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Send configuration(s)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>configs</code></strong></dt>
+<dd>string or list of strings to send to device in config mode</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_config_set(self, configs):
+    &#34;&#34;&#34;
+    Send configuration(s)
+
+    Args:
+        configs: string or list of strings to send to device in config mode
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    self.attain_priv(&#34;configuration&#34;)
+    result = self.send_inputs(configs)
+    self.attain_priv(self.default_desired_priv)
+    return result</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.BaseNetworkDriver.textfsm_parse_output"><code class="name flex">
+<span>def <span class="ident">textfsm_parse_output</span></span>(<span>self, command, output)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse output with TextFSM and ntc-templates</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>command</code></strong></dt>
+<dd>command used to get output</dd>
+<dt><strong><code>output</code></strong></dt>
+<dd>output from command</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>output</code></strong></dt>
+<dd>parsed output</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+    &#34;&#34;&#34;
+    Parse output with TextFSM and ntc-templates
+
+    Args:
+        command: command used to get output
+        output: output from command
+
+    Returns:
+        output: parsed output
+
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    template = _textfsm_get_template(self.textfsm_platform, command)
+    if template:
+        output = textfsm_parse(template, output)
+    return output</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.base.SSH2Net.close" href="base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.IOSXEDriver"><code class="flex name class">
+<span>class <span class="ident">IOSXEDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class IOSXEDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net IOSXEDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;privilege_exec&#34;
+        self.textfsm_platform = &#34;cisco_ios&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.attain_priv" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.attain_priv">attain_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.JunosDriver"><code class="flex name class">
+<span>class <span class="ident">JunosDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class JunosDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net IOSXEDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;exec&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.attain_priv" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.attain_priv">attain_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.NXOSDriver"><code class="flex name class">
+<span>class <span class="ident">NXOSDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net NXOSDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NXOSDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net NXOSDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;privilege_exec&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.attain_priv" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.attain_priv">attain_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
 <dt id="ssh2net.SSH2Net"><code class="flex name class">
 <span>class <span class="ident">SSH2Net</span></span>
-<span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, session_keepalive=False, session_keepalive_interval=10, session_timeout=5000, auth_user='', auth_password=None, auth_public_key=None, comms_prompt_regex='^[a-z0-9.\\-@()]{1,20}[#>$]$', comms_prompt_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='term length 0')</span>
+<span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, setup_ssh_config_file=False, session_keepalive=False, session_keepalive_interval=10, session_timeout=5000, auth_user='', auth_password=None, auth_public_key=None, comms_prompt_regex=^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$, comms_prompt_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='terminal length 0')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Initialize SSH2Net Object</p>
@@ -91,6 +820,8 @@ to the "comms_prompt_regex" as this is highly critical to this tool working well
 <dd>port to open ssh session to</dd>
 <dt><strong><code>setup_timeout</code></strong></dt>
 <dd>timeout in seconds for opening underlying socket to host</dd>
+<dt><strong><code>setup_ssh_config_file</code></strong></dt>
+<dd>ssh config file to use or True to try system default files</dd>
 <dt><strong><code>session_keepalive</code></strong></dt>
 <dd>FUTURE USE: whether or not to try to keep session alive</dd>
 <dt><strong><code>session_keepalive_interval</code></strong></dt>
@@ -104,18 +835,12 @@ to the "comms_prompt_regex" as this is highly critical to this tool working well
 <dt><strong><code>auth_public_key</code></strong></dt>
 <dd>path to ssh public key to use to connect to host</dd>
 <dt><strong><code>comms_prompt_regex</code></strong></dt>
-<dd>
-<p>regex pattern to use for prompt matching.
+<dd>regex pattern to use for prompt matching.
 this is the single most important attribute here! if this does not match a prompt,
-ssh2net will not work!</p>
-<p>the base pattern is:
-"^[a-z0-9.-@()]{1,20}[#&gt;$]$"</p>
-<p>if you do not wish to match cisco "config" level prompts you can use:
-"^[a-z0-9.-@]{1,20}[#&gt;$]$".</p>
-<p>IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
-for highly reliably matching for prompts after stripping trailling white space,
-case insensetive is just a conveinence factor so i can be lazy.</p>
-</dd>
+ssh2net will not work!
+IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
+for highly reliably matching for prompts after stripping trailing white space,
+case insensitive is just a convenience factor so i can be lazy.</dd>
 <dt><strong><code>comms_prompt_timeout</code></strong></dt>
 <dd>timeout in seconds for waiting for channel operations.
 this is NOT the "read" timeout. this is the timeout for the entire operation
@@ -131,7 +856,8 @@ string to send to device to disable paging</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="raises">Raises</h2>
@@ -145,29 +871,30 @@ string to send to device to disable paging</dd>
 - session_timeout is not an integer
 - comms_prompt_timeout is not an integer
 - comms_return_char is not a string</dd>
-<dt><strong><code>TypeError</code></strong></dt>
-<dd>if comms_regex_prompt is not compilable regex</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">class SSH2Net(SSH2NetChannel, SSH2NetSession):
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SSH2Net(SSH2NetSession):
     def __init__(
         self,
         setup_host: str = &#34;&#34;,
         setup_validate_host: Optional[bool] = False,
         setup_port: Optional[int] = 22,
         setup_timeout: Optional[int] = 5,
+        setup_ssh_config_file: Optional[Union[str, bool]] = False,
         session_keepalive: Optional[bool] = False,
         session_keepalive_interval: Optional[int] = 10,
         session_timeout: Optional[int] = 5000,
         auth_user: str = &#34;&#34;,
         auth_password: Optional[Union[str]] = None,
         auth_public_key: Optional[Union[str]] = None,
-        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;,
+        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
         comms_prompt_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = &#34;\n&#34;,
         comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
-        comms_disable_paging: Optional[Union[str, Callable]] = &#34;term length 0&#34;,
+        comms_disable_paging: Optional[Union[str, Callable]] = &#34;terminal length 0&#34;,
     ):
         r&#34;&#34;&#34;
         Initialize SSH2Net Object
@@ -180,6 +907,7 @@ string to send to device to disable paging</dd>
             setup_validate_host: whether or not to validate ip address is valid or dns is resolvable
             setup_port: port to open ssh session to
             setup_timeout: timeout in seconds for opening underlying socket to host
+            setup_ssh_config_file: ssh config file to use or True to try system default files
             session_keepalive: FUTURE USE: whether or not to try to keep session alive
             session_keepalive_interval: FUTURE USE: interval to use for session keepalives
             session_timeout: time in ms for session read operations; 0 is &#34;forever&#34; and will block
@@ -189,16 +917,9 @@ string to send to device to disable paging</dd>
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
-
-                the base pattern is:
-                &#34;^[a-z0-9.\-@()]{1,20}[#&gt;$]$&#34;
-
-                if you do not wish to match cisco &#34;config&#34; level prompts you can use:
-                &#34;^[a-z0-9.-@]{1,20}[#&gt;$]$&#34;.
-
-                IMPORTANT: regex search uses multiline and case insensetive flags. multiline allows
-                for highly reliably matching for prompts after stripping trailling white space,
-                case insensetive is just a conveinence factor so i can be lazy.
+                IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
+                for highly reliably matching for prompts after stripping trailing white space,
+                case insensitive is just a convenience factor so i can be lazy.
             comms_prompt_timeout: timeout in seconds for waiting for channel operations.
                 this is NOT the &#34;read&#34; timeout. this is the timeout for the entire operation
                 sent to send_inputs/send_inputs_interact
@@ -209,7 +930,7 @@ string to send to device to disable paging</dd>
                 string to send to device to disable paging
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             ValueError: in the following situations:
@@ -220,7 +941,6 @@ string to send to device to disable paging</dd>
                 - session_timeout is not an integer
                 - comms_prompt_timeout is not an integer
                 - comms_return_char is not a string
-            TypeError: if comms_regex_prompt is not compilable regex
 
         &#34;&#34;&#34;
         # set a flag to indicate if a shell has been invoked
@@ -243,9 +963,13 @@ string to send to device to disable paging</dd>
         # auth setup
         self.auth_user = auth_user.strip()
         if auth_public_key:
-            self.auth_public_key = auth_public_key.strip()
-        elif auth_password:
+            self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
+        else:
+            self.auth_public_key = auth_public_key
+        if auth_password:
             self.auth_password = auth_password.strip()
+        else:
+            self.auth_password = auth_password
 
         # comms setup
         # try to compile prompt to raise TypeError before opening any connections
@@ -254,9 +978,12 @@ string to send to device to disable paging</dd>
         self.comms_prompt_timeout = int(comms_prompt_timeout)
 
         # validate that the return character set is a string
+        # do this to ensure provided value is a string; this prevents an int being cast to string
+        # making it look like things are ok
         if isinstance(comms_return_char, str):
             self.comms_return_char = comms_return_char
         else:
+            session_log.critical(f&#34;Invalid comms_return_char: {comms_return_char}&#34;)
             raise ValueError(
                 f&#34;{comms_return_char} is an invalid comms_return_char; must be string.&#34;
             )
@@ -264,25 +991,96 @@ string to send to device to disable paging</dd>
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
+        if setup_ssh_config_file:
+            if isinstance(setup_ssh_config_file, bool) and setup_ssh_config_file:
+                setup_ssh_config_file = &#34;&#34;
+            self._setup_ssh_config_args(setup_ssh_config_file)
+
+        session_log.info(f&#34;{str(self)}; {repr(self)}&#34;)
+
     def __enter__(self):
-        &#34;&#34;&#34;Enter method for context manager&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         self.open_shell()
         return self
 
-    def __exit__(self, type, value, traceback):
-        &#34;&#34;&#34;Exit method to cleanup for context manager&#34;&#34;&#34;
+    def __exit__(self, exception_type, exception_value, traceback):
+        &#34;&#34;&#34;
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         self.close()
 
     def __str__(self):
-        &#34;&#34;&#34;Magic str method for SSH2Net class&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Magic str method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         return f&#34;SSH2Net Connection Object for host {self.host}&#34;
 
     def __repr__(self):
-        &#34;&#34;&#34;Magic repr method for SSH2Net class; for now just returns str&#34;&#34;&#34;
-        return str(self)
+        &#34;&#34;&#34;
+        Magic repr method for SSH2Net class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            repr: repr for class object
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        class_dict = self.__dict__.copy()
+        class_dict[&#34;auth_password&#34;] = &#34;********&#34;
+        return f&#34;SSH2Net {class_dict}&#34;
 
     def __bool__(self):
-        &#34;&#34;&#34;Magic bool method based on result of session_alive&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Magic bool method based on result of session_alive
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            bool: True/False if session is alive or not
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
         return self._session_alive()
 
     @staticmethod
@@ -306,15 +1104,14 @@ string to send to device to disable paging</dd>
         if comms_pre_login_handler:
             if callable(comms_pre_login_handler):
                 return comms_pre_login_handler
-            else:
-                ext_func = validate_external_function(comms_pre_login_handler)
-                if ext_func:
-                    return ext_func
-                else:
-                    raise ValueError(
-                        f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
-                        &#34;or path to a function.&#34;
-                    )
+            ext_func = validate_external_function(comms_pre_login_handler)
+            if ext_func:
+                return ext_func
+            session_log.critical(f&#34;Invalid comms_pre_login_handler: {comms_pre_login_handler}&#34;)
+            raise ValueError(
+                f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
+                &#34;or path to a function.&#34;
+            )
         return comms_pre_login_handler
 
     @staticmethod
@@ -338,31 +1135,52 @@ string to send to device to disable paging</dd>
         if comms_disable_paging != &#34;term length 0&#34;:
             if callable(comms_disable_paging):
                 return comms_disable_paging
-            else:
-                ext_func = validate_external_function(comms_disable_paging)
-                if ext_func:
-                    return ext_func
-                else:
-                    if isinstance(comms_disable_paging, str):
-                        return comms_disable_paging
-                    else:
-                        raise ValueError(
-                            f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
-                            &#34;path to a function, or is not a string.&#34;
-                        )
+            ext_func = validate_external_function(comms_disable_paging)
+            if ext_func:
+                return ext_func
+            if isinstance(comms_disable_paging, str):
+                return comms_disable_paging
+            session_log.critical(f&#34;Invalid comms_disable_paging: {comms_disable_paging}&#34;)
+            raise ValueError(
+                f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
+                &#34;path to a function, or is not a string.&#34;
+            )
         return comms_disable_paging
 
-    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;
+    def _setup_ssh_config_args(self, setup_ssh_config_file):
+        &#34;&#34;&#34;
+        Set any args from ssh config file to override existing settings
+
+        Args:
+            setup_ssh_config_file: string of path to ssh config file, or bool True
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ssh_config = SSH2NetSSHConfig(setup_ssh_config_file)
+        host_config = ssh_config.lookup(self.host)
+        if host_config.port:
+            self.setup_port = host_config.port
+        if host_config.user:
+            self.auth_user = host_config.user
+        if host_config.identity_file:
+            self.auth_public_key = os.path.expanduser(host_config.identity_file.strip().encode())
+
+    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;  # noqa
 
     def _validate_host(self) -&gt; None:
         &#34;&#34;&#34;
         Validate host is valid IP or resolvable DNS name
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            None
+            N/A  # noqa
 
         Raises:
             ValidationError: if host is invalid IP and is non resolvable
@@ -372,28 +1190,28 @@ string to send to device to disable paging</dd>
             ipaddress.ip_address(self.host)
             return
         except ValueError:
-            pass
+            session_log.info(f&#34;Failed to validate host {self.host} as an ip address&#34;)
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
-            pass
+            session_log.info(f&#34;Failed to validate host {self.host} as a resolvable dns name&#34;)
         raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)
 
-    &#34;&#34;&#34; socket setup &#34;&#34;&#34;
+    &#34;&#34;&#34; socket setup &#34;&#34;&#34;  # noqa
 
     def _socket_alive(self) -&gt; bool:
         &#34;&#34;&#34;
         Check if underlying socket is alive
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False if socket is alive
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         try:
@@ -401,20 +1219,22 @@ string to send to device to disable paging</dd>
             return True
         except OSError:
             # socket is not alive
+            session_log.debug(f&#34;Socket to host {self.host} is not alive&#34;)
             return False
         except AttributeError:
             # socket never created yet
+            session_log.debug(f&#34;Socket to host {self.host} has never been created&#34;)
             return False
 
     def _socket_open(self) -&gt; None:
         &#34;&#34;&#34;
-        Open underyling socket
+        Open underlying socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             SetupTimeout: if socket connection times out
@@ -426,49 +1246,59 @@ string to send to device to disable paging</dd>
             try:
                 self.sock.connect((self.host, self.port))
             except socket.timeout:
+                session_log.critical(
+                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
+                )
                 raise SetupTimeout(
                     f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
                 )
+            session_log.debug(f&#34;Socket to host {self.host} opened&#34;)
 
     def _socket_close(self) -&gt; None:
         &#34;&#34;&#34;
-        Close underyling socket
+        Close underlying socket
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if self._socket_alive():
             self.sock.close()
+            session_log.debug(f&#34;Socket to host {self.host} closed&#34;)
 
     def close(self) -&gt; None:
         &#34;&#34;&#34;
-        Fully close scoket, session, and channel
+        Fully close socket, session, and channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         self._channel_close()
         self._session_close()
-        self._socket_close()</code></pre>
+        self._socket_close()
+        session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
 <li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -476,49 +1306,55 @@ string to send to device to disable paging</dd>
 <span>def <span class="ident">close</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fully close scoket, session, and channel</p>
+<section class="desc"><p>Fully close socket, session, and channel</p>
 <h2 id="args">Args</h2>
-<p>N/A</p>
+<p>N/A
+# noqa</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def close(self) -&gt; None:
     &#34;&#34;&#34;
-    Fully close scoket, session, and channel
+    Fully close socket, session, and channel
 
     Args:
-        N/A
+        N/A  # noqa
 
     Returns:
-        N/A
+        N/A  # noqa
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
     self._channel_close()
     self._session_close()
-    self._socket_close()</code></pre>
+    self._socket_close()
+    session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></b></code>:
+<li><code><b><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></b></code>:
 <ul class="hlist">
-<li><code><a title="ssh2net.channel.SSH2NetChannel.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
-<li><code><a title="ssh2net.channel.SSH2NetChannel.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
-<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
-<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.session.SSH2NetSession.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
 </ul>
 </li>
 </ul>
@@ -530,7 +1366,9 @@ string to send to device to disable paging</dd>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class SSH2NetChannel:
     @staticmethod
     def _rstrip_all_lines(output: bytes) -&gt; str:
@@ -544,7 +1382,7 @@ string to send to device to disable paging</dd>
             output: bytes object with each line right stripped
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
@@ -554,7 +1392,7 @@ string to send to device to disable paging</dd>
     @staticmethod
     def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
         &#34;&#34;&#34;
-        Clean up preceeding empty lines, and strip prompt if desired
+        Clean up preceding empty lines, and strip prompt if desired
 
         Args:
             output: list of strings to parse
@@ -564,7 +1402,7 @@ string to send to device to disable paging</dd>
             output: string of joined output lines
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = output.splitlines()
@@ -580,37 +1418,8 @@ string to send to device to disable paging</dd>
         output = &#34;\n&#34;.join(output)
         return output
 
-    # this is useless now; change it to a &#34;find prompt&#34; in case people care
     @channel_timeout(Timeout)
-    def _set_prompt(self) -&gt; bool:
-        &#34;&#34;&#34;
-        Read from shell and set the current shell prompt
-
-        Args:
-            N/A
-
-        Returns:
-            N/A
-
-        Raises:
-            N/A
-
-        &#34;&#34;&#34;
-        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
-        self.session.set_timeout(1000)
-        self.channel.flush()
-        self.channel.write(self.comms_return_char)
-        while True:
-            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
-            output = output.decode(&#34;unicode_escape&#34;).strip()
-            channel_match = re.search(pattern, output)
-            if channel_match:
-                self.current_prompt = channel_match.group(0)
-                self.session.set_timeout(self.session_timeout)
-                return
-
-    @channel_timeout(Timeout)
-    def _read_until_input(self, channel_input: str):
+    def _read_until_input(self, channel_input: str) -&gt; None:
         &#34;&#34;&#34;
         Read until all input has been entered, then send return.
 
@@ -620,18 +1429,20 @@ string to send to device to disable paging</dd>
             channel_input: string to write to channel
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         output = b&#34;&#34;
         while channel_input.encode() not in output:
             output += self.channel.read()[1]
+        channel_log.debug(f&#34;Read: {repr(output)}&#34;)
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
 
     @channel_timeout(Timeout)
     def _read_until_prompt(self, output=None, prompt=None):
@@ -646,27 +1457,36 @@ string to send to device to disable paging</dd>
             output: bytes of any channel reads after prompt has been seen
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if not output:
             output = b&#34;&#34;
-        # do not like the non regex stuff... would rather regex all of it
+
+        # prefer to use regex match where possible; assume pattern is regex if starting with
+        # ^ or ending with $ -- this works as we always use multi line search
         if not prompt:
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+            prompt_regex = True
         else:
-            prompt_pattern = prompt
+            if prompt.startswith(&#34;^&#34;) or prompt.endswith(&#34;$&#34;):
+                prompt_pattern = re.compile(prompt, flags=re.M | re.I)
+                prompt_regex = True
+            else:
+                prompt_pattern = prompt
+                prompt_regex = False
 
         # disabling session blocking means the while loop will actually iterate
         # without this iteration we can never properly check for prompts
         self.session.set_blocking(False)
         while True:
             output += self.channel.read()[1]
-            # we dont need to deal w/ line replacement for the actual output, only for
+            channel_log.debug(f&#34;Read: {repr(output)}&#34;)
+            # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
             output_copy = re.sub(&#34;\r&#34;, &#34;\n&#34;, output_copy.decode(&#34;unicode_escape&#34;).strip())
-            if not prompt:
+            if prompt_regex:
                 channel_match = re.search(prompt_pattern, output_copy)
             elif prompt in output_copy:
                 channel_match = True
@@ -690,11 +1510,15 @@ string to send to device to disable paging</dd>
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.debug(
+            f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         return self._restructure_output(output, strip_prompt=strip_prompt)
@@ -722,11 +1546,17 @@ string to send to device to disable paging</dd>
             output: string of cleaned channel data
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.debug(
+            f&#34;Attempting to send input interact: {channel_input}; &#34;
+            f&#34;expecting: {expectation}; responding: {response}; &#34;
+            f&#34;with a finale: {finale}; hidden_response: {hidden_response}&#34;
+        )
         self.channel.flush()
         self.channel.write(channel_input)
+        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
@@ -737,7 +1567,9 @@ string to send to device to disable paging</dd>
         elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
+        channel_log.debug(f&#34;Write: {repr(response)}&#34;)
         self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
         return self._restructure_output(output)
 
@@ -753,18 +1585,19 @@ string to send to device to disable paging</dd>
             command: string input to write to channel
 
         Returns:
-            result: tuple of command sent and resulting output
+            result: output from command sent over the channel
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.info(f&#34;Attempting to open channel for command execution&#34;)
         if self._shell:
             self._channel_close()
         self._channel_open()
-        results = []
         output = b&#34;&#34;
         channel_buff = 1
+        session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
         self.channel.execute(command)
         while channel_buff &gt; 0:
             try:
@@ -773,25 +1606,26 @@ string to send to device to disable paging</dd>
             except SocketRecvError:
                 break
         output = self._rstrip_all_lines(output)
-        output = self._restructure_output(output)
-        results.append((command, output))
+        result = self._restructure_output(output)
         self.close()
-        return results
+        session_log.info(f&#34;Command executed, channel closed&#34;)
+        return result
 
     def open_shell(self) -&gt; None:
         &#34;&#34;&#34;
         Open and prepare interactive SSH shell
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
+        session_log.info(f&#34;Attempting to open interactive shell&#34;)
         # open the channel itself
         self._channel_open()
         # invoke a shell on the channel
@@ -805,19 +1639,50 @@ string to send to device to disable paging</dd>
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
+        session_log.info(f&#34;Interactive shell opened&#34;)
 
-    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+    @channel_timeout(Timeout)
+    def get_prompt(self) -&gt; bool:
         &#34;&#34;&#34;
-        Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+        Read from shell and get the current shell prompt
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+        self.session.set_timeout(1000)
+        self.channel.flush()
+        self.channel.write(self.comms_return_char)
+        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
+        while True:
+            output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
+            output = output.decode(&#34;unicode_escape&#34;).strip()
+            channel_match = re.search(pattern, output)
+            if channel_match:
+                self.session.set_timeout(self.session_timeout)
+                current_prompt = channel_match.group(0)
+                return current_prompt
+
+    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+        &#34;&#34;&#34;
+        Primary entry point to send data to devices in shell mode; accept inputs and return results
 
         Args:
             inputs: list of strings or string of inputs to send to channel
+            strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if isinstance(inputs, str):
@@ -825,12 +1690,12 @@ string to send to device to disable paging</dd>
         results = []
         for channel_input in inputs:
             output = self._send_input(channel_input, strip_prompt)
-            results.append((channel_input, output))
+            results.append(output)
         return results
 
     def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
         &#34;&#34;&#34;
-        Primary entrypoint to interact with devices in shell mode
+        Primary entry point to interact with devices in shell mode; used to handle prompts
 
         accepts inputs and looks for expected prompt;
         sends the appropriate response, then waits for the &#34;finale&#34;
@@ -842,15 +1707,15 @@ string to send to device to disable paging</dd>
             inputs: tuple containing strings representing:
                 initial input
                 expectation (what should ssh2net expect after input)
-                response (response to expecation)
+                response (response to expectation)
                 finale (what should ssh2net expect when &#34;done&#34;)
             hidden_response: True/False response is hidden (i.e. password input)
 
         Returns:
-            result: list of tuples of command sent and resulting output
+            result: list of output from the input command(s)
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if isinstance(inputs, tuple):
@@ -860,15 +1725,37 @@ string to send to device to disable paging</dd>
             output = self._send_input_interact(
                 channel_input, expectation, response, finale, hidden_response
             )
-            results.append((channel_input, output))
+            results.append(output)
         return results</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="ssh2net.SSH2NetChannel.get_prompt"><code class="name flex">
+<span>def <span class="ident">get_prompt</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def retry_wrapper(self, *args, **kwargs):
+    attempt, delay = attempts, starting_delay
+    while attempt &gt; 1:
+        try:
+            return wrapped_func(self, *args, **kwargs)
+        except exception_to_check:
+            print(f&#34;Retrying in {delay} seconds...&#34;)
+            time.sleep(delay)
+            attempt -= 1
+            delay *= backoff
+    return wrapped_func(self, *args, **kwargs)</code></pre>
+</details>
+</dd>
 <dt id="ssh2net.SSH2NetChannel.open_and_execute"><code class="name flex">
 <span>def <span class="ident">open_and_execute</span></span>(<span>self, command)</span>
 </code></dt>
@@ -885,15 +1772,18 @@ operations.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>result</code></strong></dt>
-<dd>tuple of command sent and resulting output</dd>
+<dd>output from command sent over the channel</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def open_and_execute(self, command: str):
     &#34;&#34;&#34;
     Open ssh channel and execute a command; closes channel when done.
@@ -906,18 +1796,19 @@ operations.</p>
         command: string input to write to channel
 
     Returns:
-        result: tuple of command sent and resulting output
+        result: output from command sent over the channel
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
+    session_log.info(f&#34;Attempting to open channel for command execution&#34;)
     if self._shell:
         self._channel_close()
     self._channel_open()
-    results = []
     output = b&#34;&#34;
     channel_buff = 1
+    session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
     self.channel.execute(command)
     while channel_buff &gt; 0:
         try:
@@ -926,10 +1817,10 @@ operations.</p>
         except SocketRecvError:
             break
     output = self._rstrip_all_lines(output)
-    output = self._restructure_output(output)
-    results.append((command, output))
+    result = self._restructure_output(output)
     self.close()
-    return results</code></pre>
+    session_log.info(f&#34;Command executed, channel closed&#34;)
+    return result</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.SSH2NetChannel.open_shell"><code class="name flex">
@@ -938,33 +1829,39 @@ operations.</p>
 <dd>
 <section class="desc"><p>Open and prepare interactive SSH shell</p>
 <h2 id="args">Args</h2>
-<p>N/A</p>
+<p>N/A
+# noqa</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def open_shell(self) -&gt; None:
     &#34;&#34;&#34;
     Open and prepare interactive SSH shell
 
     Args:
-        N/A
+        N/A  # noqa
 
     Returns:
-        N/A
+        N/A  # noqa
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
+    session_log.info(f&#34;Attempting to open interactive shell&#34;)
     # open the channel itself
     self._channel_open()
     # invoke a shell on the channel
@@ -977,43 +1874,50 @@ operations.</p>
         if callable(self.comms_disable_paging):
             self.comms_disable_paging(self)
         else:
-            self.send_inputs(self.comms_disable_paging)</code></pre>
+            self.send_inputs(self.comms_disable_paging)
+    session_log.info(f&#34;Interactive shell opened&#34;)</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.SSH2NetChannel.send_inputs"><code class="name flex">
 <span>def <span class="ident">send_inputs</span></span>(<span>self, inputs, strip_prompt=True)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Primary entrypoint to send data to devices in shell mode; accept inputs and return results</p>
+<section class="desc"><p>Primary entry point to send data to devices in shell mode; accept inputs and return results</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>inputs</code></strong></dt>
 <dd>list of strings or string of inputs to send to channel</dd>
+<dt><strong><code>strip_prompt</code></strong></dt>
+<dd>strip prompt or not, defaults to True (yes, strip the prompt)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>result</code></strong></dt>
-<dd>list of tuples of command sent and resulting output</dd>
+<dd>list of output from the input command(s)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[Tuple[str, bytes]]:
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
     &#34;&#34;&#34;
-    Primary entrypoint to send data to devices in shell mode; accept inputs and return results
+    Primary entry point to send data to devices in shell mode; accept inputs and return results
 
     Args:
         inputs: list of strings or string of inputs to send to channel
+        strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
     Returns:
-        result: list of tuples of command sent and resulting output
+        result: list of output from the input command(s)
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
     if isinstance(inputs, str):
@@ -1021,7 +1925,7 @@ operations.</p>
     results = []
     for channel_input in inputs:
         output = self._send_input(channel_input, strip_prompt)
-        results.append((channel_input, output))
+        results.append(output)
     return results</code></pre>
 </details>
 </dd>
@@ -1029,7 +1933,7 @@ operations.</p>
 <span>def <span class="ident">send_inputs_interact</span></span>(<span>self, inputs, hidden_response=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Primary entrypoint to interact with devices in shell mode</p>
+<section class="desc"><p>Primary entry point to interact with devices in shell mode; used to handle prompts</p>
 <p>accepts inputs and looks for expected prompt;
 sends the appropriate response, then waits for the "finale"
 returns the results of the interaction</p>
@@ -1040,7 +1944,7 @@ returns the results of the interaction</p>
 <dd>tuple containing strings representing:
 initial input
 expectation (what should ssh2net expect after input)
-response (response to expecation)
+response (response to expectation)
 finale (what should ssh2net expect when "done")</dd>
 <dt><strong><code>hidden_response</code></strong></dt>
 <dd>True/False response is hidden (i.e. password input)</dd>
@@ -1048,18 +1952,21 @@ finale (what should ssh2net expect when "done")</dd>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>result</code></strong></dt>
-<dd>list of tuples of command sent and resulting output</dd>
+<dd>list of output from the input command(s)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code></dt>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
     &#34;&#34;&#34;
-    Primary entrypoint to interact with devices in shell mode
+    Primary entry point to interact with devices in shell mode; used to handle prompts
 
     accepts inputs and looks for expected prompt;
     sends the appropriate response, then waits for the &#34;finale&#34;
@@ -1071,15 +1978,15 @@ finale (what should ssh2net expect when "done")</dd>
         inputs: tuple containing strings representing:
             initial input
             expectation (what should ssh2net expect after input)
-            response (response to expecation)
+            response (response to expectation)
             finale (what should ssh2net expect when &#34;done&#34;)
         hidden_response: True/False response is hidden (i.e. password input)
 
     Returns:
-        result: list of tuples of command sent and resulting output
+        result: list of output from the input command(s)
 
     Raises:
-        N/A
+        N/A  # noqa
 
     &#34;&#34;&#34;
     if isinstance(inputs, tuple):
@@ -1089,8 +1996,392 @@ finale (what should ssh2net expect when "done")</dd>
         output = self._send_input_interact(
             channel_input, expectation, response, finale, hidden_response
         )
-        results.append((channel_input, output))
+        results.append(output)
     return results</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="ssh2net.SSH2NetSSHConfig"><code class="flex name class">
+<span>class <span class="ident">SSH2NetSSHConfig</span></span>
+<span>(</span><span>ssh_config_file='')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2NetSSHConfig Object</p>
+<p>Parse OpenSSH config file</p>
+<p>Try to load the following data for all entries in config file:
+Host
+HostName
+Port
+User
+AddressFamily
+BindAddress
+ConnectTimeout
+IdentitiesOnly
+IdentityFile
+KbdInteractiveAuthentication
+PasswordAuthentication
+PreferredAuthentications</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ssh_config_file</code></strong></dt>
+<dd>string path to ssh configuration file to use if not provided
+will try to use users ssh config file in ~/.ssh/config first, then will try
+/etc/ssh/config_file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SSH2NetSSHConfig:
+    def __init__(self, ssh_config_file=&#34;&#34;):
+        &#34;&#34;&#34;
+        Initialize SSH2NetSSHConfig Object
+
+        Parse OpenSSH config file
+
+        Try to load the following data for all entries in config file:
+            Host
+            HostName
+            Port
+            User
+            AddressFamily
+            BindAddress
+            ConnectTimeout
+            IdentitiesOnly
+            IdentityFile
+            KbdInteractiveAuthentication
+            PasswordAuthentication
+            PreferredAuthentications
+
+        Args:
+            ssh_config_file: string path to ssh configuration file to use if not provided
+                will try to use users ssh config file in ~/.ssh/config first, then will try
+                /etc/ssh/config_file
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        self.ssh_config_file = self._select_config_file(ssh_config_file)
+        if self.ssh_config_file:
+            with open(self.ssh_config_file, &#34;r&#34;) as f:
+                self.ssh_config_file = f.read()
+            self.hosts = self._parse()
+            if not self.hosts:
+                self.hosts = None
+        else:
+            self.hosts = None
+
+    def __str__(self):
+        &#34;&#34;&#34;
+        Magic str method for SSH2NetSSHConfig class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        return &#34;SSH2NetSSHConfig Object&#34;
+
+    def __repr__(self):
+        &#34;&#34;&#34;
+        Magic repr method for SSH2NetSSHConfig class
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            repr: repr for class object
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        class_dict = self.__dict__.copy()
+        del class_dict[&#34;ssh_config_file&#34;]
+        return f&#34;SSH2NetSSHConfig {class_dict}&#34;
+
+    def __bool__(self):
+        &#34;&#34;&#34;
+        Magic bool method; return True if ssh_config_file
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            bool: True/False if ssh_config_file
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        if self.ssh_config_file:
+            return True
+        return False
+
+    @staticmethod
+    def _select_config_file(ssh_config_file):
+        &#34;&#34;&#34;
+        Select ssh configuration file
+
+        Args:
+            ssh_config_file: string representation of ssh config file to try to use
+
+        Returns:
+            ssh_config_file: Pathlib path object or None
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        if Path(ssh_config_file).is_file():
+            return Path(ssh_config_file)
+        if Path(os.path.expanduser(&#34;~/.ssh/config&#34;)).is_file():
+            return Path(os.path.expanduser(&#34;~/.ssh/config&#34;))
+        if Path(&#34;/etc/ssh/ssh_config&#34;).is_file():
+            return Path(&#34;/etc/ssh/ssh_config&#34;)
+        return None
+
+    @staticmethod
+    def _strip_comments(line):
+        &#34;&#34;&#34;
+        Strip out comments from ssh config file lines
+
+        Args:
+            line: to strip comments from
+
+        Returns:
+            line: rejoined ssh config file line after stripping comments
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        line = &#34; &#34;.join(shlex.split(line, comments=True))
+        return line
+
+    def _parse(self):
+        &#34;&#34;&#34;
+        Parse SSH configuration file
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            discovered_hosts: dict of host objects discovered in ssh config file
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+
+        # uncomment next line and handle global patterns (stuff before hosts) at some point
+        # global_config_pattern = re.compile(r&#34;^.*?\b(?=host)&#34;, flags=re.I | re.S)
+        # use word boundaries with a positive lookahead to get everything between the word host
+        # need to do this as whitespace/formatting is not really a thing in ssh_config file
+        # match host\s to ensure we don&#39;t pick up hostname and split things there accidentally
+        host_pattern = re.compile(r&#34;\bhost.*?\b(?=host\s|\s+$)&#34;, flags=re.I | re.S)
+        host_entries = re.findall(host_pattern, self.ssh_config_file)
+        discovered_hosts = {}
+        if not host_entries:
+            return discovered_hosts
+
+        # do we need to add whitespace between match and end of line to ensure we match correctly?
+        hosts_pattern = re.compile(r&#34;^\s*host[\s=]+(.*)$&#34;, flags=re.I | re.M)
+        hostname_pattern = re.compile(r&#34;^\s*hostname[\s=]+([\w.-]*)$&#34;, flags=re.I | re.M)
+        port_pattern = re.compile(r&#34;^\s*port[\s=]+([\d]*)$&#34;, flags=re.I | re.M)
+        user_pattern = re.compile(r&#34;^\s*user[\s=]+([\w]*)$&#34;, flags=re.I | re.M)
+        # address_family_pattern = None
+        # bind_address_pattern = None
+        # connect_timeout_pattern = None
+        identities_only_pattern = re.compile(
+            r&#34;^\s*identitiesonly[\s=]+(yes|no)$&#34;, flags=re.I | re.M
+        )
+        identity_file_pattern = re.compile(
+            r&#34;^\s*identityfile[\s=]+([\w.\/\@~-]*)$&#34;, flags=re.I | re.M
+        )
+        # keyboard_interactive_pattern = None
+        # password_authentication_pattern = None
+        # preferred_authentication_pattern = None
+
+        for host_entry in host_entries:
+            host = Host()
+            host_line = re.search(hosts_pattern, host_entry)
+            if host_line:
+                host.hosts = self._strip_comments(host_line.groups()[0])
+            hostname = re.search(hostname_pattern, host_entry)
+            if hostname:
+                host.hostname = self._strip_comments(hostname.groups()[0])
+            port = re.search(port_pattern, host_entry)
+            if port:
+                host.port = self._strip_comments(port.groups()[0])
+            user = re.search(user_pattern, host_entry)
+            if user:
+                host.user = self._strip_comments(user.groups()[0])
+            # address_family = re.search(user_pattern, host_entry[0])
+            # bind_address = re.search(user_pattern, host_entry[0])
+            # connect_timeout = re.search(user_pattern, host_entry[0])
+            identities_only = re.search(identities_only_pattern, host_entry)
+            if identities_only:
+                host.identities_only = self._strip_comments(identities_only.groups()[0])
+            identity_file = re.search(identity_file_pattern, host_entry)
+            if identity_file:
+                host.identity_file = self._strip_comments(identity_file.groups()[0])
+            # keyboard_interactive = re.search(user_pattern, host_entry[0])
+            # password_authentication = re.search(user_pattern, host_entry[0])
+            # preferred_authentication = re.search(user_pattern, host_entry[0])
+            discovered_hosts[host.hosts] = host
+        return discovered_hosts
+
+    def _lookup_fuzzy_match(self, host):
+        &#34;&#34;&#34;
+        Look up fuzzy matched hosts
+
+        Get the best match ssh config Host entry for a given host; this allows for using
+        the splat and question-mark operators in ssh config file
+
+        Args:
+            host: host to lookup in discovered_hosts dict
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        possible_matches = []
+        for host_entry in self.hosts.keys():
+            host_list = host_entry.split()
+            for host_pattern in host_list:
+                # replace periods with literal period
+                # replace asterisk (match 0 or more things) with appropriate regex
+                # replace question mark (match one thing) with appropriate regex
+                host_pattern = (
+                    host_pattern.replace(&#34;.&#34;, r&#34;\.&#34;).replace(&#34;*&#34;, r&#34;(.*)&#34;).replace(&#34;?&#34;, r&#34;(.)&#34;)
+                )
+                # compile with case insensitive
+                host_pattern = re.compile(host_pattern, flags=re.I)
+                result = re.search(host_pattern, host)
+                # if we get a result, append it and the original pattern to the possible matches
+                if result:
+                    possible_matches.append((result, host_entry))
+        # initialize a None best match
+        best_match = None
+        for match in possible_matches:
+            if best_match is None:
+                best_match = match
+            # count how many chars were replaced to get regex to work
+            chars_replaced = 0
+            for start_char, end_char in match[0].regs[1:]:
+                chars_replaced += end_char - start_char
+            # count how many chars were replaced to get regex to work on best match
+            best_match_chars_replaced = 0
+            for start_char, end_char in best_match[0].regs[1:]:
+                best_match_chars_replaced += end_char - start_char
+            # if match replaced less chars than &#34;best_match&#34; we have a new best match
+            if chars_replaced &lt; best_match_chars_replaced:
+                best_match = match
+        return self.hosts[best_match[1]]
+
+    def lookup(self, host):
+        &#34;&#34;&#34;
+        Lookup a given host
+
+        Args:
+            host: host to lookup in discovered_hosts dict
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        # return exact 1:1 match if exists
+        if host in self.hosts.keys():
+            return self.hosts[host]
+        # return match if given host is an exact match for a host entry
+        for host_entry in self.hosts.keys():
+            host_list = host_entry.split()
+            if host in host_list:
+                return self.hosts[host_entry]
+        # otherwise need to select the most correct host entry
+        return self._lookup_fuzzy_match(host)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="ssh2net.SSH2NetSSHConfig.lookup"><code class="name flex">
+<span>def <span class="ident">lookup</span></span>(<span>self, host)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Lookup a given host</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>host</code></strong></dt>
+<dd>host to lookup in discovered_hosts dict</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lookup(self, host):
+    &#34;&#34;&#34;
+    Lookup a given host
+
+    Args:
+        host: host to lookup in discovered_hosts dict
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    # return exact 1:1 match if exists
+    if host in self.hosts.keys():
+        return self.hosts[host]
+    # return match if given host is an exact match for a host entry
+    for host_entry in self.hosts.keys():
+        host_list = host_entry.split()
+        if host in host_list:
+            return self.hosts[host_entry]
+    # otherwise need to select the most correct host entry
+    return self._lookup_fuzzy_match(host)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1102,20 +2393,22 @@ finale (what should ssh2net expect when "done")</dd>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">class SSH2NetSession:
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SSH2NetSession(SSH2NetChannel):
     def _session_alive(self):
         &#34;&#34;&#34;
         Check if session is alive and authenticated
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False session is alive and authenticated
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         try:
@@ -1123,6 +2416,7 @@ finale (what should ssh2net expect when "done")</dd>
             return self.session.userauth_authenticated()
         except AttributeError:
             # session never created yet; there may be other exceptions we need to catch here
+            logging.debug(f&#34;Session to host {self.host} has never been created&#34;)
             return False
 
     def _session_open(self) -&gt; None:
@@ -1130,13 +2424,13 @@ finale (what should ssh2net expect when "done")</dd>
         Open SSH session
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if not self._socket_alive():
@@ -1149,71 +2443,121 @@ finale (what should ssh2net expect when "done")</dd>
                 self.session.set_timeout(self.session_timeout)
             try:
                 self.session.handshake(self.sock)
-            except Exception as e:
-                raise e
-        # authenticate -- think about preferred order: key -&gt; pass -&gt; interactive?
-        self._session_password_auth()
+            except Exception as exc:
+                logging.critical(
+                    f&#34;Failed to complete handshake with host {self.host}; &#34; f&#34;Exception: {exc}&#34;
+                )
+                raise exc
+
+        logging.debug(f&#34;Session to host {self.host} opened&#34;)
+        if self.auth_public_key:
+            self._session_public_key_auth()
+            if self._session_alive():
+                return
+        if self.auth_password:
+            self._session_password_auth()
+
+    def _session_public_key_auth(self) -&gt; None:
+        &#34;&#34;&#34;
+        Perform public key based auth on SSH2NetSession
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            Exception: catch all for unhandled exceptions
+
+        &#34;&#34;&#34;
+        try:
+            self.session.userauth_publickey_fromfile(self.auth_user, self.auth_public_key)
+        except AuthenticationError:
+            logging.critical(f&#34;Public key authentication with host {self.host} failed. &#34;)
+        except Exception as exc:
+            logging.critical(
+                &#34;Unknown error occurred during public key authentication with host &#34;
+                f&#34;{self.host}; Exception: {exc}&#34;
+            )
+            raise exc
 
     def _session_password_auth(self) -&gt; None:
         &#34;&#34;&#34;
         Perform password based auth on SSH2NetSession
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
             AuthenticationError: if authentication fails
-            Exception: catch all for uknown other exceptions
+            Exception: catch all for unknown other exceptions
 
         &#34;&#34;&#34;
         try:
             self.session.userauth_password(self.auth_user, self.auth_password)
-        except AuthenticationError as e:
-            print(f&#34;Password authenticaiton failed, trying keyboardinteractive. {e}&#34;)
+        except AuthenticationError as exc:
+            logging.critical(
+                f&#34;Password authentication with host {self.host} failed. &#34;
+                f&#34;Exception: {exc}. Trying keyboard interactive auth...&#34;
+            )
             try:
                 self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
-            except AuthenticationError as e:
-                raise e
-            except Exception as e:
-                raise e
-        except Exception as e:
-            raise e
+            except AuthenticationError as exc:
+                logging.critical(
+                    f&#34;Keyboard interactive authentication with host {self.host} failed. &#34;
+                    f&#34;Exception: {exc}.&#34;
+                )
+                raise exc
+            except Exception as exc:
+                logging.critical(
+                    &#34;Unknown error occurred during keyboard interactive authentication with host &#34;
+                    f&#34;{self.host}; Exception: {exc}&#34;
+                )
+                raise exc
+        except Exception as exc:
+            logging.critical(
+                &#34;Unknown error occurred during password authentication with host &#34;
+                f&#34;{self.host}; Exception: {exc}&#34;
+            )
+            raise exc
 
     def _session_close(self) -&gt; None:
         &#34;&#34;&#34;
         Close SSH SSH2NetSession
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if self.session is not None:
             self.session.disconnect()
             self.session = None
+            logging.debug(f&#34;Session to host {self.host} closed&#34;)
 
-    &#34;&#34;&#34; channel setup &#34;&#34;&#34;
+    &#34;&#34;&#34; channel setup &#34;&#34;&#34;  # noqa
 
     def _channel_alive(self) -&gt; bool:
         &#34;&#34;&#34;
         Check if channel is alive
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
             bool True/False channel is alive
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         try:
@@ -1221,6 +2565,7 @@ finale (what should ssh2net expect when "done")</dd>
                 return True
         except AttributeError:
             # channel not created or closed
+            logging.debug(f&#34;Channel to host {self.host} has never been created&#34;)
             return False
         return False
 
@@ -1229,13 +2574,13 @@ finale (what should ssh2net expect when "done")</dd>
         Open channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if not self._session_alive():
@@ -1243,45 +2588,62 @@ finale (what should ssh2net expect when "done")</dd>
         if not self._channel_alive():
             self.channel = self.session.open_session()
             self.channel.pty()
+            logging.debug(f&#34;Channel to host {self.host} opened&#34;)
 
     def _channel_close(self) -&gt; None:
         &#34;&#34;&#34;
         Close channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         if self.channel is not None:
-            self.channel.close
+            self.channel.close  # noqa
             self.channel = None
+            logging.debug(f&#34;Channel to host {self.host} closed&#34;)
 
     def _channel_invoke_shell(self) -&gt; None:
         &#34;&#34;&#34;
         Invoke shell on channel
 
         Args:
-            N/A
+            N/A  # noqa
 
         Returns:
-            N/A
+            N/A  # noqa
 
         Raises:
-            N/A
+            N/A  # noqa
 
         &#34;&#34;&#34;
         self._shell = True
         self.channel.shell()</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+</ul>
+</li>
 </ul>
 </dd>
 </dl>
@@ -1297,14 +2659,41 @@ finale (what should ssh2net expect when "done")</dd>
 <ul>
 <li><code><a title="ssh2net.base" href="base.html">ssh2net.base</a></code></li>
 <li><code><a title="ssh2net.channel" href="channel.html">ssh2net.channel</a></code></li>
+<li><code><a title="ssh2net.community" href="community/index.html">ssh2net.community</a></code></li>
+<li><code><a title="ssh2net.core" href="core/index.html">ssh2net.core</a></code></li>
 <li><code><a title="ssh2net.decorators" href="decorators.html">ssh2net.decorators</a></code></li>
 <li><code><a title="ssh2net.exceptions" href="exceptions.html">ssh2net.exceptions</a></code></li>
 <li><code><a title="ssh2net.helper" href="helper.html">ssh2net.helper</a></code></li>
+<li><code><a title="ssh2net.netmiko_compatibility" href="netmiko_compatibility.html">ssh2net.netmiko_compatibility</a></code></li>
 <li><code><a title="ssh2net.session" href="session.html">ssh2net.session</a></code></li>
+<li><code><a title="ssh2net.ssh_config" href="ssh_config.html">ssh2net.ssh_config</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ssh2net.ConnectHandler" href="#ssh2net.ConnectHandler">ConnectHandler</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="ssh2net.BaseNetworkDriver" href="#ssh2net.BaseNetworkDriver">BaseNetworkDriver</a></code></h4>
+<ul class="">
+<li><code><a title="ssh2net.BaseNetworkDriver.attain_priv" href="#ssh2net.BaseNetworkDriver.attain_priv">attain_priv</a></code></li>
+<li><code><a title="ssh2net.BaseNetworkDriver.send_command" href="#ssh2net.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.BaseNetworkDriver.send_config_set" href="#ssh2net.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.BaseNetworkDriver.textfsm_parse_output" href="#ssh2net.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="ssh2net.IOSXEDriver" href="#ssh2net.IOSXEDriver">IOSXEDriver</a></code></h4>
+</li>
+<li>
+<h4><code><a title="ssh2net.JunosDriver" href="#ssh2net.JunosDriver">JunosDriver</a></code></h4>
+</li>
+<li>
+<h4><code><a title="ssh2net.NXOSDriver" href="#ssh2net.NXOSDriver">NXOSDriver</a></code></h4>
+</li>
 <li>
 <h4><code><a title="ssh2net.SSH2Net" href="#ssh2net.SSH2Net">SSH2Net</a></code></h4>
 <ul class="">
@@ -1314,10 +2703,17 @@ finale (what should ssh2net expect when "done")</dd>
 <li>
 <h4><code><a title="ssh2net.SSH2NetChannel" href="#ssh2net.SSH2NetChannel">SSH2NetChannel</a></code></h4>
 <ul class="">
+<li><code><a title="ssh2net.SSH2NetChannel.get_prompt" href="#ssh2net.SSH2NetChannel.get_prompt">get_prompt</a></code></li>
 <li><code><a title="ssh2net.SSH2NetChannel.open_and_execute" href="#ssh2net.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.SSH2NetChannel.open_shell" href="#ssh2net.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.SSH2NetChannel.send_inputs" href="#ssh2net.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
 <li><code><a title="ssh2net.SSH2NetChannel.send_inputs_interact" href="#ssh2net.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="ssh2net.SSH2NetSSHConfig" href="#ssh2net.SSH2NetSSHConfig">SSH2NetSSHConfig</a></code></h4>
+<ul class="">
+<li><code><a title="ssh2net.SSH2NetSSHConfig.lookup" href="#ssh2net.SSH2NetSSHConfig.lookup">lookup</a></code></li>
 </ul>
 </li>
 <li>
@@ -1329,7 +2725,7 @@ finale (what should ssh2net expect when "done")</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

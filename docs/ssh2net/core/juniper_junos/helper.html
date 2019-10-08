@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
-<title>ssh2net.exceptions API documentation</title>
-<meta name="description" content="ssh2net.exception" />
+<title>ssh2net.core.juniper_junos.helper API documentation</title>
+<meta name="description" content="ssh2net.core.juniper_junos.helper" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,27 +17,32 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ssh2net.exceptions</code></h1>
+<h1 class="title">Module <code>ssh2net.core.juniper_junos.helper</code></h1>
 </header>
 <section id="section-intro">
-<p>ssh2net.exception</p>
+<p>ssh2net.core.juniper_junos.helper</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;ssh2net.exception&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;ssh2net.core.juniper_junos.helper&#34;&#34;&#34;
 
 
-class ValidationError(Exception):
-    pass
+def disable_paging(cls):
+    &#34;&#34;&#34;
+    Disable paging and set screen width for Junos
 
+    Args:
+        cls: SSH2Net connection object
 
-class SetupTimeout(Exception):
-    pass
+    Returns:
+        N/A  # noqa
 
-
-class UnknownPrivLevel(Exception):
-    pass</code></pre>
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    cls.send_inputs(&#34;set cli screen-length 0&#34;)
+    cls.send_inputs(&#34;set cli screen-width 511&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -45,68 +50,54 @@ class UnknownPrivLevel(Exception):
 <section>
 </section>
 <section>
-</section>
-<section>
-<h2 class="section-title" id="header-classes">Classes</h2>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="ssh2net.exceptions.SetupTimeout"><code class="flex name class">
-<span>class <span class="ident">SetupTimeout</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<dt id="ssh2net.core.juniper_junos.helper.disable_paging"><code class="name flex">
+<span>def <span class="ident">disable_paging</span></span>(<span>cls)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<section class="desc"><p>Disable paging and set screen width for Junos</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cls</code></strong></dt>
+<dd>SSH2Net connection object</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SetupTimeout(Exception):
-    pass</code></pre>
+<pre><code class="python">def disable_paging(cls):
+    &#34;&#34;&#34;
+    Disable paging and set screen width for Junos
+
+    Args:
+        cls: SSH2Net connection object
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    cls.send_inputs(&#34;set cli screen-length 0&#34;)
+    cls.send_inputs(&#34;set cli screen-width 511&#34;)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
-<dt id="ssh2net.exceptions.UnknownPrivLevel"><code class="flex name class">
-<span>class <span class="ident">UnknownPrivLevel</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class UnknownPrivLevel(Exception):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
-<dt id="ssh2net.exceptions.ValidationError"><code class="flex name class">
-<span>class <span class="ident">ValidationError</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ValidationError(Exception):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
 </dd>
 </dl>
+</section>
+<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -117,20 +108,12 @@ class UnknownPrivLevel(Exception):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ssh2net" href="index.html">ssh2net</a></code></li>
+<li><code><a title="ssh2net.core.juniper_junos" href="index.html">ssh2net.core.juniper_junos</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="ssh2net.exceptions.SetupTimeout" href="#ssh2net.exceptions.SetupTimeout">SetupTimeout</a></code></h4>
-</li>
-<li>
-<h4><code><a title="ssh2net.exceptions.UnknownPrivLevel" href="#ssh2net.exceptions.UnknownPrivLevel">UnknownPrivLevel</a></code></h4>
-</li>
-<li>
-<h4><code><a title="ssh2net.exceptions.ValidationError" href="#ssh2net.exceptions.ValidationError">ValidationError</a></code></h4>
-</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ssh2net.core.juniper_junos.helper.disable_paging" href="#ssh2net.core.juniper_junos.helper.disable_paging">disable_paging</a></code></li>
 </ul>
 </li>
 </ul>

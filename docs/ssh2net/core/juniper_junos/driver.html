@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
-<title>ssh2net.exceptions API documentation</title>
-<meta name="description" content="ssh2net.exception" />
+<title>ssh2net.core.juniper_junos.driver API documentation</title>
+<meta name="description" content="ssh2net.core.juniper_junos.driver" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,27 +17,77 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ssh2net.exceptions</code></h1>
+<h1 class="title">Module <code>ssh2net.core.juniper_junos.driver</code></h1>
 </header>
 <section id="section-intro">
-<p>ssh2net.exception</p>
+<p>ssh2net.core.juniper_junos.driver</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;ssh2net.exception&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;ssh2net.core.juniper_junos.driver&#34;&#34;&#34;
+import re
+from typing import Any, Dict
+
+from ssh2net.core.driver import BaseNetworkDriver, PrivilegeLevel
 
 
-class ValidationError(Exception):
-    pass
+JUNOS_ARG_MAPPER = {
+    &#34;comms_prompt_regex&#34;: r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
+    &#34;comms_return_char&#34;: &#34;\n&#34;,
+    &#34;comms_pre_login_handler&#34;: &#34;&#34;,
+    &#34;comms_disable_paging&#34;: &#34;ssh2net.core.juniper_junos.helper.disable_paging&#34;,
+}
+
+PRIVS = {
+    &#34;exec&#34;: (
+        PrivilegeLevel(
+            re.compile(r&#34;^[a-z0-9.\-@()/:]{1,32}&gt;$&#34;, flags=re.M | re.I),
+            &#34;exec&#34;,
+            None,
+            None,
+            &#34;configuration&#34;,
+            &#34;configure&#34;,
+            False,
+            False,
+            True,
+            0,
+        )
+    ),
+    &#34;configuration&#34;: (
+        PrivilegeLevel(
+            re.compile(r&#34;^[a-z0-9.\-@()/:]{1,32}#$&#34;, flags=re.M | re.I),
+            &#34;configuration&#34;,
+            &#34;exec&#34;,
+            &#34;exit configuration-mode&#34;,
+            None,
+            None,
+            False,
+            False,
+            True,
+            1,
+        )
+    ),
+}
 
 
-class SetupTimeout(Exception):
-    pass
+class JunosDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net IOSXEDriver Object
 
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
 
-class UnknownPrivLevel(Exception):
-    pass</code></pre>
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;exec&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -49,61 +99,73 @@ class UnknownPrivLevel(Exception):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ssh2net.exceptions.SetupTimeout"><code class="flex name class">
-<span>class <span class="ident">SetupTimeout</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<dt id="ssh2net.core.juniper_junos.driver.JunosDriver"><code class="flex name class">
+<span>class <span class="ident">JunosDriver</span></span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SetupTimeout(Exception):
-    pass</code></pre>
+<pre><code class="python">class JunosDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net IOSXEDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;exec&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="../../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="../../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
 </ul>
-</dd>
-<dt id="ssh2net.exceptions.UnknownPrivLevel"><code class="flex name class">
-<span>class <span class="ident">UnknownPrivLevel</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class UnknownPrivLevel(Exception):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
+<h3>Inherited members</h3>
 <ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.attain_priv" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver.attain_priv">attain_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="../../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="../../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
 </ul>
-</dd>
-<dt id="ssh2net.exceptions.ValidationError"><code class="flex name class">
-<span>class <span class="ident">ValidationError</span></span>
-<span>(</span><span>*args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ValidationError(Exception):
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
+</li>
 </ul>
 </dd>
 </dl>
@@ -117,19 +179,13 @@ class UnknownPrivLevel(Exception):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ssh2net" href="index.html">ssh2net</a></code></li>
+<li><code><a title="ssh2net.core.juniper_junos" href="index.html">ssh2net.core.juniper_junos</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ssh2net.exceptions.SetupTimeout" href="#ssh2net.exceptions.SetupTimeout">SetupTimeout</a></code></h4>
-</li>
-<li>
-<h4><code><a title="ssh2net.exceptions.UnknownPrivLevel" href="#ssh2net.exceptions.UnknownPrivLevel">UnknownPrivLevel</a></code></h4>
-</li>
-<li>
-<h4><code><a title="ssh2net.exceptions.ValidationError" href="#ssh2net.exceptions.ValidationError">ValidationError</a></code></h4>
+<h4><code><a title="ssh2net.core.juniper_junos.driver.JunosDriver" href="#ssh2net.core.juniper_junos.driver.JunosDriver">JunosDriver</a></code></h4>
 </li>
 </ul>
 </li>
