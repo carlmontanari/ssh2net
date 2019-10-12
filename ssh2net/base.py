@@ -23,14 +23,16 @@ class SSH2Net(SSH2NetSession):
         setup_port: Optional[int] = 22,
         setup_timeout: Optional[int] = 5,
         setup_ssh_config_file: Optional[Union[str, bool]] = False,
+        session_timeout: Optional[int] = 5000,
         session_keepalive: Optional[bool] = False,
         session_keepalive_interval: Optional[int] = 10,
-        session_timeout: Optional[int] = 5000,
+        session_keepalive_type: Optional[str] = "network",
+        session_keepalive_pattern: Optional[str] = "\005",
         auth_user: str = "",
         auth_password: Optional[Union[str]] = None,
         auth_public_key: Optional[Union[str]] = None,
         comms_prompt_regex: Optional[str] = r"^[a-z0-9.\-@()/:]{1,32}[#>$]$",
-        comms_prompt_timeout: Optional[int] = 10,
+        comms_operation_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = "\n",
         comms_pre_login_handler: Optional[Union[str, Callable]] = "",
         comms_disable_paging: Optional[Union[str, Callable]] = "terminal length 0",
@@ -47,9 +49,19 @@ class SSH2Net(SSH2NetSession):
             setup_port: port to open ssh session to
             setup_timeout: timeout in seconds for opening underlying socket to host
             setup_ssh_config_file: ssh config file to use or True to try system default files
-            session_keepalive: FUTURE USE: whether or not to try to keep session alive
-            session_keepalive_interval: FUTURE USE: interval to use for session keepalives
             session_timeout: time in ms for session read operations; 0 is "forever" and will block
+            session_keepalive: whether or not to try to keep session alive
+            session_keepalive_interval: interval to use for session keepalives
+            session_keepalive_type: network|standard -- "network" sends actual characters over the
+                channel as "normal" ssh keepalive doesn't keep sessions open. "standard" sends
+                "normal" ssh keepalives via ssh2 library. In both cases a thread is spawned in
+                which the keepalives are sent. This introduces a locking mechanism which in
+                theory will slow things down slightly, however provides the ability to keep the
+                session alive indefinitely.
+            session_keepalive_pattern: pattern to send to keep network channel alive. Default is
+                u"\005" which is equivalent to "ctrl+e". This pattern moves cursor to end of the
+                line which should be an innocuous pattern. This will only be entered *if* a lock
+                can be acquired.
             auth_user: username to use to connect to host
             auth_password: password to use to connect to host
             auth_public_key: path to ssh public key to use to connect to host
@@ -59,7 +71,7 @@ class SSH2Net(SSH2NetSession):
                 IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
                 for highly reliably matching for prompts after stripping trailing white space,
                 case insensitive is just a convenience factor so i can be lazy.
-            comms_prompt_timeout: timeout in seconds for waiting for channel operations.
+            comms_operation_timeout: timeout in seconds for waiting for channel operations.
                 this is NOT the "read" timeout. this is the timeout for the entire operation
                 sent to send_inputs/send_inputs_interact
             comms_return_char: character to use to send returns to host
@@ -75,10 +87,11 @@ class SSH2Net(SSH2NetSession):
             ValueError: in the following situations:
                 - setup_port is not an integer
                 - setup_timeout is not an integer
-                - session_keepalive is not an integer
-                - session_keepalive_interval is not an integer
                 - session_timeout is not an integer
-                - comms_prompt_timeout is not an integer
+                - session_keepalive is not a bool
+                - session_keepalive_interval is not an integer
+                - session_keepalive_type is not "network" or "standard"
+                - comms_operation_timeout is not an integer
                 - comms_return_char is not a string
 
         """
@@ -95,9 +108,19 @@ class SSH2Net(SSH2NetSession):
         self.setup_timeout = int(setup_timeout)
 
         # session setup
-        self.session_keepalive = int(session_keepalive)
-        self.session_keepalive_interval = int(session_keepalive_interval)
         self.session_timeout = int(session_timeout)
+        if isinstance(session_keepalive, bool):
+            self.session_keepalive = bool(session_keepalive)
+        else:
+            raise ValueError(f"'session_keepalive' must be bool, got: {type(session_keepalive)}'")
+        self.session_keepalive_interval = int(session_keepalive_interval)
+        if session_keepalive_type not in ["network", "standard"]:
+            raise ValueError(
+                f"{session_keepalive_type} is an invalid session_keepalive_type; must be "
+                "'network' or 'standard'."
+            )
+        self.session_keepalive_type = session_keepalive_type
+        self.session_keepalive_pattern = session_keepalive_pattern
 
         # auth setup
         self.auth_user = auth_user.strip()
@@ -114,7 +137,7 @@ class SSH2Net(SSH2NetSession):
         # try to compile prompt to raise TypeError before opening any connections
         re.compile(comms_prompt_regex, flags=re.M | re.I)
         self.comms_prompt_regex = comms_prompt_regex
-        self.comms_prompt_timeout = int(comms_prompt_timeout)
+        self.comms_operation_timeout = int(comms_operation_timeout)
 
         # validate that the return character set is a string
         # do this to ensure provided value is a string; this prevents an int being cast to string
@@ -271,7 +294,7 @@ class SSH2Net(SSH2NetSession):
             ValueError: if provided string does not result in a callable
 
         """
-        if comms_disable_paging != "term length 0":
+        if comms_disable_paging != "terminal length 0":
             if callable(comms_disable_paging):
                 return comms_disable_paging
             ext_func = validate_external_function(comms_disable_paging)

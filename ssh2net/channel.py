@@ -140,7 +140,7 @@ class SSH2NetChannel:
                 self.session.set_blocking(True)
                 return output
 
-    @operation_timeout("comms_prompt_timeout")
+    @operation_timeout("comms_operation_timeout")
     def _send_input(self, channel_input: str, strip_prompt: bool):
         """
         Send input to device and return results
@@ -156,6 +156,7 @@ class SSH2NetChannel:
             N/A  # noqa
 
         """
+        self._acquire_session_lock()
         session_log.debug(
             f"Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}"
         )
@@ -164,9 +165,10 @@ class SSH2NetChannel:
         channel_log.debug(f"Write: {repr(channel_input)}")
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
+        self.session_lock.release_lock()
         return self._restructure_output(output, strip_prompt=strip_prompt)
 
-    @operation_timeout("comms_prompt_timeout")
+    @operation_timeout("comms_operation_timeout")
     def _send_input_interact(
         self,
         channel_input: str,
@@ -192,6 +194,7 @@ class SSH2NetChannel:
             N/A  # noqa
 
         """
+        self._acquire_session_lock()
         session_log.debug(
             f"Attempting to send input interact: {channel_input}; "
             f"expecting: {expectation}; responding: {response}; "
@@ -214,6 +217,7 @@ class SSH2NetChannel:
         self.channel.write(self.comms_return_char)
         channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
         output += self._read_until_prompt(prompt=finale)
+        self.session_lock.release_lock()
         return self._restructure_output(output)
 
     def open_and_execute(self, command: str):
@@ -282,7 +286,8 @@ class SSH2NetChannel:
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
-        session_log.info(f"Interactive shell opened")
+        self._session_keepalive()
+        session_log.info("Interactive shell opened")
 
     @channel_timeout(Timeout)
     def get_prompt(self) -> bool:

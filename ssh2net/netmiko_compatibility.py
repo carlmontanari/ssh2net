@@ -23,18 +23,19 @@ VALID_SSH2NET_KWARGS = {
     "auth_password",
     "auth_public_key",
     "comms_prompt_regex",
-    "comms_prompt_timeout",
+    "comms_operation_timeout",
     "comms_return_char",
     "comms_pre_login_handler",
     "comms_disable_paging",
 }
 
 
-def connect_handler(**kwargs):
+def connect_handler(auto_open=True, **kwargs):
     """
     Convert netmiko style "ConnectHandler" device creation to SSH2Net style
 
     Args:
+        auto_open: auto open connection or not (primarily for testing purposes)
         **kwargs: keyword arguments
 
     Returns:
@@ -56,7 +57,9 @@ def connect_handler(**kwargs):
     final_kwargs = {**transformed_kwargs, **driver_args}
 
     driver = driver_class(**final_kwargs)
-    driver.open_shell()
+
+    if auto_open:
+        driver.open_shell()
 
     return driver
 
@@ -79,16 +82,16 @@ def transform_netmiko_kwargs(kwargs):
     kwargs["setup_ssh_config_file"] = kwargs.pop("ssh_config_file", False)
     kwargs["session_keepalive"] = False
     kwargs["session_keepalive_interval"] = 10
+    if "global_delay_factor" in kwargs.keys():
+        kwargs["session_timeout"] = kwargs["global_delay_factor"] * 5000
+        kwargs.pop("global_delay_factor")
+    else:
+        kwargs["session_timeout"] = 5000
     kwargs["auth_user"] = kwargs.pop("username")
     kwargs["auth_password"] = kwargs.pop("password", None)
     kwargs["auth_public_key"] = kwargs.pop("key_file", None)
     kwargs["comms_prompt_regex"] = ""
-    kwargs["comms_prompt_timeout"] = 10
-    if "global_delay_factor" in kwargs.keys():
-        kwargs["comms_prompt_timeout"] = kwargs["global_delay_factor"] * 10
-        kwargs.pop("global_delay_factor")
-    else:
-        kwargs["comms_prompt_timeout"] = 5
+    kwargs["comms_operation_timeout"] = 10
     kwargs["comms_return_char"] = ""
     kwargs["comms_pre_login_handler"] = ""
     kwargs["comms_disable_paging"] = ""

@@ -1,5 +1,9 @@
 """ssh2net.session"""
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 import logging
+from threading import Lock
+import time
 
 from ssh2.session import Session
 from ssh2.exceptions import AuthenticationError
@@ -30,6 +34,50 @@ class SSH2NetSession(SSH2NetChannel):
             logging.debug(f"Session to host {self.host} has never been created")
             return False
 
+    def _keepalive_thread(self) -> None:
+        lock_counter = 0
+        last_keepalive = datetime.now()
+        if self.session_keepalive_type == "network":
+            while True:
+                if not self._session_alive():
+                    return
+                diff = datetime.now() - last_keepalive
+                if diff.seconds >= self.session_keepalive_interval:
+                    if not self.session_lock.locked():
+                        lock_counter = 0
+                        self.session_lock.acquire_lock()
+                        self.channel.write(self.session_keepalive_pattern)
+                        self.session_lock.release_lock()
+                        last_keepalive = datetime.now()
+                    else:
+                        lock_counter += 1
+                        if lock_counter >= 3:
+                            print(
+                                f"Keepalive thread missed {lock_counter} consecutive keepalives..."
+                            )
+                time.sleep(self.session_keepalive_interval / 10)
+        elif self.session_keepalive_type == "standard":
+            self.session.keepalive_config(
+                want_reply=False, interval=self.session_keepalive_interval
+            )
+            while True:
+                if not self._session_alive():
+                    return
+                self.session.keepalive_send()
+                time.sleep(self.session_keepalive_interval / 10)
+
+    def _session_keepalive(self) -> None:
+        if not self.session_keepalive:
+            return
+        pool = ThreadPoolExecutor()
+        pool.submit(self._keepalive_thread)
+
+    def _acquire_session_lock(self) -> None:
+        while True:
+            if not self.session_lock.locked():
+                self.session_lock.acquire_lock()
+                return
+
     def _session_open(self) -> None:
         """
         Open SSH session
@@ -48,8 +96,6 @@ class SSH2NetSession(SSH2NetChannel):
             self._socket_open()
         if not self._session_alive():
             self.session = Session()
-            if self.session_keepalive:
-                self.session.keepalive_config(False, self.session_keepalive_interval)
             if self.session_timeout:
                 self.session.set_timeout(self.session_timeout)
             try:
@@ -61,12 +107,15 @@ class SSH2NetSession(SSH2NetChannel):
                 raise exc
 
         logging.debug(f"Session to host {self.host} opened")
+        self.session_lock = Lock()
         if self.auth_public_key:
             self._session_public_key_auth()
             if self._session_alive():
                 return
         if self.auth_password:
             self._session_password_auth()
+            if self._session_alive():
+                return
 
     def _session_public_key_auth(self) -> None:
         """
@@ -175,7 +224,7 @@ class SSH2NetSession(SSH2NetChannel):
             if self.channel:
                 return True
         except AttributeError:
-            # channel not created or closed
+            # channel not created, or closed
             logging.debug(f"Channel to host {self.host} has never been created")
             return False
         return False

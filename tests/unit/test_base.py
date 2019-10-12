@@ -77,15 +77,37 @@ def test_init_invalid_setup_timeout():
         SSH2Net(**test_host)
 
 
+def test_init_valid_session_timeout():
+    test_host = {
+        "setup_host": "my_device  ",
+        "auth_user": "username",
+        "auth_password": "password",
+        "session_timeout": 10,
+    }
+    conn = SSH2Net(**test_host)
+    assert conn.session_timeout == 10
+
+
+def test_init_invalid_session_timeout():
+    test_host = {
+        "setup_host": "my_device  ",
+        "auth_user": "username",
+        "auth_password": "password",
+        "session_timeout": "notanint",
+    }
+    with pytest.raises(ValueError):
+        SSH2Net(**test_host)
+
+
 def test_init_valid_session_keepalive():
     test_host = {
         "setup_host": "my_device  ",
         "auth_user": "username",
         "auth_password": "password",
-        "session_keepalive": 10,
+        "session_keepalive": True,
     }
     conn = SSH2Net(**test_host)
-    assert conn.session_keepalive == 10
+    assert conn.session_keepalive is True
 
 
 def test_init_invalid_session_keepalive():
@@ -93,7 +115,7 @@ def test_init_invalid_session_keepalive():
         "setup_host": "my_device  ",
         "auth_user": "username",
         "auth_password": "password",
-        "session_keepalive": "notanint",
+        "session_keepalive": "notabool",
     }
     with pytest.raises(ValueError):
         SSH2Net(**test_host)
@@ -121,26 +143,37 @@ def test_init_invalid_session_keepalive_interval():
         SSH2Net(**test_host)
 
 
-def test_init_valid_session_timeout():
+def test_init_valid_session_keepalive_type():
     test_host = {
         "setup_host": "my_device  ",
         "auth_user": "username",
         "auth_password": "password",
-        "session_timeout": 10,
+        "session_keepalive_type": "standard",
     }
     conn = SSH2Net(**test_host)
-    assert conn.session_timeout == 10
+    assert conn.session_keepalive_type == "standard"
 
 
-def test_init_invalid_session_timeout():
+def test_init_invalid_session_keepalive_type():
     test_host = {
         "setup_host": "my_device  ",
         "auth_user": "username",
         "auth_password": "password",
-        "session_timeout": "notanint",
+        "session_keepalive_type": "notvalid",
     }
     with pytest.raises(ValueError):
         SSH2Net(**test_host)
+
+
+def test_init_valid_session_keepalive_pattern():
+    test_host = {
+        "setup_host": "my_device  ",
+        "auth_user": "username",
+        "auth_password": "password",
+        "session_keepalive_pattern": "\007",
+    }
+    conn = SSH2Net(**test_host)
+    assert conn.session_keepalive_pattern == "\x07"
 
 
 def test_init_username_strip():
@@ -192,10 +225,10 @@ def test_init_valid_comms_prompt_timeout():
         "setup_host": "my_device  ",
         "auth_user": "username",
         "auth_password": "password",
-        "comms_prompt_timeout": 10,
+        "comms_operation_timeout": 10,
     }
     conn = SSH2Net(**test_host)
-    assert conn.comms_prompt_timeout == 10
+    assert conn.comms_operation_timeout == 10
 
 
 def test_init_invalid_comms_prompt_timeout():
@@ -203,7 +236,7 @@ def test_init_invalid_comms_prompt_timeout():
         "setup_host": "my_device  ",
         "auth_user": "username",
         "auth_password": "password",
-        "comms_prompt_timeout": "notanint",
+        "comms_operation_timeout": "notanint",
     }
     with pytest.raises(ValueError):
         SSH2Net(**test_host)
@@ -274,6 +307,12 @@ def test_init_invalid_comms_pre_login_handler():
         str(e.value)
         == f"{test_host['comms_pre_login_handler']} is an invalid comms_pre_login_handler function or path to a function."
     )
+
+
+def test_init_valid_comms_disable_paging_default():
+    test_host = {"setup_host": "my_device", "auth_user": "username", "auth_password": "password"}
+    conn = SSH2Net(**test_host)
+    assert conn.comms_disable_paging == "term length 0"
 
 
 def test_init_valid_comms_disable_paging_func():
@@ -373,11 +412,12 @@ def test_repr():
     conn = SSH2Net(**test_host)
     assert repr(conn) == (
         f"SSH2Net {{'_shell': False, 'host': '{test_host['setup_host']}', 'port': 22, "
-        "'setup_timeout': 5, 'session_keepalive': 0, 'session_keepalive_interval'"
-        f": 10, 'session_timeout': 5000, 'auth_user': '{test_host['auth_user']}', "
+        "'setup_timeout': 5, 'session_timeout': 5000, 'session_keepalive': False, "
+        "'session_keepalive_interval': 10, 'session_keepalive_type': 'network', "
+        fr"'session_keepalive_pattern': '\x05', 'auth_user': '{test_host['auth_user']}', "
         "'auth_public_key': None, 'auth_password': '********', 'comms_prompt_regex': "
-        r"'^[a-z0-9.\\-@()/:]{1,32}[#>$]$', 'comms_prompt_timeout': 10, 'comms_return_char': '\n', "
-        "'comms_pre_login_handler': '', 'comms_disable_paging': "
+        r"'^[a-z0-9.\\-@()/:]{1,32}[#>$]$', 'comms_operation_timeout': 10, "
+        r"'comms_return_char': '\n', 'comms_pre_login_handler': '', 'comms_disable_paging': "
         "'terminal length 0'}"
     )
 

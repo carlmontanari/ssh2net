@@ -1,11 +1,21 @@
 """ssh2net.decorators"""
+import logging
 import signal
 import time
+
+
+channel_log = logging.getLogger("ssh2net_channel")
 
 
 def operation_timeout(attribute):
     """
     Decorate an "operation" -- raises exception if the operation timeout is exceeded
+
+    This decorator wraps an entire "operation" -- in other words for each send_input or
+    send_inputs_interact this decorator wraps that entire operation. The `comms_operation_timeout`
+    value governs this timeout decorator -- and as such it should always be larger than the base
+    `session_timeout` argument plus the amount of time that `channel_timeout` decorator will delay
+    while retrying the read operation.
 
     Args:
         attribute: attribute to inspect in class (to set timeout duration)
@@ -44,6 +54,9 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
     """
     Decorate read operations; basic backoff timer to try to read channel for reasonable time
 
+    This decorator wraps individual read operations. If/when the read operation times out
+    (timeout configured by `session_timeout`), run a basic backoff process retrying five times
+
     Args:
         exception_to_check: Exception to handle; basically if this exception is seen, try again
         attempts: number of attempts to make to retry
@@ -65,7 +78,7 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
                 try:
                     return wrapped_func(self, *args, **kwargs)
                 except exception_to_check:
-                    print(f"Retrying in {delay} seconds...")
+                    channel_log.info(f"Retrying read operation in {delay} seconds...")
                     time.sleep(delay)
                     attempt -= 1
                     delay *= backoff
