@@ -26,13 +26,23 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.decorators&#34;&#34;&#34;
+import logging
 import signal
 import time
+
+
+channel_log = logging.getLogger(&#34;ssh2net_channel&#34;)
 
 
 def operation_timeout(attribute):
     &#34;&#34;&#34;
     Decorate an &#34;operation&#34; -- raises exception if the operation timeout is exceeded
+
+    This decorator wraps an entire &#34;operation&#34; -- in other words for each send_input or
+    send_inputs_interact this decorator wraps that entire operation. The `comms_operation_timeout`
+    value governs this timeout decorator -- and as such it should always be larger than the base
+    `session_timeout` argument plus the amount of time that `channel_timeout` decorator will delay
+    while retrying the read operation.
 
     Args:
         attribute: attribute to inspect in class (to set timeout duration)
@@ -71,6 +81,9 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
     &#34;&#34;&#34;
     Decorate read operations; basic backoff timer to try to read channel for reasonable time
 
+    This decorator wraps individual read operations. If/when the read operation times out
+    (timeout configured by `session_timeout`), run a basic backoff process retrying five times
+
     Args:
         exception_to_check: Exception to handle; basically if this exception is seen, try again
         attempts: number of attempts to make to retry
@@ -92,7 +105,7 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
                 try:
                     return wrapped_func(self, *args, **kwargs)
                 except exception_to_check:
-                    print(f&#34;Retrying in {delay} seconds...&#34;)
+                    channel_log.info(f&#34;Retrying read operation in {delay} seconds...&#34;)
                     time.sleep(delay)
                     attempt -= 1
                     delay *= backoff
@@ -115,6 +128,8 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
 </code></dt>
 <dd>
 <section class="desc"><p>Decorate read operations; basic backoff timer to try to read channel for reasonable time</p>
+<p>This decorator wraps individual read operations. If/when the read operation times out
+(timeout configured by <code>session_timeout</code>), run a basic backoff process retrying five times</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>exception_to_check</code></strong></dt>
@@ -145,6 +160,9 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
     &#34;&#34;&#34;
     Decorate read operations; basic backoff timer to try to read channel for reasonable time
 
+    This decorator wraps individual read operations. If/when the read operation times out
+    (timeout configured by `session_timeout`), run a basic backoff process retrying five times
+
     Args:
         exception_to_check: Exception to handle; basically if this exception is seen, try again
         attempts: number of attempts to make to retry
@@ -166,7 +184,7 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
                 try:
                     return wrapped_func(self, *args, **kwargs)
                 except exception_to_check:
-                    print(f&#34;Retrying in {delay} seconds...&#34;)
+                    channel_log.info(f&#34;Retrying read operation in {delay} seconds...&#34;)
                     time.sleep(delay)
                     attempt -= 1
                     delay *= backoff
@@ -182,6 +200,11 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
 </code></dt>
 <dd>
 <section class="desc"><p>Decorate an "operation" &ndash; raises exception if the operation timeout is exceeded</p>
+<p>This decorator wraps an entire "operation" &ndash; in other words for each send_input or
+send_inputs_interact this decorator wraps that entire operation. The <code>comms_operation_timeout</code>
+value governs this timeout decorator &ndash; and as such it should always be larger than the base
+<code>session_timeout</code> argument plus the amount of time that <a title="ssh2net.decorators.channel_timeout" href="#ssh2net.decorators.channel_timeout"><code>channel_timeout()</code></a> decorator will delay
+while retrying the read operation.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>attribute</code></strong></dt>
@@ -204,6 +227,12 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
 <pre><code class="python">def operation_timeout(attribute):
     &#34;&#34;&#34;
     Decorate an &#34;operation&#34; -- raises exception if the operation timeout is exceeded
+
+    This decorator wraps an entire &#34;operation&#34; -- in other words for each send_input or
+    send_inputs_interact this decorator wraps that entire operation. The `comms_operation_timeout`
+    value governs this timeout decorator -- and as such it should always be larger than the base
+    `session_timeout` argument plus the amount of time that `channel_timeout` decorator will delay
+    while retrying the read operation.
 
     Args:
         attribute: attribute to inspect in class (to set timeout duration)

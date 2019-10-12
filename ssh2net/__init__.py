@@ -12,7 +12,7 @@ from ssh2net.core.cisco_iosxe.driver import IOSXEDriver
 from ssh2net.core.cisco_nxos.driver import NXOSDriver
 from ssh2net.core.juniper_junos.driver import JunosDriver
 
-__version__ = "2019.10.07"
+__version__ = "2019.10.12"
 __all__ = (
     "SSH2Net",
     "SSH2NetSession",

@@ -167,7 +167,7 @@ class SSH2NetChannel:
                 self.session.set_blocking(True)
                 return output
 
-    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input(self, channel_input: str, strip_prompt: bool):
         &#34;&#34;&#34;
         Send input to device and return results
@@ -183,6 +183,7 @@ class SSH2NetChannel:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self._acquire_session_lock()
         session_log.debug(
             f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
         )
@@ -191,9 +192,10 @@ class SSH2NetChannel:
         channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
+        self.session_lock.release_lock()
         return self._restructure_output(output, strip_prompt=strip_prompt)
 
-    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input_interact(
         self,
         channel_input: str,
@@ -219,6 +221,7 @@ class SSH2NetChannel:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self._acquire_session_lock()
         session_log.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
             f&#34;expecting: {expectation}; responding: {response}; &#34;
@@ -241,6 +244,7 @@ class SSH2NetChannel:
         self.channel.write(self.comms_return_char)
         channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
+        self.session_lock.release_lock()
         return self._restructure_output(output)
 
     def open_and_execute(self, command: str):
@@ -309,7 +313,8 @@ class SSH2NetChannel:
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
-        session_log.info(f&#34;Interactive shell opened&#34;)
+        self._session_keepalive()
+        session_log.info(&#34;Interactive shell opened&#34;)
 
     @channel_timeout(Timeout)
     def get_prompt(self) -&gt; bool:
@@ -546,7 +551,7 @@ class SSH2NetChannel:
                 self.session.set_blocking(True)
                 return output
 
-    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input(self, channel_input: str, strip_prompt: bool):
         &#34;&#34;&#34;
         Send input to device and return results
@@ -562,6 +567,7 @@ class SSH2NetChannel:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self._acquire_session_lock()
         session_log.debug(
             f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
         )
@@ -570,9 +576,10 @@ class SSH2NetChannel:
         channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
+        self.session_lock.release_lock()
         return self._restructure_output(output, strip_prompt=strip_prompt)
 
-    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input_interact(
         self,
         channel_input: str,
@@ -598,6 +605,7 @@ class SSH2NetChannel:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self._acquire_session_lock()
         session_log.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
             f&#34;expecting: {expectation}; responding: {response}; &#34;
@@ -620,6 +628,7 @@ class SSH2NetChannel:
         self.channel.write(self.comms_return_char)
         channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
+        self.session_lock.release_lock()
         return self._restructure_output(output)
 
     def open_and_execute(self, command: str):
@@ -688,7 +697,8 @@ class SSH2NetChannel:
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
-        session_log.info(f&#34;Interactive shell opened&#34;)
+        self._session_keepalive()
+        session_log.info(&#34;Interactive shell opened&#34;)
 
     @channel_timeout(Timeout)
     def get_prompt(self) -&gt; bool:
@@ -798,7 +808,7 @@ class SSH2NetChannel:
         try:
             return wrapped_func(self, *args, **kwargs)
         except exception_to_check:
-            print(f&#34;Retrying in {delay} seconds...&#34;)
+            channel_log.info(f&#34;Retrying read operation in {delay} seconds...&#34;)
             time.sleep(delay)
             attempt -= 1
             delay *= backoff
@@ -924,7 +934,8 @@ operations.</p>
             self.comms_disable_paging(self)
         else:
             self.send_inputs(self.comms_disable_paging)
-    session_log.info(f&#34;Interactive shell opened&#34;)</code></pre>
+    self._session_keepalive()
+    session_log.info(&#34;Interactive shell opened&#34;)</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.channel.SSH2NetChannel.send_inputs"><code class="name flex">

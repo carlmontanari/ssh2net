@@ -50,18 +50,19 @@ VALID_SSH2NET_KWARGS = {
     &#34;auth_password&#34;,
     &#34;auth_public_key&#34;,
     &#34;comms_prompt_regex&#34;,
-    &#34;comms_prompt_timeout&#34;,
+    &#34;comms_operation_timeout&#34;,
     &#34;comms_return_char&#34;,
     &#34;comms_pre_login_handler&#34;,
     &#34;comms_disable_paging&#34;,
 }
 
 
-def connect_handler(**kwargs):
+def connect_handler(auto_open=True, **kwargs):
     &#34;&#34;&#34;
     Convert netmiko style &#34;ConnectHandler&#34; device creation to SSH2Net style
 
     Args:
+        auto_open: auto open connection or not (primarily for testing purposes)
         **kwargs: keyword arguments
 
     Returns:
@@ -83,7 +84,9 @@ def connect_handler(**kwargs):
     final_kwargs = {**transformed_kwargs, **driver_args}
 
     driver = driver_class(**final_kwargs)
-    driver.open_shell()
+
+    if auto_open:
+        driver.open_shell()
 
     return driver
 
@@ -106,16 +109,16 @@ def transform_netmiko_kwargs(kwargs):
     kwargs[&#34;setup_ssh_config_file&#34;] = kwargs.pop(&#34;ssh_config_file&#34;, False)
     kwargs[&#34;session_keepalive&#34;] = False
     kwargs[&#34;session_keepalive_interval&#34;] = 10
+    if &#34;global_delay_factor&#34; in kwargs.keys():
+        kwargs[&#34;session_timeout&#34;] = kwargs[&#34;global_delay_factor&#34;] * 5000
+        kwargs.pop(&#34;global_delay_factor&#34;)
+    else:
+        kwargs[&#34;session_timeout&#34;] = 5000
     kwargs[&#34;auth_user&#34;] = kwargs.pop(&#34;username&#34;)
     kwargs[&#34;auth_password&#34;] = kwargs.pop(&#34;password&#34;, None)
     kwargs[&#34;auth_public_key&#34;] = kwargs.pop(&#34;key_file&#34;, None)
     kwargs[&#34;comms_prompt_regex&#34;] = &#34;&#34;
-    kwargs[&#34;comms_prompt_timeout&#34;] = 10
-    if &#34;global_delay_factor&#34; in kwargs.keys():
-        kwargs[&#34;comms_prompt_timeout&#34;] = kwargs[&#34;global_delay_factor&#34;] * 10
-        kwargs.pop(&#34;global_delay_factor&#34;)
-    else:
-        kwargs[&#34;comms_prompt_timeout&#34;] = 5
+    kwargs[&#34;comms_operation_timeout&#34;] = 10
     kwargs[&#34;comms_return_char&#34;] = &#34;&#34;
     kwargs[&#34;comms_pre_login_handler&#34;] = &#34;&#34;
     kwargs[&#34;comms_disable_paging&#34;] = &#34;&#34;
@@ -133,12 +136,14 @@ def transform_netmiko_kwargs(kwargs):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="ssh2net.netmiko_compatibility.connect_handler"><code class="name flex">
-<span>def <span class="ident">connect_handler</span></span>(<span>**kwargs)</span>
+<span>def <span class="ident">connect_handler</span></span>(<span>auto_open=True, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Convert netmiko style "ConnectHandler" device creation to SSH2Net style</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auto_open</code></strong></dt>
+<dd>auto open connection or not (primarily for testing purposes)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword arguments</dd>
 </dl>
@@ -156,11 +161,12 @@ def transform_netmiko_kwargs(kwargs):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def connect_handler(**kwargs):
+<pre><code class="python">def connect_handler(auto_open=True, **kwargs):
     &#34;&#34;&#34;
     Convert netmiko style &#34;ConnectHandler&#34; device creation to SSH2Net style
 
     Args:
+        auto_open: auto open connection or not (primarily for testing purposes)
         **kwargs: keyword arguments
 
     Returns:
@@ -182,7 +188,9 @@ def transform_netmiko_kwargs(kwargs):
     final_kwargs = {**transformed_kwargs, **driver_args}
 
     driver = driver_class(**final_kwargs)
-    driver.open_shell()
+
+    if auto_open:
+        driver.open_shell()
 
     return driver</code></pre>
 </details>
@@ -224,16 +232,16 @@ def transform_netmiko_kwargs(kwargs):
     kwargs[&#34;setup_ssh_config_file&#34;] = kwargs.pop(&#34;ssh_config_file&#34;, False)
     kwargs[&#34;session_keepalive&#34;] = False
     kwargs[&#34;session_keepalive_interval&#34;] = 10
+    if &#34;global_delay_factor&#34; in kwargs.keys():
+        kwargs[&#34;session_timeout&#34;] = kwargs[&#34;global_delay_factor&#34;] * 5000
+        kwargs.pop(&#34;global_delay_factor&#34;)
+    else:
+        kwargs[&#34;session_timeout&#34;] = 5000
     kwargs[&#34;auth_user&#34;] = kwargs.pop(&#34;username&#34;)
     kwargs[&#34;auth_password&#34;] = kwargs.pop(&#34;password&#34;, None)
     kwargs[&#34;auth_public_key&#34;] = kwargs.pop(&#34;key_file&#34;, None)
     kwargs[&#34;comms_prompt_regex&#34;] = &#34;&#34;
-    kwargs[&#34;comms_prompt_timeout&#34;] = 10
-    if &#34;global_delay_factor&#34; in kwargs.keys():
-        kwargs[&#34;comms_prompt_timeout&#34;] = kwargs[&#34;global_delay_factor&#34;] * 10
-        kwargs.pop(&#34;global_delay_factor&#34;)
-    else:
-        kwargs[&#34;comms_prompt_timeout&#34;] = 5
+    kwargs[&#34;comms_operation_timeout&#34;] = 10
     kwargs[&#34;comms_return_char&#34;] = &#34;&#34;
     kwargs[&#34;comms_pre_login_handler&#34;] = &#34;&#34;
     kwargs[&#34;comms_disable_paging&#34;] = &#34;&#34;

@@ -39,7 +39,7 @@ from ssh2net.core.cisco_iosxe.driver import IOSXEDriver
 from ssh2net.core.cisco_nxos.driver import NXOSDriver
 from ssh2net.core.juniper_junos.driver import JunosDriver
 
-__version__ = &#34;2019.10.07&#34;
+__version__ = &#34;2019.10.12&#34;
 __all__ = (
     &#34;SSH2Net&#34;,
     &#34;SSH2NetSession&#34;,
@@ -128,12 +128,14 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="ssh2net.ConnectHandler"><code class="name flex">
-<span>def <span class="ident">ConnectHandler</span></span>(<span>**kwargs)</span>
+<span>def <span class="ident">ConnectHandler</span></span>(<span>auto_open=True, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Convert netmiko style "ConnectHandler" device creation to SSH2Net style</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auto_open</code></strong></dt>
+<dd>auto open connection or not (primarily for testing purposes)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword arguments</dd>
 </dl>
@@ -151,11 +153,12 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def connect_handler(**kwargs):
+<pre><code class="python">def connect_handler(auto_open=True, **kwargs):
     &#34;&#34;&#34;
     Convert netmiko style &#34;ConnectHandler&#34; device creation to SSH2Net style
 
     Args:
+        auto_open: auto open connection or not (primarily for testing purposes)
         **kwargs: keyword arguments
 
     Returns:
@@ -177,7 +180,9 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
     final_kwargs = {**transformed_kwargs, **driver_args}
 
     driver = driver_class(**final_kwargs)
-    driver.open_shell()
+
+    if auto_open:
+        driver.open_shell()
 
     return driver</code></pre>
 </details>
@@ -804,7 +809,7 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
 </dd>
 <dt id="ssh2net.SSH2Net"><code class="flex name class">
 <span>class <span class="ident">SSH2Net</span></span>
-<span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, setup_ssh_config_file=False, session_keepalive=False, session_keepalive_interval=10, session_timeout=5000, auth_user='', auth_password=None, auth_public_key=None, comms_prompt_regex=^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$, comms_prompt_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='terminal length 0')</span>
+<span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, setup_ssh_config_file=False, session_timeout=5000, session_keepalive=False, session_keepalive_interval=10, session_keepalive_type='network', session_keepalive_pattern='\x05', auth_user='', auth_password=None, auth_public_key=None, comms_prompt_regex=^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$, comms_operation_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='terminal length 0')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Initialize SSH2Net Object</p>
@@ -822,12 +827,24 @@ to the "comms_prompt_regex" as this is highly critical to this tool working well
 <dd>timeout in seconds for opening underlying socket to host</dd>
 <dt><strong><code>setup_ssh_config_file</code></strong></dt>
 <dd>ssh config file to use or True to try system default files</dd>
-<dt><strong><code>session_keepalive</code></strong></dt>
-<dd>FUTURE USE: whether or not to try to keep session alive</dd>
-<dt><strong><code>session_keepalive_interval</code></strong></dt>
-<dd>FUTURE USE: interval to use for session keepalives</dd>
 <dt><strong><code>session_timeout</code></strong></dt>
 <dd>time in ms for session read operations; 0 is "forever" and will block</dd>
+<dt><strong><code>session_keepalive</code></strong></dt>
+<dd>whether or not to try to keep session alive</dd>
+<dt><strong><code>session_keepalive_interval</code></strong></dt>
+<dd>interval to use for session keepalives</dd>
+<dt><strong><code>session_keepalive_type</code></strong></dt>
+<dd>network|standard &ndash; "network" sends actual characters over the
+channel as "normal" ssh keepalive doesn't keep sessions open. "standard" sends
+"normal" ssh keepalives via ssh2 library. In both cases a thread is spawned in
+which the keepalives are sent. This introduces a locking mechanism which in
+theory will slow things down slightly, however provides the ability to keep the
+session alive indefinitely.</dd>
+<dt><strong><code>session_keepalive_pattern</code></strong></dt>
+<dd>pattern to send to keep network channel alive. Default is
+u"\005" which is equivalent to "ctrl+e". This pattern moves cursor to end of the
+line which should be an innocuous pattern. This will only be entered <em>if</em> a lock
+can be acquired.</dd>
 <dt><strong><code>auth_user</code></strong></dt>
 <dd>username to use to connect to host</dd>
 <dt><strong><code>auth_password</code></strong></dt>
@@ -841,7 +858,7 @@ ssh2net will not work!
 IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
 for highly reliably matching for prompts after stripping trailing white space,
 case insensitive is just a convenience factor so i can be lazy.</dd>
-<dt><strong><code>comms_prompt_timeout</code></strong></dt>
+<dt><strong><code>comms_operation_timeout</code></strong></dt>
 <dd>timeout in seconds for waiting for channel operations.
 this is NOT the "read" timeout. this is the timeout for the entire operation
 sent to send_inputs/send_inputs_interact</dd>
@@ -866,10 +883,11 @@ string to send to device to disable paging</dd>
 <dd>in the following situations:
 - setup_port is not an integer
 - setup_timeout is not an integer
-- session_keepalive is not an integer
-- session_keepalive_interval is not an integer
 - session_timeout is not an integer
-- comms_prompt_timeout is not an integer
+- session_keepalive is not a bool
+- session_keepalive_interval is not an integer
+- session_keepalive_type is not "network" or "standard"
+- comms_operation_timeout is not an integer
 - comms_return_char is not a string</dd>
 </dl></section>
 <details class="source">
@@ -884,14 +902,16 @@ string to send to device to disable paging</dd>
         setup_port: Optional[int] = 22,
         setup_timeout: Optional[int] = 5,
         setup_ssh_config_file: Optional[Union[str, bool]] = False,
+        session_timeout: Optional[int] = 5000,
         session_keepalive: Optional[bool] = False,
         session_keepalive_interval: Optional[int] = 10,
-        session_timeout: Optional[int] = 5000,
+        session_keepalive_type: Optional[str] = &#34;network&#34;,
+        session_keepalive_pattern: Optional[str] = &#34;\005&#34;,
         auth_user: str = &#34;&#34;,
         auth_password: Optional[Union[str]] = None,
         auth_public_key: Optional[Union[str]] = None,
         comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
-        comms_prompt_timeout: Optional[int] = 10,
+        comms_operation_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = &#34;\n&#34;,
         comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
         comms_disable_paging: Optional[Union[str, Callable]] = &#34;terminal length 0&#34;,
@@ -908,9 +928,19 @@ string to send to device to disable paging</dd>
             setup_port: port to open ssh session to
             setup_timeout: timeout in seconds for opening underlying socket to host
             setup_ssh_config_file: ssh config file to use or True to try system default files
-            session_keepalive: FUTURE USE: whether or not to try to keep session alive
-            session_keepalive_interval: FUTURE USE: interval to use for session keepalives
             session_timeout: time in ms for session read operations; 0 is &#34;forever&#34; and will block
+            session_keepalive: whether or not to try to keep session alive
+            session_keepalive_interval: interval to use for session keepalives
+            session_keepalive_type: network|standard -- &#34;network&#34; sends actual characters over the
+                channel as &#34;normal&#34; ssh keepalive doesn&#39;t keep sessions open. &#34;standard&#34; sends
+                &#34;normal&#34; ssh keepalives via ssh2 library. In both cases a thread is spawned in
+                which the keepalives are sent. This introduces a locking mechanism which in
+                theory will slow things down slightly, however provides the ability to keep the
+                session alive indefinitely.
+            session_keepalive_pattern: pattern to send to keep network channel alive. Default is
+                u&#34;\005&#34; which is equivalent to &#34;ctrl+e&#34;. This pattern moves cursor to end of the
+                line which should be an innocuous pattern. This will only be entered *if* a lock
+                can be acquired.
             auth_user: username to use to connect to host
             auth_password: password to use to connect to host
             auth_public_key: path to ssh public key to use to connect to host
@@ -920,7 +950,7 @@ string to send to device to disable paging</dd>
                 IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
                 for highly reliably matching for prompts after stripping trailing white space,
                 case insensitive is just a convenience factor so i can be lazy.
-            comms_prompt_timeout: timeout in seconds for waiting for channel operations.
+            comms_operation_timeout: timeout in seconds for waiting for channel operations.
                 this is NOT the &#34;read&#34; timeout. this is the timeout for the entire operation
                 sent to send_inputs/send_inputs_interact
             comms_return_char: character to use to send returns to host
@@ -936,10 +966,11 @@ string to send to device to disable paging</dd>
             ValueError: in the following situations:
                 - setup_port is not an integer
                 - setup_timeout is not an integer
-                - session_keepalive is not an integer
-                - session_keepalive_interval is not an integer
                 - session_timeout is not an integer
-                - comms_prompt_timeout is not an integer
+                - session_keepalive is not a bool
+                - session_keepalive_interval is not an integer
+                - session_keepalive_type is not &#34;network&#34; or &#34;standard&#34;
+                - comms_operation_timeout is not an integer
                 - comms_return_char is not a string
 
         &#34;&#34;&#34;
@@ -956,9 +987,19 @@ string to send to device to disable paging</dd>
         self.setup_timeout = int(setup_timeout)
 
         # session setup
-        self.session_keepalive = int(session_keepalive)
-        self.session_keepalive_interval = int(session_keepalive_interval)
         self.session_timeout = int(session_timeout)
+        if isinstance(session_keepalive, bool):
+            self.session_keepalive = bool(session_keepalive)
+        else:
+            raise ValueError(f&#34;&#39;session_keepalive&#39; must be bool, got: {type(session_keepalive)}&#39;&#34;)
+        self.session_keepalive_interval = int(session_keepalive_interval)
+        if session_keepalive_type not in [&#34;network&#34;, &#34;standard&#34;]:
+            raise ValueError(
+                f&#34;{session_keepalive_type} is an invalid session_keepalive_type; must be &#34;
+                &#34;&#39;network&#39; or &#39;standard&#39;.&#34;
+            )
+        self.session_keepalive_type = session_keepalive_type
+        self.session_keepalive_pattern = session_keepalive_pattern
 
         # auth setup
         self.auth_user = auth_user.strip()
@@ -975,7 +1016,7 @@ string to send to device to disable paging</dd>
         # try to compile prompt to raise TypeError before opening any connections
         re.compile(comms_prompt_regex, flags=re.M | re.I)
         self.comms_prompt_regex = comms_prompt_regex
-        self.comms_prompt_timeout = int(comms_prompt_timeout)
+        self.comms_operation_timeout = int(comms_operation_timeout)
 
         # validate that the return character set is a string
         # do this to ensure provided value is a string; this prevents an int being cast to string
@@ -1132,7 +1173,7 @@ string to send to device to disable paging</dd>
             ValueError: if provided string does not result in a callable
 
         &#34;&#34;&#34;
-        if comms_disable_paging != &#34;term length 0&#34;:
+        if comms_disable_paging != &#34;terminal length 0&#34;:
             if callable(comms_disable_paging):
                 return comms_disable_paging
             ext_func = validate_external_function(comms_disable_paging)
@@ -1497,7 +1538,7 @@ string to send to device to disable paging</dd>
                 self.session.set_blocking(True)
                 return output
 
-    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input(self, channel_input: str, strip_prompt: bool):
         &#34;&#34;&#34;
         Send input to device and return results
@@ -1513,6 +1554,7 @@ string to send to device to disable paging</dd>
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self._acquire_session_lock()
         session_log.debug(
             f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
         )
@@ -1521,9 +1563,10 @@ string to send to device to disable paging</dd>
         channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
+        self.session_lock.release_lock()
         return self._restructure_output(output, strip_prompt=strip_prompt)
 
-    @operation_timeout(&#34;comms_prompt_timeout&#34;)
+    @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input_interact(
         self,
         channel_input: str,
@@ -1549,6 +1592,7 @@ string to send to device to disable paging</dd>
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self._acquire_session_lock()
         session_log.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
             f&#34;expecting: {expectation}; responding: {response}; &#34;
@@ -1571,6 +1615,7 @@ string to send to device to disable paging</dd>
         self.channel.write(self.comms_return_char)
         channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
+        self.session_lock.release_lock()
         return self._restructure_output(output)
 
     def open_and_execute(self, command: str):
@@ -1639,7 +1684,8 @@ string to send to device to disable paging</dd>
                 self.comms_disable_paging(self)
             else:
                 self.send_inputs(self.comms_disable_paging)
-        session_log.info(f&#34;Interactive shell opened&#34;)
+        self._session_keepalive()
+        session_log.info(&#34;Interactive shell opened&#34;)
 
     @channel_timeout(Timeout)
     def get_prompt(self) -&gt; bool:
@@ -1749,7 +1795,7 @@ string to send to device to disable paging</dd>
         try:
             return wrapped_func(self, *args, **kwargs)
         except exception_to_check:
-            print(f&#34;Retrying in {delay} seconds...&#34;)
+            channel_log.info(f&#34;Retrying read operation in {delay} seconds...&#34;)
             time.sleep(delay)
             attempt -= 1
             delay *= backoff
@@ -1875,7 +1921,8 @@ operations.</p>
             self.comms_disable_paging(self)
         else:
             self.send_inputs(self.comms_disable_paging)
-    session_log.info(f&#34;Interactive shell opened&#34;)</code></pre>
+    self._session_keepalive()
+    session_log.info(&#34;Interactive shell opened&#34;)</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.SSH2NetChannel.send_inputs"><code class="name flex">
@@ -2419,6 +2466,50 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
             logging.debug(f&#34;Session to host {self.host} has never been created&#34;)
             return False
 
+    def _keepalive_thread(self) -&gt; None:
+        lock_counter = 0
+        last_keepalive = datetime.now()
+        if self.session_keepalive_type == &#34;network&#34;:
+            while True:
+                if not self._session_alive():
+                    return
+                diff = datetime.now() - last_keepalive
+                if diff.seconds &gt;= self.session_keepalive_interval:
+                    if not self.session_lock.locked():
+                        lock_counter = 0
+                        self.session_lock.acquire_lock()
+                        self.channel.write(self.session_keepalive_pattern)
+                        self.session_lock.release_lock()
+                        last_keepalive = datetime.now()
+                    else:
+                        lock_counter += 1
+                        if lock_counter &gt;= 3:
+                            print(
+                                f&#34;Keepalive thread missed {lock_counter} consecutive keepalives...&#34;
+                            )
+                time.sleep(self.session_keepalive_interval / 10)
+        elif self.session_keepalive_type == &#34;standard&#34;:
+            self.session.keepalive_config(
+                want_reply=False, interval=self.session_keepalive_interval
+            )
+            while True:
+                if not self._session_alive():
+                    return
+                self.session.keepalive_send()
+                time.sleep(self.session_keepalive_interval / 10)
+
+    def _session_keepalive(self) -&gt; None:
+        if not self.session_keepalive:
+            return
+        pool = ThreadPoolExecutor()
+        pool.submit(self._keepalive_thread)
+
+    def _acquire_session_lock(self) -&gt; None:
+        while True:
+            if not self.session_lock.locked():
+                self.session_lock.acquire_lock()
+                return
+
     def _session_open(self) -&gt; None:
         &#34;&#34;&#34;
         Open SSH session
@@ -2437,8 +2528,6 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
             self._socket_open()
         if not self._session_alive():
             self.session = Session()
-            if self.session_keepalive:
-                self.session.keepalive_config(False, self.session_keepalive_interval)
             if self.session_timeout:
                 self.session.set_timeout(self.session_timeout)
             try:
@@ -2450,12 +2539,15 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
                 raise exc
 
         logging.debug(f&#34;Session to host {self.host} opened&#34;)
+        self.session_lock = Lock()
         if self.auth_public_key:
             self._session_public_key_auth()
             if self._session_alive():
                 return
         if self.auth_password:
             self._session_password_auth()
+            if self._session_alive():
+                return
 
     def _session_public_key_auth(self) -&gt; None:
         &#34;&#34;&#34;
@@ -2564,7 +2656,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
             if self.channel:
                 return True
         except AttributeError:
-            # channel not created or closed
+            # channel not created, or closed
             logging.debug(f&#34;Channel to host {self.host} has never been created&#34;)
             return False
         return False
