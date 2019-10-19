@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 
 from ssh2net.exceptions import UnknownPrivLevel
@@ -25,6 +27,7 @@ def test__determine_current_priv_unknown():
         base_driver._determine_current_priv("!!!!thisissoooowrongggg!!!!!!?!")
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="not supporting textfsm on windows")
 def test_textfsm_parse_output():
     base_driver = BaseNetworkDriver()
     base_driver.textfsm_platform = "cisco_ios"

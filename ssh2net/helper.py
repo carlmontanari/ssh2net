@@ -46,7 +46,7 @@ def _textfsm_get_template(platform: str, command: str):
 
     """
     try:
-        from textfsm.clitable import CliTable
+        from textfsm.clitable import CliTable  # noqa
         import ntc_templates  # noqa
     except ModuleNotFoundError as e:
         err = f"Module '{e.name}' not installed!"

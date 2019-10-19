@@ -1,6 +1,9 @@
-name: linting and unit tests
+name: weekly linting and unit tests
 
-on: [push]
+on:
+  schedule:
+    # weekly at 0700 PST/1400 UTC on Sunday
+    - cron: '0 14 * * 0'
 
 jobs:
   build:
@@ -15,7 +18,7 @@ jobs:
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}      
+          python-version: ${{ matrix.python-version }}
       - name: setup test env
         run: |
           python -m pip install --upgrade pip
@@ -23,4 +26,3 @@ jobs:
           python -m pip install tox
       - name: run tox
         run: python -m tox --skip-missing-interpreters=true
-

@@ -9,6 +9,19 @@ def test_connect_handler_invalid_device_type():
         connect_handler(**device)
 
 
+def test_connect_handler_ip_no_hostname():
+    netmiko_args = {
+        "ip": "1.2.3.4",
+        "username": "person",
+        "password": "password",
+        "port": 123,
+        "global_delay_factor": 5,
+        "device_type": "cisco_xe",
+    }
+    conn = connect_handler(auto_open=False, **netmiko_args)
+    assert conn.textfsm_platform == "cisco_ios"
+
+
 def test_connect_handler_valid_connection():
     netmiko_args = {
         "host": "1.2.3.4",

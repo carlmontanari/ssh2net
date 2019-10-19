@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+import sys
+
+import pytest
 
 import ssh2net
 from ssh2net import SSH2NetSSHConfig
@@ -17,6 +20,7 @@ def test_init_ssh_config_file_explicit():
     assert ssh_conf.ssh_config_file == ssh_config_file
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="not supporting ssh config on windows")
 def test_init_ssh_config_file_user(fs):
     fs.add_real_file("/etc/ssh/ssh_config", target_path=f"{os.path.expanduser('~')}/.ssh/config")
     ssh_conf = SSH2NetSSHConfig()
@@ -25,6 +29,7 @@ def test_init_ssh_config_file_user(fs):
     assert ssh_conf.ssh_config_file == ssh_config_file
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="not supporting ssh config on windows")
 def test_init_ssh_config_file_system(fs):
     fs.add_real_file("/etc/ssh/ssh_config")
     ssh_conf = SSH2NetSSHConfig()

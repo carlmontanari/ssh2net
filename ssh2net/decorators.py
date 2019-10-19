@@ -1,6 +1,6 @@
 """ssh2net.decorators"""
 import logging
-import signal
+import multiprocessing.pool
 import time
 
 
@@ -28,22 +28,16 @@ def operation_timeout(attribute):
 
     """
 
-    def _raise_exception(signum, frame):
-        raise TimeoutError
-
     def decorate(wrapped_func):
         def timeout_wrapper(self, *args, **kwargs):
             timeout_duration = getattr(self, attribute)
-            if not timeout_duration:
-                return wrapped_func
-            old = signal.signal(signal.SIGALRM, _raise_exception)
-            signal.setitimer(signal.ITIMER_REAL, timeout_duration)
+            pool = multiprocessing.pool.ThreadPool(processes=1)
+            args = [self, *args]
+            async_result = pool.apply_async(wrapped_func, args, kwargs)
             try:
-                return wrapped_func(self, *args, **kwargs)
-            finally:
-                if timeout_duration:
-                    signal.setitimer(signal.ITIMER_REAL, 0)
-                    signal.signal(signal.SIGALRM, old)
+                return async_result.get(timeout_duration)
+            except multiprocessing.context.TimeoutError:
+                raise TimeoutError
 
         return timeout_wrapper
 

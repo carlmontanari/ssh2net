@@ -1,5 +1,6 @@
 from pathlib import Path
 import pytest
+import sys
 
 import ssh2net
 from ssh2net import SSH2Net
@@ -472,6 +473,7 @@ def test__socket_alive_false():
     assert conn._socket_alive() is False
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="no ssh server for windows")
 def test__socket_alive_true():
     test_host = {"setup_host": "127.0.0.1", "auth_user": "username", "auth_password": "password"}
     conn = SSH2Net(**test_host)
@@ -479,6 +481,7 @@ def test__socket_alive_true():
     assert conn._socket_alive() is True
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="no ssh server for windows")
 def test__socket_close():
     test_host = {"setup_host": "127.0.0.1", "auth_user": "username", "auth_password": "password"}
     conn = SSH2Net(**test_host)
@@ -488,6 +491,7 @@ def test__socket_close():
     assert conn._socket_alive() is False
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="no ssh server for windows")
 def test__socket_open_timeout():
     test_host = {
         "setup_host": "240.0.0.1",

@@ -75,7 +75,9 @@ def transform_netmiko_kwargs(kwargs):
         transformed_kwargs: converted keyword arguments
 
     """
-    kwargs["setup_host"] = kwargs.pop("host")
+    host = kwargs.pop("host", None)
+    ip = kwargs.pop("ip", None)
+    kwargs["setup_host"] = host if host is not None else ip
     kwargs["setup_validate_host"] = False
     kwargs["setup_port"] = kwargs.pop("port", 22)
     kwargs["setup_timeout"] = 5
