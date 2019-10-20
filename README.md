@@ -40,7 +40,7 @@ I would like to add functional tests for:
 
 Any additional platforms would likely not be included in the "core" platform (and therefore functional testing). Additional platforms could be considered, however a pre-requisite for additional platforms would be the capability to create vrnetlab containers for that platform.
 
-As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and Ubuntu regularly and should work on any POSIX system. It has never been tested on Windows, but I don't see any reason it should not work, however I have no plans on supporting Windows as I don't have access or desire to do so.
+As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and Ubuntu regularly and should work on any POSIX system. It has had minimal testing on Windows, however I have no plans on supporting Windows as I don't have access or desire to do so. In general I believe everything other than the TextFSM support should work though!
 
 
 ## Platform Drivers
