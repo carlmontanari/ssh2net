@@ -19,7 +19,10 @@ setuptools.setup(
     url="https://github.com/carlmontanari/ssh2net",
     packages=setuptools.find_packages(),
     install_requires=["ssh2-python>=0.18.0-1"],
-    extras_require={"textfsm": ["textfsm>=1.1.0", "ntc-templates>=1.1.0"]},
+    extras_require={
+        "textfsm": ["textfsm>=1.1.0", "ntc-templates>=1.1.0"],
+        "paramiko": ["paramiko>=2.6.0"],
+    },
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",

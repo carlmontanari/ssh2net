@@ -5,10 +5,10 @@ import logging
 from threading import Lock
 import time
 
-from ssh2.session import Session
-from ssh2.exceptions import AuthenticationError
 
 from ssh2net.channel import SSH2NetChannel
+from ssh2net.session_miko import SSH2NetSessionParamiko
+from ssh2net.session_ssh2 import SSH2NetSessionSSH2
 
 
 class SSH2NetSession(SSH2NetChannel):
@@ -28,13 +28,33 @@ class SSH2NetSession(SSH2NetChannel):
         """
         try:
             # if authenticated we can assume session is good to go
-            return self.session.userauth_authenticated()
+            return self._session_check_authenticated()
         except AttributeError:
             # session never created yet; there may be other exceptions we need to catch here
             logging.debug(f"Session to host {self.host} has never been created")
             return False
 
     def _keepalive_thread(self) -> None:
+        """
+        Attempt to keep sessions alive.
+
+        In the case of "networking" equipment this will try to acquire a session lock and send an
+        innocuous character -- such as CTRL+E -- to keep the device "exec-timeout" from expiring.
+
+        For "normal" devices that allow for a standard ssh keepalive, this thread will simply use
+        those mechanisms to maintain the session. This will likely break (for "normal" devices) if
+        using paramiko for the underlying driver, but has not been tested yet!
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
         lock_counter = 0
         last_keepalive = datetime.now()
         if self.session_keepalive_type == "network":
@@ -67,12 +87,38 @@ class SSH2NetSession(SSH2NetChannel):
                 time.sleep(self.session_keepalive_interval / 10)
 
     def _session_keepalive(self) -> None:
+        """
+        Spawn keepalive thread for ssh session
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
         if not self.session_keepalive:
             return
         pool = ThreadPoolExecutor()
         pool.submit(self._keepalive_thread)
 
     def _acquire_session_lock(self) -> None:
+        """
+        Attempt to acquire session lock
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
         while True:
             if not self.session_lock.locked():
                 self.session_lock.acquire_lock()
@@ -92,19 +138,45 @@ class SSH2NetSession(SSH2NetChannel):
             N/A  # noqa
 
         """
+        if self.setup_use_paramiko is False:
+            ssh2_session_obj = SSH2NetSessionSSH2(self)
+            self._session_open_connect = (
+                ssh2_session_obj._session_open_connect  # pylint: disable=W0212
+            )
+            self._session_public_key_auth = (
+                ssh2_session_obj._session_public_key_auth  # pylint: disable=W0212
+            )
+            self._session_password_auth = (
+                ssh2_session_obj._session_password_auth  # pylint: disable=W0212
+            )
+            self._channel_open_driver = (
+                ssh2_session_obj._channel_open_driver  # pylint: disable=W0212
+            )
+            self._channel_invoke_shell = (
+                ssh2_session_obj._channel_invoke_shell  # pylint: disable=W0212
+            )
+        else:
+            miko_sesion_obj = SSH2NetSessionParamiko(self)
+            self._session_open_connect = (
+                miko_sesion_obj._session_open_connect  # pylint: disable=W0212
+            )
+            self._session_public_key_auth = (
+                miko_sesion_obj._session_public_key_auth  # pylint: disable=W0212
+            )
+            self._session_password_auth = (
+                miko_sesion_obj._session_password_auth  # pylint: disable=W0212
+            )
+            self._channel_open_driver = (
+                miko_sesion_obj._channel_open_driver  # pylint: disable=W0212
+            )
+            self._channel_invoke_shell = (
+                miko_sesion_obj._channel_invoke_shell  # pylint: disable=W0212
+            )
+
         if not self._socket_alive():
             self._socket_open()
         if not self._session_alive():
-            self.session = Session()
-            if self.session_timeout:
-                self.session.set_timeout(self.session_timeout)
-            try:
-                self.session.handshake(self.sock)
-            except Exception as exc:
-                logging.critical(
-                    f"Failed to complete handshake with host {self.host}; " f"Exception: {exc}"
-                )
-                raise exc
+            self._session_open_connect()
 
         logging.debug(f"Session to host {self.host} opened")
         self.session_lock = Lock()
@@ -117,73 +189,23 @@ class SSH2NetSession(SSH2NetChannel):
             if self._session_alive():
                 return
 
-    def _session_public_key_auth(self) -> None:
+    def _session_check_authenticated(self) -> bool:
         """
-        Perform public key based auth on SSH2NetSession
+        Check if session is authenticated
 
         Args:
             N/A  # noqa
 
         Returns:
-            N/A  # noqa
+            bool: True/False for session authenticated
 
         Raises:
-            Exception: catch all for unhandled exceptions
-
-        """
-        try:
-            self.session.userauth_publickey_fromfile(self.auth_user, self.auth_public_key)
-        except AuthenticationError:
-            logging.critical(f"Public key authentication with host {self.host} failed. ")
-        except Exception as exc:
-            logging.critical(
-                "Unknown error occurred during public key authentication with host "
-                f"{self.host}; Exception: {exc}"
-            )
-            raise exc
-
-    def _session_password_auth(self) -> None:
-        """
-        Perform password based auth on SSH2NetSession
-
-        Args:
             N/A  # noqa
 
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            AuthenticationError: if authentication fails
-            Exception: catch all for unknown other exceptions
-
         """
-        try:
-            self.session.userauth_password(self.auth_user, self.auth_password)
-        except AuthenticationError as exc:
-            logging.critical(
-                f"Password authentication with host {self.host} failed. "
-                f"Exception: {exc}. Trying keyboard interactive auth..."
-            )
-            try:
-                self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
-            except AuthenticationError as exc:
-                logging.critical(
-                    f"Keyboard interactive authentication with host {self.host} failed. "
-                    f"Exception: {exc}."
-                )
-                raise exc
-            except Exception as exc:
-                logging.critical(
-                    "Unknown error occurred during keyboard interactive authentication with host "
-                    f"{self.host}; Exception: {exc}"
-                )
-                raise exc
-        except Exception as exc:
-            logging.critical(
-                "Unknown error occurred during password authentication with host "
-                f"{self.host}; Exception: {exc}"
-            )
-            raise exc
+        if self.setup_use_paramiko is False:
+            return self.session.userauth_authenticated()
+        return self.session.is_authenticated()
 
     def _session_close(self) -> None:
         """
@@ -199,8 +221,8 @@ class SSH2NetSession(SSH2NetChannel):
             N/A  # noqa
 
         """
-        if self.session is not None:
-            self.session.disconnect()
+        if self.session is not None:  # pylint: disable=E0203
+            self.session.disconnect()  # pylint: disable=E0203
             self.session = None
             logging.debug(f"Session to host {self.host} closed")
 
@@ -246,9 +268,7 @@ class SSH2NetSession(SSH2NetChannel):
         if not self._session_alive():
             self._session_open()
         if not self._channel_alive():
-            self.channel = self.session.open_session()
-            self.channel.pty()
-            logging.debug(f"Channel to host {self.host} opened")
+            self._channel_open_driver()
 
     def _channel_close(self) -> None:
         """
@@ -264,24 +284,7 @@ class SSH2NetSession(SSH2NetChannel):
             N/A  # noqa
 
         """
-        if self.channel is not None:
+        if self.channel is not None:  # pylint: disable=E0203
             self.channel.close  # noqa
             self.channel = None
             logging.debug(f"Channel to host {self.host} closed")
-
-    def _channel_invoke_shell(self) -> None:
-        """
-        Invoke shell on channel
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        """
-        self._shell = True
-        self.channel.shell()

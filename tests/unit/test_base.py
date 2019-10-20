@@ -263,10 +263,7 @@ def test_init_invalid_comms_return_char():
     }
     with pytest.raises(ValueError) as e:
         SSH2Net(**test_host)
-    assert (
-        str(e.value)
-        == f"{test_host['comms_return_char']} is an invalid comms_return_char; must be string."
-    )
+    assert str(e.value) == "'comms_return_char' must be <class 'str'>, got: <class 'bool'>'"
 
 
 def test_init_valid_comms_pre_login_handler_func():
@@ -413,10 +410,10 @@ def test_repr():
     conn = SSH2Net(**test_host)
     assert repr(conn) == (
         f"SSH2Net {{'_shell': False, 'host': '{test_host['setup_host']}', 'port': 22, "
-        "'setup_timeout': 5, 'session_timeout': 5000, 'session_keepalive': False, "
-        "'session_keepalive_interval': 10, 'session_keepalive_type': 'network', "
-        fr"'session_keepalive_pattern': '\x05', 'auth_user': '{test_host['auth_user']}', "
-        "'auth_public_key': None, 'auth_password': '********', 'comms_prompt_regex': "
+        "'setup_timeout': 5, 'setup_use_paramiko': False, 'session_timeout': 5000, "
+        "'session_keepalive': False, 'session_keepalive_interval': 10, 'session_keepalive_type': "
+        fr"'network', 'session_keepalive_pattern': '\x05', 'auth_user': '{test_host['auth_user']}',"
+        " 'auth_public_key': None, 'auth_password': '********', 'comms_prompt_regex': "
         r"'^[a-z0-9.\\-@()/:]{1,32}[#>$]$', 'comms_operation_timeout': 10, "
         r"'comms_return_char': '\n', 'comms_pre_login_handler': '', 'comms_disable_paging': "
         "'terminal length 0'}"

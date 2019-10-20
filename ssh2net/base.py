@@ -23,6 +23,7 @@ class SSH2Net(SSH2NetSession):
         setup_port: Optional[int] = 22,
         setup_timeout: Optional[int] = 5,
         setup_ssh_config_file: Optional[Union[str, bool]] = False,
+        setup_use_paramiko: Optional[bool] = False,
         session_timeout: Optional[int] = 5000,
         session_keepalive: Optional[bool] = False,
         session_keepalive_interval: Optional[int] = 10,
@@ -49,6 +50,7 @@ class SSH2Net(SSH2NetSession):
             setup_port: port to open ssh session to
             setup_timeout: timeout in seconds for opening underlying socket to host
             setup_ssh_config_file: ssh config file to use or True to try system default files
+            setup_use_paramiko: use paramiko instead of ssh2-python
             session_timeout: time in ms for session read operations; 0 is "forever" and will block
             session_keepalive: whether or not to try to keep session alive
             session_keepalive_interval: interval to use for session keepalives
@@ -87,6 +89,7 @@ class SSH2Net(SSH2NetSession):
             ValueError: in the following situations:
                 - setup_port is not an integer
                 - setup_timeout is not an integer
+                - setup_use_paramiko is not a bool
                 - session_timeout is not an integer
                 - session_keepalive is not a bool
                 - session_keepalive_interval is not an integer
@@ -98,60 +101,31 @@ class SSH2Net(SSH2NetSession):
         # set a flag to indicate if a shell has been invoked
         self._shell: bool = False
 
-        # pre socket setup
-        self.host = setup_host.strip()
-        if setup_validate_host:
-            self._validate_host()
-        self.port = int(setup_port)
+        # setup setup args
+        self._setup_setup_args(
+            setup_host, setup_validate_host, setup_port, setup_timeout, setup_use_paramiko
+        )
 
-        # socket setup
-        self.setup_timeout = int(setup_timeout)
-
-        # session setup
-        self.session_timeout = int(session_timeout)
-        if isinstance(session_keepalive, bool):
-            self.session_keepalive = bool(session_keepalive)
-        else:
-            raise ValueError(f"'session_keepalive' must be bool, got: {type(session_keepalive)}'")
-        self.session_keepalive_interval = int(session_keepalive_interval)
-        if session_keepalive_type not in ["network", "standard"]:
-            raise ValueError(
-                f"{session_keepalive_type} is an invalid session_keepalive_type; must be "
-                "'network' or 'standard'."
-            )
-        self.session_keepalive_type = session_keepalive_type
-        self.session_keepalive_pattern = session_keepalive_pattern
+        # setup session args
+        self._setup_session_args(
+            session_timeout,
+            session_keepalive,
+            session_keepalive_interval,
+            session_keepalive_type,
+            session_keepalive_pattern,
+        )
 
         # auth setup
-        self.auth_user = auth_user.strip()
-        if auth_public_key:
-            self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
-        else:
-            self.auth_public_key = auth_public_key
-        if auth_password:
-            self.auth_password = auth_password.strip()
-        else:
-            self.auth_password = auth_password
+        self._setup_auth_args(auth_user, auth_public_key, auth_password)
 
         # comms setup
-        # try to compile prompt to raise TypeError before opening any connections
-        re.compile(comms_prompt_regex, flags=re.M | re.I)
-        self.comms_prompt_regex = comms_prompt_regex
-        self.comms_operation_timeout = int(comms_operation_timeout)
-
-        # validate that the return character set is a string
-        # do this to ensure provided value is a string; this prevents an int being cast to string
-        # making it look like things are ok
-        if isinstance(comms_return_char, str):
-            self.comms_return_char = comms_return_char
-        else:
-            session_log.critical(f"Invalid comms_return_char: {comms_return_char}")
-            raise ValueError(
-                f"{comms_return_char} is an invalid comms_return_char; must be string."
-            )
-
-        self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
-        self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
+        self._setup_comms_args(
+            comms_prompt_regex,
+            comms_operation_timeout,
+            comms_return_char,
+            comms_pre_login_handler,
+            comms_disable_paging,
+        )
 
         if setup_ssh_config_file:
             if isinstance(setup_ssh_config_file, bool) and setup_ssh_config_file:
@@ -309,7 +283,181 @@ class SSH2Net(SSH2NetSession):
             )
         return comms_disable_paging
 
-    def _setup_ssh_config_args(self, setup_ssh_config_file):
+    @staticmethod
+    def _invalid_arg_type(target_type, arg_name, arg) -> None:
+        """
+        Handle invalid argument types for SSH2Net constructor
+
+        Args:
+            target_type: expected type of argument
+            arg_name: argument name
+            arg: value of provided argument
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            ValueError
+
+        """
+        session_log.critical(f"Invalid '{arg_name}': {arg}")
+        raise ValueError(f"'{arg_name}' must be {target_type}, got: {type(arg)}'")
+
+    def _setup_setup_args(
+        self, setup_host, setup_validate_host, setup_port, setup_timeout, setup_use_paramiko
+    ) -> None:
+        """
+        Process and set "setup" args
+
+        Note: setup_ssh_config_file is processed after auth setup
+
+        Args:
+            setup_host: ip address or hostname to connect to
+            setup_validate_host: whether or not to validate ip address is valid or dns is resolvable
+            setup_port: port to open ssh session to
+            setup_timeout: timeout in seconds for opening underlying socket to host
+            setup_use_paramiko: use paramiko instead of ssh2-python
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self.host = setup_host.strip()
+        if setup_validate_host:
+            self._validate_host()
+        self.port = int(setup_port)
+        self.setup_timeout = int(setup_timeout)
+        if isinstance(setup_use_paramiko, bool):
+            self.setup_use_paramiko = setup_use_paramiko
+        else:
+            self._invalid_arg_type(bool, "setup_use_paramiko", setup_use_paramiko)
+
+    def _setup_session_args(
+        self,
+        session_timeout,
+        session_keepalive,
+        session_keepalive_interval,
+        session_keepalive_type,
+        session_keepalive_pattern,
+    ) -> None:
+        r"""
+        Process and set "session" args
+
+        Args:
+            session_timeout: time in ms for session read operations; 0 is "forever" and will block
+            session_keepalive: whether or not to try to keep session alive
+            session_keepalive_interval: interval to use for session keepalives
+            session_keepalive_type: network|standard -- "network" sends actual characters over the
+                channel as "normal" ssh keepalive doesn't keep sessions open. "standard" sends
+                "normal" ssh keepalives via ssh2 library. In both cases a thread is spawned in
+                which the keepalives are sent. This introduces a locking mechanism which in
+                theory will slow things down slightly, however provides the ability to keep the
+                session alive indefinitely.
+            session_keepalive_pattern: pattern to send to keep network channel alive. Default is
+                u"\005" which is equivalent to "ctrl+e". This pattern moves cursor to end of the
+                line which should be an innocuous pattern. This will only be entered *if* a lock
+                can be acquired.
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self.session_timeout = int(session_timeout)
+        if isinstance(session_keepalive, bool):
+            self.session_keepalive = session_keepalive
+        else:
+            self._invalid_arg_type(bool, "session_keepalive", session_keepalive)
+        self.session_keepalive_interval = int(session_keepalive_interval)
+        if session_keepalive_type not in ["network", "standard"]:
+            raise ValueError(
+                f"{session_keepalive_type} is an invalid session_keepalive_type; must be "
+                "'network' or 'standard'."
+            )
+        self.session_keepalive_type = session_keepalive_type
+        self.session_keepalive_pattern = session_keepalive_pattern
+
+    def _setup_auth_args(self, auth_user, auth_public_key, auth_password) -> None:
+        """
+        Process and set "auth" args
+
+        Args:
+            auth_user: username to use to connect to host
+            auth_password: password to use to connect to host
+            auth_public_key: path to ssh public key to use to connect to host
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self.auth_user = auth_user.strip()
+        if auth_public_key:
+            self.auth_public_key = os.path.expanduser(auth_public_key.strip().encode())
+        else:
+            self.auth_public_key = auth_public_key
+        if auth_password:
+            self.auth_password = auth_password.strip()
+        else:
+            self.auth_password = auth_password
+
+    def _setup_comms_args(
+        self,
+        comms_prompt_regex,
+        comms_operation_timeout,
+        comms_return_char,
+        comms_pre_login_handler,
+        comms_disable_paging,
+    ):
+        """
+        Process and set "auth" args
+
+        Args:
+            comms_prompt_regex: regex pattern to use for prompt matching.
+                this is the single most important attribute here! if this does not match a prompt,
+                ssh2net will not work!
+                IMPORTANT: regex search uses multi-line + case insensitive flags. multi-line allows
+                for highly reliably matching for prompts after stripping trailing white space,
+                case insensitive is just a convenience factor so i can be lazy.
+            comms_operation_timeout: timeout in seconds for waiting for channel operations.
+                this is NOT the "read" timeout. this is the timeout for the entire operation
+                sent to send_inputs/send_inputs_interact
+            comms_return_char: character to use to send returns to host
+            comms_pre_login_handler: callable or string that resolves to an importable function to
+                handle pre-login (pre disable paging) operations
+            comms_disable_paging: callable, string that resolves to an importable function, or
+                string to send to device to disable paging
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        # try to compile prompt to raise TypeError before opening any connections
+        re.compile(comms_prompt_regex, flags=re.M | re.I)
+        self.comms_prompt_regex = comms_prompt_regex
+        self.comms_operation_timeout = int(comms_operation_timeout)
+
+        # validate that the return character set is a string
+        # do this to ensure provided value is a string; this prevents an int being cast to string
+        # making it look like things are ok
+        if isinstance(comms_return_char, str):
+            self.comms_return_char = comms_return_char
+        else:
+            self._invalid_arg_type(str, "comms_return_char", comms_return_char)
+        self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
+        self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
+
+    def _setup_ssh_config_args(self, setup_ssh_config_file) -> None:
         """
         Set any args from ssh config file to override existing settings
 

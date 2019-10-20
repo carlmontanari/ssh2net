@@ -12,3 +12,4 @@ pdoc3>=0.6.2
 netmiko>=2.4.1
 -r requirements.txt
 -r requirements-textfsm.txt
+-r requirements-paramiko.txt

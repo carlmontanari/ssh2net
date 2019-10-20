@@ -1,11 +1,17 @@
 """ssh2net.channel"""
 import logging
 import re
+import sys
 from typing import List, Optional, Tuple
 
 from ssh2.exceptions import SocketRecvError, Timeout
 
-from ssh2net.decorators import operation_timeout, channel_timeout
+from ssh2net.decorators import channel_timeout
+
+if not sys.platform.startswith("win"):
+    from ssh2net.decorators import operation_timeout
+else:
+    from ssh2net.decorators import operation_timeout_win as operation_timeout
 
 
 channel_log = logging.getLogger("ssh2net_channel")

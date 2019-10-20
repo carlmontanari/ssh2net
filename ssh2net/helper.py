@@ -48,11 +48,11 @@ def _textfsm_get_template(platform: str, command: str):
     try:
         from textfsm.clitable import CliTable  # noqa
         import ntc_templates  # noqa
-    except ModuleNotFoundError as e:
-        err = f"Module '{e.name}' not installed!"
+    except ModuleNotFoundError as exc:
+        err = f"Module '{exc.name}' not installed!"
         msg = f"***** {err} {'*' * (80 - len(err))}"
         fix = (
-            f"To resolve this issue, install '{e.name}'. You can do this in one of the following"
+            f"To resolve this issue, install '{exc.name}'. You can do this in one of the following"
             " ways:\n"
             "1: 'pip install -r requirements-textfsm.txt'\n"
             "2: 'pip install ssh2net[textfsm]'"

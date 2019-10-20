@@ -17,6 +17,55 @@ def operation_timeout(attribute):
     `session_timeout` argument plus the amount of time that `channel_timeout` decorator will delay
     while retrying the read operation.
 
+    Note: Different versions for Windows vs POSIX systems as I think the Windows version is ugly
+    and would prefer to not use it if possible. I imagine there is a better way to implement
+    a OS dependant decorator, but for now this works!
+
+    Args:
+        attribute: attribute to inspect in class (to set timeout duration)
+
+    Returns:
+        decorate: wrapped function
+
+    Raises:
+        TimeoutError: if timeout exceeded
+
+    """
+    import signal  # noqa
+
+    def _raise_exception(signum, frame):
+        raise TimeoutError
+
+    def decorate(wrapped_func):
+        def timeout_wrapper(self, *args, **kwargs):
+            timeout_duration = getattr(self, attribute)
+            if not timeout_duration:
+                return wrapped_func
+            old = signal.signal(signal.SIGALRM, _raise_exception)
+            signal.setitimer(signal.ITIMER_REAL, timeout_duration)
+            try:
+                return wrapped_func(self, *args, **kwargs)
+            finally:
+                if timeout_duration:
+                    signal.setitimer(signal.ITIMER_REAL, 0)
+                    signal.signal(signal.SIGALRM, old)
+
+        return timeout_wrapper
+
+    return decorate
+
+
+def operation_timeout_win(attribute):
+    """
+    Decorate an "operation" -- raises exception if the operation timeout is exceeded
+
+    See documentation for "operation_timeout"
+
+    This is a variation of the "operation_timeout" decorator that supports windows. I think the
+    Windows version is ugly and would prefer to not use it if possible, so the `ssh2net.channel`
+    module checks for os type and imports the appropriate version to not use this if it can at all
+    be avoided.
+
     Args:
         attribute: attribute to inspect in class (to set timeout duration)
 

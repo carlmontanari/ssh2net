@@ -1,7 +1,15 @@
-"""ssh2net.exception"""
+"""ssh2net.exceptions"""
 
 
 class ValidationError(Exception):
+    pass
+
+
+class RequirementsNotSatisfied(Exception):
+    pass
+
+
+class AuthenticationFailed(Exception):
     pass
 
 
