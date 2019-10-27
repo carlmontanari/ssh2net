@@ -1,5 +1,6 @@
 """ssh2net.session_miko"""
 import logging
+import time
 import warnings
 
 from paramiko.ssh_exception import AuthenticationException
@@ -51,7 +52,6 @@ class SSH2NetSessionParamiko:
         try:
             from paramiko import Transport  # noqa
         except ModuleNotFoundError as exc:
-            print(exc)
             err = f"Module '{exc.name}' not installed!"
             msg = f"***** {err} {'*' * (80 - len(err))}"
             fix = (
@@ -66,6 +66,7 @@ class SSH2NetSessionParamiko:
         try:
             self.session = Transport(self.sock)
             self.session.start_client()
+            self.session.set_timeout = self._set_timeout
         except Exception as exc:
             logging.critical(
                 f"Failed to complete handshake with host {self.host}; " f"Exception: {exc}"
@@ -168,7 +169,7 @@ class SSH2NetSessionParamiko:
         self.channel.invoke_shell()
         self.channel.read = self._paramiko_read_channel
         self.channel.write = self.channel.sendall
-        self.session.set_blocking = self.channel.setblocking
+        self.session.set_blocking = self._set_blocking
         self.channel.flush = self._flush
 
     def _paramiko_read_channel(self):
@@ -191,8 +192,7 @@ class SSH2NetSessionParamiko:
         channel_read = self.channel.recv(1024)
         return None, channel_read
 
-    @staticmethod
-    def _flush():
+    def _flush(self):
         """
         Patch a "flush" method for paramiko driver
 
@@ -211,4 +211,21 @@ class SSH2NetSessionParamiko:
             N/A  # noqa
 
         """
-        return
+        while True:
+            time.sleep(0.01)
+            if self.channel.recv_ready():
+                self._paramiko_read_channel()
+            else:
+                self.channel.write("\n")
+                return
+
+    def _set_blocking(self, blocking):
+        # Add docstring
+        # need to reset timeout because it seems paramiko sets it to 0 if you set to non blocking
+        # paramiko uses seconds instead of ms
+        self.channel.setblocking(blocking)
+        self.channel.settimeout(self.session_timeout / 1000)
+
+    def _set_timeout(self, timeout):
+        # paramiko uses seconds instead of ms
+        self.channel.settimeout(timeout / 1000)

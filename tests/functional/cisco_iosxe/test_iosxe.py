@@ -1,174 +1,88 @@
-from difflib import Differ
 from pathlib import Path
 import re
 
+import pytest
+
+from tests.functional.base_functional_tests import BaseFunctionalTest
 import ssh2net
 
+TEST_DEVICE = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
-NET2_DIR = ssh2net.__file__
-FUNC_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/functional/cisco_iosxe/"
-
-IOSXE_TEST = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
-
-
-def test_show_run_execute():
-    conn = ssh2net.SSH2Net(**IOSXE_TEST)
-    show_run = conn.open_and_execute("show run")
-    with open(f"{FUNC_TEST_DIR}expected_output/show_run_execute", "r") as f:
-        expected_show_run = f.read()
-
-    # crypto strings on the vrnetlab devices change; replace w/ "CRYPTO" to parse
-    show_run = re.sub(r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", show_run).replace(
-        "\t", "  "
-    )
-    expected_show_run = re.sub(
-        r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", expected_show_run
-    )
-
-    assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
-    assert show_run.splitlines()[7:] == expected_show_run.splitlines()[7:]
+dummy_conn = ssh2net.IOSXEDriver(**TEST_DEVICE)
+PRIV_LEVELS = dummy_conn.privs
 
 
-def test_show_run_inputs():
-    with ssh2net.SSH2Net(**IOSXE_TEST) as conn:
-        show_run = conn.send_inputs("show run")[0]
-    with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
-        expected_show_run = f.read()
+class TestIOSXE(BaseFunctionalTest):
+    def setup_method(self):
+        self.platform_driver = ssh2net.IOSXEDriver
 
-    # crypto strings on the vrnetlab devices change; replace w/ "CRYPTO" to parse
-    show_run = re.sub(r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", show_run)
-    expected_show_run = re.sub(
-        r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", expected_show_run
-    )
+        self.device_type = Path(__file__).resolve().parts[-2]
+        self.func_test_dir = (
+            f"{Path(ssh2net.__file__).parents[1]}/tests/functional/{self.device_type}/"
+        )
+        self.test_device = TEST_DEVICE
+        self.disable_paging_ext_function = f"tests.functional.{self.device_type}.ext_test_funcs.{self.device_type.split('_')[1]}_disable_paging"
 
-    d = Differ()
-    diff = list(d.compare(show_run.splitlines()[7:], expected_show_run.splitlines()[7:]))
-    diff = [line for line in diff if not line.startswith("  ")]
-    if diff:
-        print(diff)
+    @staticmethod
+    def _replace_trailing_chars_running_config(input_data):
+        execute_trailing_chars_pattern = re.compile(r"^end.*$", flags=re.M | re.I | re.S)
+        input_data = re.sub(execute_trailing_chars_pattern, "end", input_data)
+        return input_data
 
-    assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
-    assert show_run.splitlines()[7:] == expected_show_run.splitlines()[7:]
+    @staticmethod
+    def _replace_config_bytes(input_data):
+        config_bytes_pattern = re.compile(r"^Current configuration : \d+ bytes$", flags=re.M | re.I)
+        input_data = re.sub(
+            config_bytes_pattern, "Current configuration : CONFIG_BYTES", input_data
+        )
+        return input_data
 
+    @staticmethod
+    def _replace_timestamps(input_data):
+        datetime_pattern = re.compile(
+            r"\d+:\d+:\d+\d+\s+[a-z]{3}\s+(mon|tue|wed|thu|fri|sat|sun)\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d+\s+\d+",
+            flags=re.M | re.I,
+        )
+        input_data = re.sub(datetime_pattern, "TIME_STAMP_REPLACED", input_data)
+        return input_data
 
-def test_show_run_inputs_no_strip_prompt():
-    with ssh2net.SSH2Net(**IOSXE_TEST) as conn:
-        show_run = conn.send_inputs("show run", strip_prompt=False)[0]
-    with open(f"{FUNC_TEST_DIR}expected_output/show_run_no_strip", "r") as f:
-        expected_show_run = f.read().strip()  # strip off extra space after prompt to match ssh2net
+    @staticmethod
+    def _replace_configured_by(input_data):
+        configured_by_pattern = re.compile(
+            r"^! Last configuration change at TIME_STAMP_REPLACED by (\w+)$", flags=re.M | re.I
+        )
+        input_data = re.sub(
+            configured_by_pattern, "! Last configuration change at TIME_STAMP_REPLACED", input_data
+        )
+        return input_data
 
-    # crypto strings on the vrnetlab devices change; replace w/ "CRYPTO" to parse
-    show_run = re.sub(r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", show_run)
-    expected_show_run = re.sub(
-        r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", expected_show_run
-    )
+    @staticmethod
+    def _replace_crypto_strings(input_data):
+        crypto_pattern = re.compile(
+            r"^\s+certificate self-signed.*$\s(^\s{2}(\w+\s){1,8})+\s+quit$", flags=re.M | re.I
+        )
+        input_data = re.sub(crypto_pattern, "CRYPTO_REPLACED", input_data)
+        return input_data
 
-    d = Differ()
-    diff = list(d.compare(show_run.splitlines()[7:], expected_show_run.splitlines()[7:]))
-    diff = [line for line in diff if not line.startswith("  ")]
-    if diff:
-        print(diff)
-
-    assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
-    assert show_run.splitlines()[7:] == expected_show_run.splitlines()[7:]
-
-
-def test_send_inputs_interact():
-    with ssh2net.SSH2Net(**IOSXE_TEST) as conn:
-        current_prompt = conn.get_prompt()
-        interactive = conn.send_inputs_interact(
-            ("clear logg", "Clear logging buffer [confirm]", "", current_prompt)
-        )[0]
-    with open(f"{FUNC_TEST_DIR}expected_output/interactive", "r") as f:
-        expected_interactive = f.read().strip()
-
-    d = Differ()
-    diff = list(d.compare(interactive.splitlines(), expected_interactive.splitlines()))
-    diff = [line for line in diff if not line.startswith("  ")]
-    if diff:
-        print(diff)
-
-    assert len(interactive.splitlines()) == len(expected_interactive.splitlines())
-    assert interactive.splitlines() == expected_interactive.splitlines()
-
-
-def test_disable_paging_function():
-    def disable_paging_func(cls):
+    def disable_paging(self, cls):
         cls.send_inputs("term length 0")
 
-    disable_paging = disable_paging_func
-    with ssh2net.SSH2Net(**IOSXE_TEST, comms_disable_paging=disable_paging) as conn:
-        show_run = conn.send_inputs("show run")[0]
-    with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
-        expected_show_run = f.read()
+    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    def test_send_inputs_interact(self, setup_use_paramiko):
+        interact = ["clear logg", "Clear logging buffer [confirm]", ""]
+        super().test_send_inputs_interact(setup_use_paramiko, interact)
 
-    # crypto strings on the vrnetlab devices change; replace w/ "CRYPTO" to parse
-    show_run = re.sub(r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", show_run)
-    expected_show_run = re.sub(
-        r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", expected_show_run
-    )
+    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize("priv_level", [priv for priv in PRIV_LEVELS.values()])
+    def test_acquire_all_priv_levels(self, setup_use_paramiko, priv_level):
+        super().test_acquire_all_priv_levels(setup_use_paramiko, priv_level)
 
-    d = Differ()
-    diff = list(d.compare(show_run.splitlines()[7:], expected_show_run.splitlines()[7:]))
-    diff = [line for line in diff if not line.startswith("  ")]
-    if diff:
-        print(diff)
-
-    assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
-    assert show_run.splitlines()[7:] == expected_show_run.splitlines()[7:]
-
-
-def test_disable_paging_external_function():
-    with ssh2net.SSH2Net(
-        **IOSXE_TEST,
-        comms_disable_paging="tests.functional.cisco_iosxe.ext_test_funcs.iosxe_disable_paging",
-    ) as conn:
-        show_run = conn.send_inputs("show run")[0]
-    with open(f"{FUNC_TEST_DIR}expected_output/show_run", "r") as f:
-        expected_show_run = f.read()
-
-    # crypto strings on the vrnetlab devices change; replace w/ "CRYPTO" to parse
-    show_run = re.sub(r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", show_run)
-    expected_show_run = re.sub(
-        r" certificate self-signed 01(\n\s(\s\w+)*)*", "CRYPTO", expected_show_run
-    )
-
-    d = Differ()
-    diff = list(d.compare(show_run.splitlines()[7:], expected_show_run.splitlines()[7:]))
-    diff = [line for line in diff if not line.startswith("  ")]
-    if diff:
-        print(diff)
-
-    assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
-    assert show_run.splitlines()[7:] == expected_show_run.splitlines()[7:]
-
-
-def test__determine_current_priv_exec():
-    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
-        conn.send_inputs("disable")
-        current_prompt = conn.get_prompt()
-        current_priv = conn._determine_current_priv(current_prompt)
-    assert current_priv.name == "exec"
-
-
-def test__determine_current_priv_privilege_exec():
-    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
-        current_prompt = conn.get_prompt()
-        current_priv = conn._determine_current_priv(current_prompt)
-    assert current_priv.name == "privilege_exec"
-
-
-def test__determine_current_priv_configuration():
-    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
-        conn.send_inputs("configure terminal")
-        current_prompt = conn.get_prompt()
-        current_priv = conn._determine_current_priv(current_prompt)
-    assert current_priv.name == "configuration"
-
-
-def test__determine_current_priv_special_configuration():
-    with ssh2net.IOSXEDriver(**IOSXE_TEST) as conn:
-        conn.send_inputs(["configure terminal", "interface GigabitEthernet1"])
-        current_prompt = conn.get_prompt()
-        current_priv = conn._determine_current_priv(current_prompt)
-    assert current_priv.name == "special_configuration"
+    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    def test__determine_current_priv_special_configuration(self, setup_use_paramiko):
+        with self.platform_driver(
+            **self.test_device, setup_use_paramiko=setup_use_paramiko
+        ) as conn:
+            conn.send_inputs(["configure terminal", "interface GigabitEthernet1"])
+            current_prompt = conn.get_prompt()
+            current_priv = conn._determine_current_priv(current_prompt)
+        assert current_priv.name == "special_configuration"

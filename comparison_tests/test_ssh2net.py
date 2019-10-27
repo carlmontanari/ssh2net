@@ -22,12 +22,14 @@ def main():
         for command in commands:
             print(f"Sending command: '{command}'")
             print("*" * 80)
-            start_time = datetime.now()
+            command_start_time = datetime.now()
             r = conn.send_inputs(command)
-            end_time = datetime.now()
-            print(r[0][1])
+            command_end_time = datetime.now()
+            print(r[0])
             print("*" * 80)
-            print(f"Sending command: '{command}' took {end_time - start_time} seconds!")
+            print(
+                f"Sending command: '{command}' took {command_end_time - command_start_time} seconds!"
+            )
             print("*" * 80)
             print()
 

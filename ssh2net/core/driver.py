@@ -56,7 +56,8 @@ class BaseNetworkDriver(SSH2Net):
             priv_level: NamedTuple of current privilege level
 
         Raises:
-            UnknownPrivLevel: if privilege level cannot be determined
+            UnknownPrivLevel: if privilege level cannot be determined  # noqa
+            # darglint raises DAR401 for some reason hence the noqa...
 
         """
         for priv_level in self.privs.values():

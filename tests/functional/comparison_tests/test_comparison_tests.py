@@ -14,8 +14,8 @@ def subprocess_runner(cmd, cwd):
     return (std_out.decode(), std_err.decode(), proc.returncode)
 
 
-def test_test_net2():
-    cmd = ["python", "test_net2.py"]
+def test_test_ssh2net():
+    cmd = ["python", "test_ssh2net.py"]
     std_out, std_err, return_code = subprocess_runner(cmd, COMPARISON_TEST_DIR)
     assert return_code == 0
     assert std_err == ""

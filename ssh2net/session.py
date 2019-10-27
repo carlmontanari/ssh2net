@@ -222,7 +222,10 @@ class SSH2NetSession(SSH2NetChannel):
 
         """
         if self.session is not None:  # pylint: disable=E0203
-            self.session.disconnect()  # pylint: disable=E0203
+            if self.setup_use_paramiko:
+                self.session.close()  # pylint: disable=E0203
+            else:
+                self.session.disconnect()  # pylint: disable=E0203
             self.session = None
             logging.debug(f"Session to host {self.host} closed")
 
