@@ -125,8 +125,8 @@ python setup.py install
   - Answer: To learn and build hopefully a really cool thing!
 - Question: Is this better than Netmiko/Paramiko/Ansible?
   - Answer: Nope! It is different though! The main focus is just to be stupid fast. It is very much that. It *should* be super reliable too as the timeouts are very easy/obvious to control, but that said it for sure has not been tested thoroughly with latent devices.
-- Question: Is this is to use?
-  - Answer: Yep! The "native" usage is pretty straight forward -- the thing to remember is that it doesn't do "things" for you like Netmiko does for example, so its a lot more like Paramiko in that regard. That said you can use one of the available drivers to have a Netmiko-like experience -OR- write your own driver as this has been built with the thought of being easily extended.
+- Question: Is this easy to use?
+  - Answer: Yep! The "native" usage is pretty straight forward -- the thing to remember is that it doesn't do "things" for you like Netmiko does for example, so its a lot more like Paramiko in that regard. That said you can use one of the available drivers to have a more Netmiko-like experience -OR- write your own driver as this has been built with the thought of being easily extended.
 - Other questions? Ask away!
 
 
