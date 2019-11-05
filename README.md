@@ -232,4 +232,3 @@ Once the container(s) are ready, you can use the make commands to execute tests 
 
 **Note** - the functional tests test the "native" SSH2Net functionality, but as of now do *not* test the "driver" functionality (i.e. it does not test anything in ssh2net/core/). 
 
-.
