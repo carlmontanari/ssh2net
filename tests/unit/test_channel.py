@@ -24,3 +24,9 @@ def test__restructure_output_strip_prompt():
     output = SSH2NetChannel._restructure_output(output, strip_prompt=True)
     assert output.splitlines()[0] != ""
     assert output.splitlines()[-1] != "3560CX#"
+
+
+def test__strip_ansi():
+    output = b"[admin@CoolDevice.Sea1: \x1b[1m/\x1b[0;0m]$"
+    output = SSH2NetChannel._strip_ansi(output)
+    assert output == b"[admin@CoolDevice.Sea1: /]$"

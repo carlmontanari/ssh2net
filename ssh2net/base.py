@@ -32,6 +32,7 @@ class SSH2Net(SSH2NetSession):
         auth_user: str = "",
         auth_password: Optional[Union[str]] = None,
         auth_public_key: Optional[Union[str]] = None,
+        comms_strip_ansi: Optional[bool] = False,
         comms_prompt_regex: Optional[str] = r"^[a-z0-9.\-@()/:]{1,32}[#>$]$",
         comms_operation_timeout: Optional[int] = 10,
         comms_return_char: Optional[str] = "\n",
@@ -67,6 +68,7 @@ class SSH2Net(SSH2NetSession):
             auth_user: username to use to connect to host
             auth_password: password to use to connect to host
             auth_public_key: path to ssh public key to use to connect to host
+            comms_strip_ansi: whether or not to strip ansi characters from channel
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
@@ -120,6 +122,7 @@ class SSH2Net(SSH2NetSession):
 
         # comms setup
         self._setup_comms_args(
+            comms_strip_ansi,
             comms_prompt_regex,
             comms_operation_timeout,
             comms_return_char,
@@ -297,11 +300,11 @@ class SSH2Net(SSH2NetSession):
             N/A  # noqa
 
         Raises:
-            ValueError
+            TypeError
 
         """
         session_log.critical(f"Invalid '{arg_name}': {arg}")
-        raise ValueError(f"'{arg_name}' must be {target_type}, got: {type(arg)}'")
+        raise TypeError(f"'{arg_name}' must be {target_type}, got: {type(arg)}'")
 
     def _setup_setup_args(
         self, setup_host, setup_validate_host, setup_port, setup_timeout, setup_use_paramiko
@@ -410,6 +413,7 @@ class SSH2Net(SSH2NetSession):
 
     def _setup_comms_args(
         self,
+        comms_strip_ansi,
         comms_prompt_regex,
         comms_operation_timeout,
         comms_return_char,
@@ -417,9 +421,10 @@ class SSH2Net(SSH2NetSession):
         comms_disable_paging,
     ):
         """
-        Process and set "auth" args
+        Process and set "comms" args
 
         Args:
+            comms_strip_ansi: whether or not to strip ansi characters from channel
             comms_prompt_regex: regex pattern to use for prompt matching.
                 this is the single most important attribute here! if this does not match a prompt,
                 ssh2net will not work!
@@ -442,6 +447,11 @@ class SSH2Net(SSH2NetSession):
             N/A  # noqa
 
         """
+        if isinstance(comms_strip_ansi, bool):
+            self.comms_strip_ansi = comms_strip_ansi
+        else:
+            self._invalid_arg_type(bool, "comms_strip_ansi", comms_strip_ansi)
+
         # try to compile prompt to raise TypeError before opening any connections
         re.compile(comms_prompt_regex, flags=re.M | re.I)
         self.comms_prompt_regex = comms_prompt_regex

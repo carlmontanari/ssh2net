@@ -118,7 +118,7 @@ def test_init_invalid_session_keepalive():
         "auth_password": "password",
         "session_keepalive": "notabool",
     }
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         SSH2Net(**test_host)
 
 
@@ -199,6 +199,28 @@ def test_init_ssh_key_strip():
     assert conn.auth_public_key == b"/some/public/key"
 
 
+def test_init_valid_comms_strip_ansi():
+    test_host = {
+        "setup_host": "my_device",
+        "auth_user": "username",
+        "auth_password": "password",
+        "comms_strip_ansi": True,
+    }
+    conn = SSH2Net(**test_host)
+    assert conn.comms_strip_ansi is True
+
+
+def test_init_invalid_comms_strip_ansi():
+    test_host = {
+        "setup_host": "my_device",
+        "auth_user": "username",
+        "auth_password": "password",
+        "comms_strip_ansi": 123,
+    }
+    with pytest.raises(TypeError):
+        SSH2Net(**test_host)
+
+
 def test_init_valid_comms_prompt_regex():
     test_host = {
         "setup_host": "my_device",
@@ -261,7 +283,7 @@ def test_init_invalid_comms_return_char():
         "auth_password": "password",
         "comms_return_char": False,
     }
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         SSH2Net(**test_host)
     assert str(e.value) == "'comms_return_char' must be <class 'str'>, got: <class 'bool'>'"
 
@@ -409,14 +431,13 @@ def test_repr():
     test_host = {"setup_host": "1.2.3.4", "auth_user": "username", "auth_password": "password"}
     conn = SSH2Net(**test_host)
     assert repr(conn) == (
-        f"SSH2Net {{'_shell': False, 'host': '{test_host['setup_host']}', 'port': 22, "
-        "'setup_timeout': 5, 'setup_use_paramiko': False, 'session_timeout': 5000, "
-        "'session_keepalive': False, 'session_keepalive_interval': 10, 'session_keepalive_type': "
-        fr"'network', 'session_keepalive_pattern': '\x05', 'auth_user': '{test_host['auth_user']}',"
-        " 'auth_public_key': None, 'auth_password': '********', 'comms_prompt_regex': "
-        r"'^[a-z0-9.\\-@()/:]{1,32}[#>$]$', 'comms_operation_timeout': 10, "
-        r"'comms_return_char': '\n', 'comms_pre_login_handler': '', 'comms_disable_paging': "
-        "'terminal length 0'}"
+        "SSH2Net {'_shell': False, 'host': '1.2.3.4', 'port': 22, 'setup_timeout': 5, "
+        "'setup_use_paramiko': False, 'session_timeout': 5000, 'session_keepalive': False, "
+        "'session_keepalive_interval': 10, 'session_keepalive_type': 'network', "
+        "'session_keepalive_pattern': '\\x05', 'auth_user': 'username', 'auth_public_key': None, "
+        "'auth_password': '********', 'comms_strip_ansi': False, 'comms_prompt_regex': "
+        "'^[a-z0-9.\\\\-@()/:]{1,32}[#>$]$', 'comms_operation_timeout': 10, 'comms_return_char': "
+        "'\\n', 'comms_pre_login_handler': '', 'comms_disable_paging': 'terminal length 0'}"
     )
 
 

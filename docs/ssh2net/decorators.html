@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>ssh2net.decorators API documentation</title>
 <meta name="description" content="ssh2net.decorators" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -27,7 +27,7 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.decorators&#34;&#34;&#34;
 import logging
-import signal
+import multiprocessing.pool
 import time
 
 
@@ -44,6 +44,10 @@ def operation_timeout(attribute):
     `session_timeout` argument plus the amount of time that `channel_timeout` decorator will delay
     while retrying the read operation.
 
+    Note: Different versions for Windows vs POSIX systems as I think the Windows version is ugly
+    and would prefer to not use it if possible. I imagine there is a better way to implement
+    a OS dependant decorator, but for now this works!
+
     Args:
         attribute: attribute to inspect in class (to set timeout duration)
 
@@ -54,6 +58,7 @@ def operation_timeout(attribute):
         TimeoutError: if timeout exceeded
 
     &#34;&#34;&#34;
+    import signal  # noqa
 
     def _raise_exception(signum, frame):
         raise TimeoutError
@@ -71,6 +76,44 @@ def operation_timeout(attribute):
                 if timeout_duration:
                     signal.setitimer(signal.ITIMER_REAL, 0)
                     signal.signal(signal.SIGALRM, old)
+
+        return timeout_wrapper
+
+    return decorate
+
+
+def operation_timeout_win(attribute):
+    &#34;&#34;&#34;
+    Decorate an &#34;operation&#34; -- raises exception if the operation timeout is exceeded
+
+    See documentation for &#34;operation_timeout&#34;
+
+    This is a variation of the &#34;operation_timeout&#34; decorator that supports windows. I think the
+    Windows version is ugly and would prefer to not use it if possible, so the `ssh2net.channel`
+    module checks for os type and imports the appropriate version to not use this if it can at all
+    be avoided.
+
+    Args:
+        attribute: attribute to inspect in class (to set timeout duration)
+
+    Returns:
+        decorate: wrapped function
+
+    Raises:
+        TimeoutError: if timeout exceeded
+
+    &#34;&#34;&#34;
+
+    def decorate(wrapped_func):
+        def timeout_wrapper(self, *args, **kwargs):
+            timeout_duration = getattr(self, attribute)
+            pool = multiprocessing.pool.ThreadPool(processes=1)
+            args = [self, *args]
+            async_result = pool.apply_async(wrapped_func, args, kwargs)
+            try:
+                return async_result.get(timeout_duration)
+            except multiprocessing.context.TimeoutError:
+                raise TimeoutError
 
         return timeout_wrapper
 
@@ -205,6 +248,9 @@ send_inputs_interact this decorator wraps that entire operation. The <code>comms
 value governs this timeout decorator &ndash; and as such it should always be larger than the base
 <code>session_timeout</code> argument plus the amount of time that <a title="ssh2net.decorators.channel_timeout" href="#ssh2net.decorators.channel_timeout"><code>channel_timeout()</code></a> decorator will delay
 while retrying the read operation.</p>
+<p>Note: Different versions for Windows vs POSIX systems as I think the Windows version is ugly
+and would prefer to not use it if possible. I imagine there is a better way to implement
+a OS dependant decorator, but for now this works!</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>attribute</code></strong></dt>
@@ -234,6 +280,10 @@ while retrying the read operation.</p>
     `session_timeout` argument plus the amount of time that `channel_timeout` decorator will delay
     while retrying the read operation.
 
+    Note: Different versions for Windows vs POSIX systems as I think the Windows version is ugly
+    and would prefer to not use it if possible. I imagine there is a better way to implement
+    a OS dependant decorator, but for now this works!
+
     Args:
         attribute: attribute to inspect in class (to set timeout duration)
 
@@ -244,6 +294,7 @@ while retrying the read operation.</p>
         TimeoutError: if timeout exceeded
 
     &#34;&#34;&#34;
+    import signal  # noqa
 
     def _raise_exception(signum, frame):
         raise TimeoutError
@@ -261,6 +312,73 @@ while retrying the read operation.</p>
                 if timeout_duration:
                     signal.setitimer(signal.ITIMER_REAL, 0)
                     signal.signal(signal.SIGALRM, old)
+
+        return timeout_wrapper
+
+    return decorate</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.decorators.operation_timeout_win"><code class="name flex">
+<span>def <span class="ident">operation_timeout_win</span></span>(<span>attribute)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Decorate an "operation" &ndash; raises exception if the operation timeout is exceeded</p>
+<p>See documentation for "operation_timeout"</p>
+<p>This is a variation of the "operation_timeout" decorator that supports windows. I think the
+Windows version is ugly and would prefer to not use it if possible, so the <a title="ssh2net.channel" href="channel.html"><code>ssh2net.channel</code></a>
+module checks for os type and imports the appropriate version to not use this if it can at all
+be avoided.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>attribute</code></strong></dt>
+<dd>attribute to inspect in class (to set timeout duration)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>decorate</code></strong></dt>
+<dd>wrapped function</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>TimeoutError</code></strong></dt>
+<dd>if timeout exceeded</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def operation_timeout_win(attribute):
+    &#34;&#34;&#34;
+    Decorate an &#34;operation&#34; -- raises exception if the operation timeout is exceeded
+
+    See documentation for &#34;operation_timeout&#34;
+
+    This is a variation of the &#34;operation_timeout&#34; decorator that supports windows. I think the
+    Windows version is ugly and would prefer to not use it if possible, so the `ssh2net.channel`
+    module checks for os type and imports the appropriate version to not use this if it can at all
+    be avoided.
+
+    Args:
+        attribute: attribute to inspect in class (to set timeout duration)
+
+    Returns:
+        decorate: wrapped function
+
+    Raises:
+        TimeoutError: if timeout exceeded
+
+    &#34;&#34;&#34;
+
+    def decorate(wrapped_func):
+        def timeout_wrapper(self, *args, **kwargs):
+            timeout_duration = getattr(self, attribute)
+            pool = multiprocessing.pool.ThreadPool(processes=1)
+            args = [self, *args]
+            async_result = pool.apply_async(wrapped_func, args, kwargs)
+            try:
+                return async_result.get(timeout_duration)
+            except multiprocessing.context.TimeoutError:
+                raise TimeoutError
 
         return timeout_wrapper
 
@@ -287,13 +405,14 @@ while retrying the read operation.</p>
 <ul class="">
 <li><code><a title="ssh2net.decorators.channel_timeout" href="#ssh2net.decorators.channel_timeout">channel_timeout</a></code></li>
 <li><code><a title="ssh2net.decorators.operation_timeout" href="#ssh2net.decorators.operation_timeout">operation_timeout</a></code></li>
+<li><code><a title="ssh2net.decorators.operation_timeout_win" href="#ssh2net.decorators.operation_timeout_win">operation_timeout_win</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

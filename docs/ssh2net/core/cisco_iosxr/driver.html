@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>ssh2net.core.cisco_iosxe.driver API documentation</title>
-<meta name="description" content="ssh2net.core.cisco_iosxe.driver" />
+<title>ssh2net.core.cisco_iosxr.driver API documentation</title>
+<meta name="description" content="ssh2net.core.cisco_iosxr.driver" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,22 +17,23 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ssh2net.core.cisco_iosxe.driver</code></h1>
+<h1 class="title">Module <code>ssh2net.core.cisco_iosxr.driver</code></h1>
 </header>
 <section id="section-intro">
-<p>ssh2net.core.cisco_iosxe.driver</p>
+<p>ssh2net.core.cisco_iosxr.driver</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;ssh2net.core.cisco_iosxe.driver&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;ssh2net.core.cisco_iosxr.driver&#34;&#34;&#34;
 import re
+import time
 from typing import Any, Dict
 
 from ssh2net.core.driver import BaseNetworkDriver, PrivilegeLevel
 
 
-IOSXE_ARG_MAPPER = {
+IOSXR_ARG_MAPPER = {
     &#34;comms_prompt_regex&#34;: r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
     &#34;comms_return_char&#34;: &#34;\n&#34;,
     &#34;comms_pre_login_handler&#34;: &#34;&#34;,
@@ -40,20 +41,6 @@ IOSXE_ARG_MAPPER = {
 }
 
 PRIVS = {
-    &#34;exec&#34;: (
-        PrivilegeLevel(
-            re.compile(r&#34;^[a-z0-9.\-@()/:]{1,32}&gt;$&#34;, flags=re.M | re.I),
-            &#34;exec&#34;,
-            None,
-            None,
-            &#34;privilege_exec&#34;,
-            &#34;enable&#34;,
-            True,
-            &#34;Password:&#34;,
-            True,
-            0,
-        )
-    ),
     &#34;privilege_exec&#34;: (
         PrivilegeLevel(
             re.compile(r&#34;^[a-z0-9.\-@/:]{1,32}#$&#34;, flags=re.M | re.I),
@@ -99,10 +86,15 @@ PRIVS = {
 }
 
 
-class IOSXEDriver(BaseNetworkDriver):
+def comms_pre_login_handler(cls):  # pylint: disable=W0613
+    # sleep for session to establish; without this we never find base prompt
+    time.sleep(1)
+
+
+class IOSXRDriver(BaseNetworkDriver):
     def __init__(self, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net IOSXEDriver Object
+        Initialize SSH2Net IOSXRDriver Object
 
         Args:
             **kwargs: keyword args to pass to inherited class(es)
@@ -116,7 +108,7 @@ class IOSXEDriver(BaseNetworkDriver):
         super().__init__(**kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;
-        self.textfsm_platform = &#34;cisco_ios&#34;</code></pre>
+        self.textfsm_platform = &#34;cisco_xr&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -124,16 +116,33 @@ class IOSXEDriver(BaseNetworkDriver):
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="ssh2net.core.cisco_iosxr.driver.comms_pre_login_handler"><code class="name flex">
+<span>def <span class="ident">comms_pre_login_handler</span></span>(<span>cls)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def comms_pre_login_handler(cls):  # pylint: disable=W0613
+    # sleep for session to establish; without this we never find base prompt
+    time.sleep(1)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ssh2net.core.cisco_iosxe.driver.IOSXEDriver"><code class="flex name class">
-<span>class <span class="ident">IOSXEDriver</span></span>
+<dt id="ssh2net.core.cisco_iosxr.driver.IOSXRDriver"><code class="flex name class">
+<span>class <span class="ident">IOSXRDriver</span></span>
 <span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<section class="desc"><p>Initialize SSH2Net IOSXRDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>**kwargs</code></strong></dt>
@@ -155,10 +164,10 @@ class IOSXEDriver(BaseNetworkDriver):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class IOSXEDriver(BaseNetworkDriver):
+<pre><code class="python">class IOSXRDriver(BaseNetworkDriver):
     def __init__(self, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net IOSXEDriver Object
+        Initialize SSH2Net IOSXRDriver Object
 
         Args:
             **kwargs: keyword args to pass to inherited class(es)
@@ -172,7 +181,7 @@ class IOSXEDriver(BaseNetworkDriver):
         super().__init__(**kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;
-        self.textfsm_platform = &#34;cisco_ios&#34;</code></pre>
+        self.textfsm_platform = &#34;cisco_xr&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -209,13 +218,18 @@ class IOSXEDriver(BaseNetworkDriver):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ssh2net.core.cisco_iosxe" href="index.html">ssh2net.core.cisco_iosxe</a></code></li>
+<li><code><a title="ssh2net.core.cisco_iosxr" href="index.html">ssh2net.core.cisco_iosxr</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ssh2net.core.cisco_iosxr.driver.comms_pre_login_handler" href="#ssh2net.core.cisco_iosxr.driver.comms_pre_login_handler">comms_pre_login_handler</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ssh2net.core.cisco_iosxe.driver.IOSXEDriver" href="#ssh2net.core.cisco_iosxe.driver.IOSXEDriver">IOSXEDriver</a></code></h4>
+<h4><code><a title="ssh2net.core.cisco_iosxr.driver.IOSXRDriver" href="#ssh2net.core.cisco_iosxr.driver.IOSXRDriver">IOSXRDriver</a></code></h4>
 </li>
 </ul>
 </li>

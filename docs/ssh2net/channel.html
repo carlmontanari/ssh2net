@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>ssh2net.channel API documentation</title>
 <meta name="description" content="ssh2net.channel" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -28,11 +28,17 @@
 <pre><code class="python">&#34;&#34;&#34;ssh2net.channel&#34;&#34;&#34;
 import logging
 import re
+import sys
 from typing import List, Optional, Tuple
 
 from ssh2.exceptions import SocketRecvError, Timeout
 
-from ssh2net.decorators import operation_timeout, channel_timeout
+from ssh2net.decorators import channel_timeout
+
+if not sys.platform.startswith(&#34;win&#34;):
+    from ssh2net.decorators import operation_timeout
+else:
+    from ssh2net.decorators import operation_timeout_win as operation_timeout
 
 
 channel_log = logging.getLogger(&#34;ssh2net_channel&#34;)
@@ -88,6 +94,25 @@ class SSH2NetChannel:
         output = &#34;\n&#34;.join(output)
         return output
 
+    @staticmethod
+    def _strip_ansi(output: bytes) -&gt; bytes:
+        &#34;&#34;&#34;
+        Strip ansi characters from bytes string
+
+        Args:
+            output: bytes from channel that need ansi stripped
+
+        Returns:
+            output: bytes string with ansi stripped
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
+        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        return output
+
     @channel_timeout(Timeout)
     def _read_until_input(self, channel_input: str) -&gt; None:
         &#34;&#34;&#34;
@@ -107,7 +132,10 @@ class SSH2NetChannel:
         &#34;&#34;&#34;
         output = b&#34;&#34;
         while channel_input.encode() not in output:
-            output += self.channel.read()[1]
+            if not self.comms_strip_ansi:
+                output += self.channel.read()[1]
+            else:
+                output += self._strip_ansi(self.channel.read()[1])
         channel_log.debug(f&#34;Read: {repr(output)}&#34;)
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
@@ -150,7 +178,10 @@ class SSH2NetChannel:
         # without this iteration we can never properly check for prompts
         self.session.set_blocking(False)
         while True:
-            output += self.channel.read()[1]
+            if not self.comms_strip_ansi:
+                output += self.channel.read()[1]
+            else:
+                output += self._strip_ansi(self.channel.read()[1])
             channel_log.debug(f&#34;Read: {repr(output)}&#34;)
             # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
@@ -472,6 +503,25 @@ class SSH2NetChannel:
         output = &#34;\n&#34;.join(output)
         return output
 
+    @staticmethod
+    def _strip_ansi(output: bytes) -&gt; bytes:
+        &#34;&#34;&#34;
+        Strip ansi characters from bytes string
+
+        Args:
+            output: bytes from channel that need ansi stripped
+
+        Returns:
+            output: bytes string with ansi stripped
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
+        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        return output
+
     @channel_timeout(Timeout)
     def _read_until_input(self, channel_input: str) -&gt; None:
         &#34;&#34;&#34;
@@ -491,7 +541,10 @@ class SSH2NetChannel:
         &#34;&#34;&#34;
         output = b&#34;&#34;
         while channel_input.encode() not in output:
-            output += self.channel.read()[1]
+            if not self.comms_strip_ansi:
+                output += self.channel.read()[1]
+            else:
+                output += self._strip_ansi(self.channel.read()[1])
         channel_log.debug(f&#34;Read: {repr(output)}&#34;)
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
@@ -534,7 +587,10 @@ class SSH2NetChannel:
         # without this iteration we can never properly check for prompts
         self.session.set_blocking(False)
         while True:
-            output += self.channel.read()[1]
+            if not self.comms_strip_ansi:
+                output += self.channel.read()[1]
+            else:
+                output += self._strip_ansi(self.channel.read()[1])
             channel_log.debug(f&#34;Read: {repr(output)}&#34;)
             # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
@@ -1094,7 +1150,7 @@ finale (what should ssh2net expect when "done")</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

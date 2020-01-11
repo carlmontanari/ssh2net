@@ -67,6 +67,25 @@ class SSH2NetChannel:
         output = "\n".join(output)
         return output
 
+    @staticmethod
+    def _strip_ansi(output: bytes) -> bytes:
+        """
+        Strip ansi characters from bytes string
+
+        Args:
+            output: bytes from channel that need ansi stripped
+
+        Returns:
+            output: bytes string with ansi stripped
+
+        Raises:
+            N/A  # noqa
+
+        """
+        ansi_escape_pattern = re.compile(rb"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+        output = re.sub(ansi_escape_pattern, b"", output)
+        return output
+
     @channel_timeout(Timeout)
     def _read_until_input(self, channel_input: str) -> None:
         """
@@ -86,7 +105,10 @@ class SSH2NetChannel:
         """
         output = b""
         while channel_input.encode() not in output:
-            output += self.channel.read()[1]
+            if not self.comms_strip_ansi:
+                output += self.channel.read()[1]
+            else:
+                output += self._strip_ansi(self.channel.read()[1])
         channel_log.debug(f"Read: {repr(output)}")
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
@@ -129,7 +151,10 @@ class SSH2NetChannel:
         # without this iteration we can never properly check for prompts
         self.session.set_blocking(False)
         while True:
-            output += self.channel.read()[1]
+            if not self.comms_strip_ansi:
+                output += self.channel.read()[1]
+            else:
+                output += self._strip_ansi(self.channel.read()[1])
             channel_log.debug(f"Read: {repr(output)}")
             # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output

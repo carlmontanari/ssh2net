@@ -14,7 +14,7 @@ from ssh2net.core.cisco_iosxr.driver import IOSXRDriver
 from ssh2net.core.arista_eos.driver import EOSDriver
 from ssh2net.core.juniper_junos.driver import JunosDriver
 
-__version__ = "2019.10.27"
+__version__ = "2020.01.10"
 __all__ = (
     "SSH2Net",
     "SSH2NetSession",
