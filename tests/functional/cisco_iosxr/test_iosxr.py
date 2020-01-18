@@ -9,14 +9,14 @@ import ssh2net
 
 TEST_DEVICE = {"setup_host": "172.18.0.13", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
-dummy_conn = ssh2net.IOSXRDriver(**TEST_DEVICE)
+dummy_conn = ssh2net.core.IOSXRDriver(**TEST_DEVICE)
 PRIV_LEVELS = dummy_conn.privs
 PRE_LOGIN_HANDLER = comms_pre_login_handler
 
 
 class TestIOSXR(BaseFunctionalTest):
     def setup_method(self):
-        self.platform_driver = ssh2net.IOSXRDriver
+        self.platform_driver = ssh2net.core.IOSXRDriver
 
         self.device_type = Path(__file__).resolve().parts[-2]
         self.func_test_dir = (

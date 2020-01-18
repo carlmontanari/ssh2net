@@ -4,7 +4,7 @@ import re
 from typing import Any, Dict, Optional, Union
 
 from ssh2net.base import SSH2Net
-from ssh2net.exceptions import UnknownPrivLevel
+from ssh2net.exceptions import CouldNotAcquirePrivLevel, UnknownPrivLevel
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
 
 
@@ -57,7 +57,7 @@ class BaseNetworkDriver(SSH2Net):
 
         Raises:
             UnknownPrivLevel: if privilege level cannot be determined  # noqa
-            # darglint raises DAR401 for some reason hence the noqa...
+            # NOTE: darglint raises DAR401 for some reason hence the noqa...
 
         """
         for priv_level in self.privs.values():
@@ -112,9 +112,9 @@ class BaseNetworkDriver(SSH2Net):
         if current_priv.deescalate:
             self.send_inputs(current_priv.deescalate)
 
-    def attain_priv(self, desired_priv) -> None:
+    def acquire_priv(self, desired_priv) -> None:
         """
-        Attain desired priv level
+        Acquire desired priv level
 
         Args:
             desired_priv: string name of desired privilege level
@@ -124,17 +124,22 @@ class BaseNetworkDriver(SSH2Net):
             N/A  # noqa
 
         Raises:
-            N/A  # noqa
+            CouldNotAcquirePrivLevel: if requested priv level not attained
 
         """
+        priv_attempt_counter = 0
         while True:
             current_priv = self._determine_current_priv(self.get_prompt())
             if current_priv == self.privs[desired_priv]:
                 return
+            elif priv_attempt_counter > len(self.privs):
+                raise CouldNotAcquirePrivLevel(f"Could not get to '{desired_priv}' privilege level.")
+
             if current_priv.level > self.privs[desired_priv].level:
                 self._deescalate()
             else:
                 self._escalate()
+            priv_attempt_counter += 1
 
     def send_command(self, commands):
         """
@@ -149,7 +154,7 @@ class BaseNetworkDriver(SSH2Net):
         Raises:
             N/A  # noqa
         """
-        self.attain_priv(self.default_desired_priv)
+        self.acquire_priv(self.default_desired_priv)
         result = self.send_inputs(commands)
         return result
 
@@ -166,9 +171,9 @@ class BaseNetworkDriver(SSH2Net):
         Raises:
             N/A  # noqa
         """
-        self.attain_priv("configuration")
+        self.acquire_priv("configuration")
         result = self.send_inputs(configs)
-        self.attain_priv(self.default_desired_priv)
+        self.acquire_priv(self.default_desired_priv)
         return result
 
     def textfsm_parse_output(self, command: str, output: str) -> str:

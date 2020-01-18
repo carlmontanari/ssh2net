@@ -3,8 +3,6 @@ import logging
 import time
 import warnings
 
-from paramiko.ssh_exception import AuthenticationException
-
 from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 
 
@@ -51,6 +49,9 @@ class SSH2NetSessionParamiko:
         """
         try:
             from paramiko import Transport  # noqa
+            from paramiko.ssh_exception import AuthenticationException  # noqa
+
+            self.ParamikoAuthenticationException = AuthenticationException
         except ModuleNotFoundError as exc:
             err = f"Module '{exc.name}' not installed!"
             msg = f"***** {err} {'*' * (80 - len(err))}"
@@ -89,7 +90,7 @@ class SSH2NetSessionParamiko:
         """
         try:
             self.session.auth_publickey(self.auth_user, self.auth_public_key)
-        except AuthenticationException:
+        except self.ParamikoAuthenticationException:
             logging.critical(f"Public key authentication with host {self.host} failed.")
         except Exception as exc:
             logging.critical(
@@ -115,7 +116,7 @@ class SSH2NetSessionParamiko:
         """
         try:
             self.session.auth_password(self.auth_user, self.auth_password)
-        except AuthenticationException as exc:
+        except self.ParamikoAuthenticationException as exc:
             logging.critical(
                 f"Password authentication with host {self.host} failed. Exception: {exc}."
                 "\n\tNote: Paramiko automatically attempts both standard auth as well as keyboard "
@@ -216,16 +217,16 @@ class SSH2NetSessionParamiko:
             if self.channel.recv_ready():
                 self._paramiko_read_channel()
             else:
-                self.channel.write("\n")
                 return
 
     def _set_blocking(self, blocking):
-        # Add docstring
+        # TODO -- Add docstring
         # need to reset timeout because it seems paramiko sets it to 0 if you set to non blocking
         # paramiko uses seconds instead of ms
         self.channel.setblocking(blocking)
         self.channel.settimeout(self.session_timeout / 1000)
 
     def _set_timeout(self, timeout):
+        # TODO -- Add docstring
         # paramiko uses seconds instead of ms
         self.channel.settimeout(timeout / 1000)

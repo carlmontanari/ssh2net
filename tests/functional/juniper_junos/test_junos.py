@@ -13,13 +13,13 @@ TEST_DEVICE = {
     "comms_disable_paging": "set cli screen-length 0",
 }
 
-dummy_conn = ssh2net.JunosDriver(**TEST_DEVICE)
+dummy_conn = ssh2net.core.JunosDriver(**TEST_DEVICE)
 PRIV_LEVELS = dummy_conn.privs
 
 
 class TestJunos(BaseFunctionalTest):
     def setup_method(self):
-        self.platform_driver = ssh2net.JunosDriver
+        self.platform_driver = ssh2net.core.JunosDriver
 
         self.device_type = Path(__file__).resolve().parts[-2]
         self.func_test_dir = (

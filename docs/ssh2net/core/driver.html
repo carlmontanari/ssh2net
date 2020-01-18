@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>ssh2net.core.driver API documentation</title>
 <meta name="description" content="ssh2net.core.driver" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -31,7 +31,7 @@ import re
 from typing import Any, Dict, Optional, Union
 
 from ssh2net.base import SSH2Net
-from ssh2net.exceptions import UnknownPrivLevel
+from ssh2net.exceptions import CouldNotAcquirePrivLevel, UnknownPrivLevel
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
 
 
@@ -84,7 +84,7 @@ class BaseNetworkDriver(SSH2Net):
 
         Raises:
             UnknownPrivLevel: if privilege level cannot be determined  # noqa
-            # darglint raises DAR401 for some reason hence the noqa...
+            # NOTE: darglint raises DAR401 for some reason hence the noqa...
 
         &#34;&#34;&#34;
         for priv_level in self.privs.values():
@@ -139,9 +139,9 @@ class BaseNetworkDriver(SSH2Net):
         if current_priv.deescalate:
             self.send_inputs(current_priv.deescalate)
 
-    def attain_priv(self, desired_priv) -&gt; None:
+    def acquire_priv(self, desired_priv) -&gt; None:
         &#34;&#34;&#34;
-        Attain desired priv level
+        Acquire desired priv level
 
         Args:
             desired_priv: string name of desired privilege level
@@ -151,17 +151,22 @@ class BaseNetworkDriver(SSH2Net):
             N/A  # noqa
 
         Raises:
-            N/A  # noqa
+            CouldNotAcquirePrivLevel: if requested priv level not attained
 
         &#34;&#34;&#34;
+        priv_attempt_counter = 0
         while True:
             current_priv = self._determine_current_priv(self.get_prompt())
             if current_priv == self.privs[desired_priv]:
                 return
+            elif priv_attempt_counter &gt; len(self.privs):
+                raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+
             if current_priv.level &gt; self.privs[desired_priv].level:
                 self._deescalate()
             else:
                 self._escalate()
+            priv_attempt_counter += 1
 
     def send_command(self, commands):
         &#34;&#34;&#34;
@@ -176,7 +181,7 @@ class BaseNetworkDriver(SSH2Net):
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        self.attain_priv(self.default_desired_priv)
+        self.acquire_priv(self.default_desired_priv)
         result = self.send_inputs(commands)
         return result
 
@@ -193,9 +198,9 @@ class BaseNetworkDriver(SSH2Net):
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        self.attain_priv(&#34;configuration&#34;)
+        self.acquire_priv(&#34;configuration&#34;)
         result = self.send_inputs(configs)
-        self.attain_priv(self.default_desired_priv)
+        self.acquire_priv(self.default_desired_priv)
         return result
 
     def textfsm_parse_output(self, command: str, output: str) -&gt; str:
@@ -286,7 +291,7 @@ class BaseNetworkDriver(SSH2Net):
 
         Raises:
             UnknownPrivLevel: if privilege level cannot be determined  # noqa
-            # darglint raises DAR401 for some reason hence the noqa...
+            # NOTE: darglint raises DAR401 for some reason hence the noqa...
 
         &#34;&#34;&#34;
         for priv_level in self.privs.values():
@@ -341,9 +346,9 @@ class BaseNetworkDriver(SSH2Net):
         if current_priv.deescalate:
             self.send_inputs(current_priv.deescalate)
 
-    def attain_priv(self, desired_priv) -&gt; None:
+    def acquire_priv(self, desired_priv) -&gt; None:
         &#34;&#34;&#34;
-        Attain desired priv level
+        Acquire desired priv level
 
         Args:
             desired_priv: string name of desired privilege level
@@ -353,17 +358,22 @@ class BaseNetworkDriver(SSH2Net):
             N/A  # noqa
 
         Raises:
-            N/A  # noqa
+            CouldNotAcquirePrivLevel: if requested priv level not attained
 
         &#34;&#34;&#34;
+        priv_attempt_counter = 0
         while True:
             current_priv = self._determine_current_priv(self.get_prompt())
             if current_priv == self.privs[desired_priv]:
                 return
+            elif priv_attempt_counter &gt; len(self.privs):
+                raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+
             if current_priv.level &gt; self.privs[desired_priv].level:
                 self._deescalate()
             else:
                 self._escalate()
+            priv_attempt_counter += 1
 
     def send_command(self, commands):
         &#34;&#34;&#34;
@@ -378,7 +388,7 @@ class BaseNetworkDriver(SSH2Net):
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        self.attain_priv(self.default_desired_priv)
+        self.acquire_priv(self.default_desired_priv)
         result = self.send_inputs(commands)
         return result
 
@@ -395,9 +405,9 @@ class BaseNetworkDriver(SSH2Net):
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        self.attain_priv(&#34;configuration&#34;)
+        self.acquire_priv(&#34;configuration&#34;)
         result = self.send_inputs(configs)
-        self.attain_priv(self.default_desired_priv)
+        self.acquire_priv(self.default_desired_priv)
         return result
 
     def textfsm_parse_output(self, command: str, output: str) -&gt; str:
@@ -427,19 +437,19 @@ class BaseNetworkDriver(SSH2Net):
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="ssh2net.core.cisco_iosxe.driver.IOSXEDriver" href="cisco_iosxe/driver.html#ssh2net.core.cisco_iosxe.driver.IOSXEDriver">IOSXEDriver</a></li>
-<li><a title="ssh2net.core.cisco_nxos.driver.NXOSDriver" href="cisco_nxos/driver.html#ssh2net.core.cisco_nxos.driver.NXOSDriver">NXOSDriver</a></li>
-<li><a title="ssh2net.core.cisco_iosxr.driver.IOSXRDriver" href="cisco_iosxr/driver.html#ssh2net.core.cisco_iosxr.driver.IOSXRDriver">IOSXRDriver</a></li>
 <li><a title="ssh2net.core.arista_eos.driver.EOSDriver" href="arista_eos/driver.html#ssh2net.core.arista_eos.driver.EOSDriver">EOSDriver</a></li>
+<li><a title="ssh2net.core.cisco_iosxe.driver.IOSXEDriver" href="cisco_iosxe/driver.html#ssh2net.core.cisco_iosxe.driver.IOSXEDriver">IOSXEDriver</a></li>
+<li><a title="ssh2net.core.cisco_iosxr.driver.IOSXRDriver" href="cisco_iosxr/driver.html#ssh2net.core.cisco_iosxr.driver.IOSXRDriver">IOSXRDriver</a></li>
+<li><a title="ssh2net.core.cisco_nxos.driver.NXOSDriver" href="cisco_nxos/driver.html#ssh2net.core.cisco_nxos.driver.NXOSDriver">NXOSDriver</a></li>
 <li><a title="ssh2net.core.juniper_junos.driver.JunosDriver" href="juniper_junos/driver.html#ssh2net.core.juniper_junos.driver.JunosDriver">JunosDriver</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="ssh2net.core.driver.BaseNetworkDriver.attain_priv"><code class="name flex">
-<span>def <span class="ident">attain_priv</span></span>(<span>self, desired_priv)</span>
+<dt id="ssh2net.core.driver.BaseNetworkDriver.acquire_priv"><code class="name flex">
+<span>def <span class="ident">acquire_priv</span></span>(<span>self, desired_priv)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Attain desired priv level</p>
+<section class="desc"><p>Acquire desired priv level</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>desired_priv</code></strong></dt>
@@ -454,17 +464,16 @@ class BaseNetworkDriver(SSH2Net):
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>N</code>/<code>A</code>
-# <code>noqa</code></dt>
-<dd>&nbsp;</dd>
+<dt><strong><code>CouldNotAcquirePrivLevel</code></strong></dt>
+<dd>if requested priv level not attained</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def attain_priv(self, desired_priv) -&gt; None:
+<pre><code class="python">def acquire_priv(self, desired_priv) -&gt; None:
     &#34;&#34;&#34;
-    Attain desired priv level
+    Acquire desired priv level
 
     Args:
         desired_priv: string name of desired privilege level
@@ -474,17 +483,22 @@ class BaseNetworkDriver(SSH2Net):
         N/A  # noqa
 
     Raises:
-        N/A  # noqa
+        CouldNotAcquirePrivLevel: if requested priv level not attained
 
     &#34;&#34;&#34;
+    priv_attempt_counter = 0
     while True:
         current_priv = self._determine_current_priv(self.get_prompt())
         if current_priv == self.privs[desired_priv]:
             return
+        elif priv_attempt_counter &gt; len(self.privs):
+            raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+
         if current_priv.level &gt; self.privs[desired_priv].level:
             self._deescalate()
         else:
-            self._escalate()</code></pre>
+            self._escalate()
+        priv_attempt_counter += 1</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.core.driver.BaseNetworkDriver.send_command"><code class="name flex">
@@ -526,7 +540,7 @@ class BaseNetworkDriver(SSH2Net):
     Raises:
         N/A  # noqa
     &#34;&#34;&#34;
-    self.attain_priv(self.default_desired_priv)
+    self.acquire_priv(self.default_desired_priv)
     result = self.send_inputs(commands)
     return result</code></pre>
 </details>
@@ -570,9 +584,9 @@ class BaseNetworkDriver(SSH2Net):
     Raises:
         N/A  # noqa
     &#34;&#34;&#34;
-    self.attain_priv(&#34;configuration&#34;)
+    self.acquire_priv(&#34;configuration&#34;)
     result = self.send_inputs(configs)
-    self.attain_priv(self.default_desired_priv)
+    self.acquire_priv(self.default_desired_priv)
     return result</code></pre>
 </details>
 </dd>
@@ -639,7 +653,7 @@ class BaseNetworkDriver(SSH2Net):
 </dd>
 <dt id="ssh2net.core.driver.PrivLevel"><code class="flex name class">
 <span>class <span class="ident">PrivilegeLevel</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>pattern, name, deescalate_priv, deescalate, escalate_priv, escalate, escalate_auth, escalate_prompt, requestable, level)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>PrivLevel(pattern, name, deescalate_priv, deescalate, escalate_priv, escalate, escalate_auth, escalate_prompt, requestable, level)</p></section>
@@ -710,7 +724,7 @@ class BaseNetworkDriver(SSH2Net):
 <li>
 <h4><code><a title="ssh2net.core.driver.BaseNetworkDriver" href="#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></code></h4>
 <ul class="">
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.attain_priv" href="#ssh2net.core.driver.BaseNetworkDriver.attain_priv">attain_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
@@ -737,7 +751,7 @@ class BaseNetworkDriver(SSH2Net):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

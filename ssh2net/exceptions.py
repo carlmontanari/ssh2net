@@ -19,3 +19,7 @@ class SetupTimeout(Exception):
 
 class UnknownPrivLevel(Exception):
     pass
+
+
+class CouldNotAcquirePrivLevel(Exception):
+    pass

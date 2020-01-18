@@ -63,8 +63,6 @@ test_functional:
 	--cov-report html \
 	--cov-report term \
 	tests/functional/. \
-	--ignore tests/functional/cisco_iosxr \
-	--ignore tests/functional/arista_eos \
 	--ignore tests/functional/comparison_tests
 
 test_all:
@@ -72,10 +70,7 @@ test_all:
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
-	tests/. \
-	--ignore tests/functional/cisco_iosxr \
-	--ignore tests/functional/arista_eos \
-	--ignore tests/functional/comparison_tests
+	tests/.
 
 test_iosxe:
 	python -m pytest \

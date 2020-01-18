@@ -152,7 +152,7 @@ class BaseFunctionalTest:
         with self.platform_driver(
             **self.test_device, setup_use_paramiko=setup_use_paramiko
         ) as conn:
-            conn.attain_priv(priv_level.name)
+            conn.acquire_priv(priv_level.name)
             current_prompt = conn.get_prompt()
             current_priv = conn._determine_current_priv(current_prompt)
             assert current_priv.name == priv_level.name

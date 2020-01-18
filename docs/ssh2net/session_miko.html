@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>ssh2net.session_miko API documentation</title>
 <meta name="description" content="ssh2net.session_miko" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -29,8 +29,6 @@
 import logging
 import time
 import warnings
-
-from paramiko.ssh_exception import AuthenticationException
 
 from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 
@@ -78,6 +76,9 @@ class SSH2NetSessionParamiko:
         &#34;&#34;&#34;
         try:
             from paramiko import Transport  # noqa
+            from paramiko.ssh_exception import AuthenticationException  # noqa
+
+            self.ParamikoAuthenticationException = AuthenticationException
         except ModuleNotFoundError as exc:
             err = f&#34;Module &#39;{exc.name}&#39; not installed!&#34;
             msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
@@ -116,7 +117,7 @@ class SSH2NetSessionParamiko:
         &#34;&#34;&#34;
         try:
             self.session.auth_publickey(self.auth_user, self.auth_public_key)
-        except AuthenticationException:
+        except self.ParamikoAuthenticationException:
             logging.critical(f&#34;Public key authentication with host {self.host} failed.&#34;)
         except Exception as exc:
             logging.critical(
@@ -142,7 +143,7 @@ class SSH2NetSessionParamiko:
         &#34;&#34;&#34;
         try:
             self.session.auth_password(self.auth_user, self.auth_password)
-        except AuthenticationException as exc:
+        except self.ParamikoAuthenticationException as exc:
             logging.critical(
                 f&#34;Password authentication with host {self.host} failed. Exception: {exc}.&#34;
                 &#34;\n\tNote: Paramiko automatically attempts both standard auth as well as keyboard &#34;
@@ -243,17 +244,17 @@ class SSH2NetSessionParamiko:
             if self.channel.recv_ready():
                 self._paramiko_read_channel()
             else:
-                self.channel.write(&#34;\n&#34;)
                 return
 
     def _set_blocking(self, blocking):
-        # Add docstring
+        # TODO -- Add docstring
         # need to reset timeout because it seems paramiko sets it to 0 if you set to non blocking
         # paramiko uses seconds instead of ms
         self.channel.setblocking(blocking)
         self.channel.settimeout(self.session_timeout / 1000)
 
     def _set_timeout(self, timeout):
+        # TODO -- Add docstring
         # paramiko uses seconds instead of ms
         self.channel.settimeout(timeout / 1000)</code></pre>
 </details>
@@ -342,6 +343,9 @@ desired; this is the reason Paramiko is in here now!</p>
         &#34;&#34;&#34;
         try:
             from paramiko import Transport  # noqa
+            from paramiko.ssh_exception import AuthenticationException  # noqa
+
+            self.ParamikoAuthenticationException = AuthenticationException
         except ModuleNotFoundError as exc:
             err = f&#34;Module &#39;{exc.name}&#39; not installed!&#34;
             msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
@@ -380,7 +384,7 @@ desired; this is the reason Paramiko is in here now!</p>
         &#34;&#34;&#34;
         try:
             self.session.auth_publickey(self.auth_user, self.auth_public_key)
-        except AuthenticationException:
+        except self.ParamikoAuthenticationException:
             logging.critical(f&#34;Public key authentication with host {self.host} failed.&#34;)
         except Exception as exc:
             logging.critical(
@@ -406,7 +410,7 @@ desired; this is the reason Paramiko is in here now!</p>
         &#34;&#34;&#34;
         try:
             self.session.auth_password(self.auth_user, self.auth_password)
-        except AuthenticationException as exc:
+        except self.ParamikoAuthenticationException as exc:
             logging.critical(
                 f&#34;Password authentication with host {self.host} failed. Exception: {exc}.&#34;
                 &#34;\n\tNote: Paramiko automatically attempts both standard auth as well as keyboard &#34;
@@ -507,17 +511,17 @@ desired; this is the reason Paramiko is in here now!</p>
             if self.channel.recv_ready():
                 self._paramiko_read_channel()
             else:
-                self.channel.write(&#34;\n&#34;)
                 return
 
     def _set_blocking(self, blocking):
-        # Add docstring
+        # TODO -- Add docstring
         # need to reset timeout because it seems paramiko sets it to 0 if you set to non blocking
         # paramiko uses seconds instead of ms
         self.channel.setblocking(blocking)
         self.channel.settimeout(self.session_timeout / 1000)
 
     def _set_timeout(self, timeout):
+        # TODO -- Add docstring
         # paramiko uses seconds instead of ms
         self.channel.settimeout(timeout / 1000)</code></pre>
 </details>
@@ -547,7 +551,7 @@ desired; this is the reason Paramiko is in here now!</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

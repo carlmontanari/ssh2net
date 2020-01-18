@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>ssh2net.core API documentation</title>
 <meta name="description" content="ssh2net core platform drivers" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -25,7 +25,22 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;ssh2net core platform drivers&#34;&#34;&#34;</code></pre>
+<pre><code class="python">&#34;&#34;&#34;ssh2net core platform drivers&#34;&#34;&#34;
+from ssh2net.core.driver import BaseNetworkDriver
+from ssh2net.core.arista_eos.driver import EOSDriver
+from ssh2net.core.cisco_iosxe.driver import IOSXEDriver
+from ssh2net.core.cisco_iosxr.driver import IOSXRDriver
+from ssh2net.core.cisco_nxos.driver import NXOSDriver
+from ssh2net.core.juniper_junos.driver import JunosDriver
+
+__all__ = (
+    &#34;BaseNetworkDriver&#34;,
+    &#34;EOSDriver&#34;,
+    &#34;IOSXEDriver&#34;,
+    &#34;IOSXRDriver&#34;,
+    &#34;NXOSDriver&#34;,
+    &#34;JunosDriver&#34;,
+)</code></pre>
 </details>
 </section>
 <section>
@@ -62,6 +77,776 @@
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ssh2net.core.BaseNetworkDriver"><code class="flex name class">
+<span>class <span class="ident">BaseNetworkDriver</span></span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net BaseNetworkDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BaseNetworkDriver(SSH2Net):
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net BaseNetworkDriver Object
+
+        Args:
+            auth_secondary: password to use for secondary authentication (enable)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        self.auth_secondary = auth_secondary
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = None
+        self.textfsm_platform = None
+
+    def _determine_current_priv(self, current_prompt: str):
+        &#34;&#34;&#34;
+        Determine current privilege level from prompt string
+
+        Args:
+            current_prompt: string of current prompt
+
+        Returns:
+            priv_level: NamedTuple of current privilege level
+
+        Raises:
+            UnknownPrivLevel: if privilege level cannot be determined  # noqa
+            # NOTE: darglint raises DAR401 for some reason hence the noqa...
+
+        &#34;&#34;&#34;
+        for priv_level in self.privs.values():
+            if re.search(priv_level.pattern, current_prompt):
+                return priv_level
+        raise UnknownPrivLevel
+
+    def _escalate(self) -&gt; None:
+        &#34;&#34;&#34;
+        Escalate to the next privilege level up
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        current_priv = self._determine_current_priv(self.get_prompt())
+        if current_priv.escalate:
+            if current_priv.escalate_auth:
+                self.send_inputs_interact(
+                    (
+                        current_priv.escalate,
+                        current_priv.escalate_prompt,
+                        self.auth_enable,
+                        self.privs.get(&#34;escalate_priv&#34;),
+                    ),
+                    hidden_response=True,
+                )
+            else:
+                self.send_inputs(current_priv.escalate)
+
+    def _deescalate(self) -&gt; None:
+        &#34;&#34;&#34;
+        Deescalate to the next privilege level down
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        current_priv = self._determine_current_priv(self.get_prompt())
+        if current_priv.deescalate:
+            self.send_inputs(current_priv.deescalate)
+
+    def acquire_priv(self, desired_priv) -&gt; None:
+        &#34;&#34;&#34;
+        Acquire desired priv level
+
+        Args:
+            desired_priv: string name of desired privilege level
+                (see ssh2net.core.&lt;device_type&gt;.driver for levels)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            CouldNotAcquirePrivLevel: if requested priv level not attained
+
+        &#34;&#34;&#34;
+        priv_attempt_counter = 0
+        while True:
+            current_priv = self._determine_current_priv(self.get_prompt())
+            if current_priv == self.privs[desired_priv]:
+                return
+            elif priv_attempt_counter &gt; len(self.privs):
+                raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+
+            if current_priv.level &gt; self.privs[desired_priv].level:
+                self._deescalate()
+            else:
+                self._escalate()
+            priv_attempt_counter += 1
+
+    def send_command(self, commands):
+        &#34;&#34;&#34;
+        Send command(s)
+
+        Args:
+            commands: string or list of strings to send to device in privilege exec mode
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        self.acquire_priv(self.default_desired_priv)
+        result = self.send_inputs(commands)
+        return result
+
+    def send_config_set(self, configs):
+        &#34;&#34;&#34;
+        Send configuration(s)
+
+        Args:
+            configs: string or list of strings to send to device in config mode
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        self.acquire_priv(&#34;configuration&#34;)
+        result = self.send_inputs(configs)
+        self.acquire_priv(self.default_desired_priv)
+        return result
+
+    def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+        &#34;&#34;&#34;
+        Parse output with TextFSM and ntc-templates
+
+        Args:
+            command: command used to get output
+            output: output from command
+
+        Returns:
+            output: parsed output
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        template = _textfsm_get_template(self.textfsm_platform, command)
+        if template:
+            output = textfsm_parse(template, output)
+        return output</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.arista_eos.driver.EOSDriver" href="arista_eos/driver.html#ssh2net.core.arista_eos.driver.EOSDriver">EOSDriver</a></li>
+<li><a title="ssh2net.core.cisco_iosxe.driver.IOSXEDriver" href="cisco_iosxe/driver.html#ssh2net.core.cisco_iosxe.driver.IOSXEDriver">IOSXEDriver</a></li>
+<li><a title="ssh2net.core.cisco_iosxr.driver.IOSXRDriver" href="cisco_iosxr/driver.html#ssh2net.core.cisco_iosxr.driver.IOSXRDriver">IOSXRDriver</a></li>
+<li><a title="ssh2net.core.cisco_nxos.driver.NXOSDriver" href="cisco_nxos/driver.html#ssh2net.core.cisco_nxos.driver.NXOSDriver">NXOSDriver</a></li>
+<li><a title="ssh2net.core.juniper_junos.driver.JunosDriver" href="juniper_junos/driver.html#ssh2net.core.juniper_junos.driver.JunosDriver">JunosDriver</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="ssh2net.core.BaseNetworkDriver.acquire_priv"><code class="name flex">
+<span>def <span class="ident">acquire_priv</span></span>(<span>self, desired_priv)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Acquire desired priv level</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>desired_priv</code></strong></dt>
+<dd>string name of desired privilege level
+(see ssh2net.core.<device_type>.driver for levels)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>CouldNotAcquirePrivLevel</code></strong></dt>
+<dd>if requested priv level not attained</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def acquire_priv(self, desired_priv) -&gt; None:
+    &#34;&#34;&#34;
+    Acquire desired priv level
+
+    Args:
+        desired_priv: string name of desired privilege level
+            (see ssh2net.core.&lt;device_type&gt;.driver for levels)
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        CouldNotAcquirePrivLevel: if requested priv level not attained
+
+    &#34;&#34;&#34;
+    priv_attempt_counter = 0
+    while True:
+        current_priv = self._determine_current_priv(self.get_prompt())
+        if current_priv == self.privs[desired_priv]:
+            return
+        elif priv_attempt_counter &gt; len(self.privs):
+            raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+
+        if current_priv.level &gt; self.privs[desired_priv].level:
+            self._deescalate()
+        else:
+            self._escalate()
+        priv_attempt_counter += 1</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.core.BaseNetworkDriver.send_command"><code class="name flex">
+<span>def <span class="ident">send_command</span></span>(<span>self, commands)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Send command(s)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>commands</code></strong></dt>
+<dd>string or list of strings to send to device in privilege exec mode</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_command(self, commands):
+    &#34;&#34;&#34;
+    Send command(s)
+
+    Args:
+        commands: string or list of strings to send to device in privilege exec mode
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    self.acquire_priv(self.default_desired_priv)
+    result = self.send_inputs(commands)
+    return result</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.core.BaseNetworkDriver.send_config_set"><code class="name flex">
+<span>def <span class="ident">send_config_set</span></span>(<span>self, configs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Send configuration(s)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>configs</code></strong></dt>
+<dd>string or list of strings to send to device in config mode</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_config_set(self, configs):
+    &#34;&#34;&#34;
+    Send configuration(s)
+
+    Args:
+        configs: string or list of strings to send to device in config mode
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    self.acquire_priv(&#34;configuration&#34;)
+    result = self.send_inputs(configs)
+    self.acquire_priv(self.default_desired_priv)
+    return result</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.core.BaseNetworkDriver.textfsm_parse_output"><code class="name flex">
+<span>def <span class="ident">textfsm_parse_output</span></span>(<span>self, command, output)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse output with TextFSM and ntc-templates</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>command</code></strong></dt>
+<dd>command used to get output</dd>
+<dt><strong><code>output</code></strong></dt>
+<dd>output from command</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>output</code></strong></dt>
+<dd>parsed output</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+    &#34;&#34;&#34;
+    Parse output with TextFSM and ntc-templates
+
+    Args:
+        command: command used to get output
+        output: output from command
+
+    Returns:
+        output: parsed output
+
+    Raises:
+        N/A  # noqa
+    &#34;&#34;&#34;
+    template = _textfsm_get_template(self.textfsm_platform, command)
+    if template:
+        output = textfsm_parse(template, output)
+    return output</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.base.SSH2Net.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.send_inputs_interact" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.core.EOSDriver"><code class="flex name class">
+<span>class <span class="ident">EOSDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net EOSDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EOSDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net EOSDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;privilege_exec&#34;
+        self.textfsm_platform = &#34;arista_eos&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.core.IOSXEDriver"><code class="flex name class">
+<span>class <span class="ident">IOSXEDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class IOSXEDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net IOSXEDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;privilege_exec&#34;
+        self.textfsm_platform = &#34;cisco_ios&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.core.IOSXRDriver"><code class="flex name class">
+<span>class <span class="ident">IOSXRDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net IOSXRDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class IOSXRDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net IOSXRDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;privilege_exec&#34;
+        self.textfsm_platform = &#34;cisco_xr&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.core.JunosDriver"><code class="flex name class">
+<span>class <span class="ident">JunosDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class JunosDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net IOSXEDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;exec&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="ssh2net.core.NXOSDriver"><code class="flex name class">
+<span>class <span class="ident">NXOSDriver</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize SSH2Net NXOSDriver Object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NXOSDriver(BaseNetworkDriver):
+    def __init__(self, **kwargs: Dict[str, Any]):
+        &#34;&#34;&#34;
+        Initialize SSH2Net NXOSDriver Object
+
+        Args:
+            **kwargs: keyword args to pass to inherited class(es)
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+        &#34;&#34;&#34;
+        super().__init__(**kwargs)
+        self.privs = PRIVS
+        self.default_desired_priv = &#34;privilege_exec&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
+<li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_inputs_interact" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -85,11 +870,39 @@
 <li><code><a title="ssh2net.core.juniper_junos" href="juniper_junos/index.html">ssh2net.core.juniper_junos</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ssh2net.core.BaseNetworkDriver" href="#ssh2net.core.BaseNetworkDriver">BaseNetworkDriver</a></code></h4>
+<ul class="">
+<li><code><a title="ssh2net.core.BaseNetworkDriver.acquire_priv" href="#ssh2net.core.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
+<li><code><a title="ssh2net.core.BaseNetworkDriver.send_command" href="#ssh2net.core.BaseNetworkDriver.send_command">send_command</a></code></li>
+<li><code><a title="ssh2net.core.BaseNetworkDriver.send_config_set" href="#ssh2net.core.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.BaseNetworkDriver.textfsm_parse_output" href="#ssh2net.core.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="ssh2net.core.EOSDriver" href="#ssh2net.core.EOSDriver">EOSDriver</a></code></h4>
+</li>
+<li>
+<h4><code><a title="ssh2net.core.IOSXEDriver" href="#ssh2net.core.IOSXEDriver">IOSXEDriver</a></code></h4>
+</li>
+<li>
+<h4><code><a title="ssh2net.core.IOSXRDriver" href="#ssh2net.core.IOSXRDriver">IOSXRDriver</a></code></h4>
+</li>
+<li>
+<h4><code><a title="ssh2net.core.JunosDriver" href="#ssh2net.core.JunosDriver">JunosDriver</a></code></h4>
+</li>
+<li>
+<h4><code><a title="ssh2net.core.NXOSDriver" href="#ssh2net.core.NXOSDriver">NXOSDriver</a></code></h4>
+</li>
+</ul>
+</li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

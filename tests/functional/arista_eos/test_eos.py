@@ -8,13 +8,13 @@ import ssh2net
 
 TEST_DEVICE = {"setup_host": "172.18.0.14", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
-dummy_conn = ssh2net.IOSXEDriver(**TEST_DEVICE)
+dummy_conn = ssh2net.core.IOSXEDriver(**TEST_DEVICE)
 PRIV_LEVELS = dummy_conn.privs
 
 
 class TestEOS(BaseFunctionalTest):
     def setup_method(self):
-        self.platform_driver = ssh2net.EOSDriver
+        self.platform_driver = ssh2net.core.EOSDriver
 
         self.device_type = Path(__file__).resolve().parts[-2]
         self.func_test_dir = (

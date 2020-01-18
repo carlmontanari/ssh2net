@@ -5,7 +5,6 @@ import logging
 from threading import Lock
 import time
 
-
 from ssh2net.channel import SSH2NetChannel
 from ssh2net.session_miko import SSH2NetSessionParamiko
 from ssh2net.session_ssh2 import SSH2NetSessionSSH2
@@ -139,39 +138,22 @@ class SSH2NetSession(SSH2NetChannel):
 
         """
         if self.setup_use_paramiko is False:
-            ssh2_session_obj = SSH2NetSessionSSH2(self)
-            self._session_open_connect = (
-                ssh2_session_obj._session_open_connect  # pylint: disable=W0212
-            )
-            self._session_public_key_auth = (
-                ssh2_session_obj._session_public_key_auth  # pylint: disable=W0212
-            )
-            self._session_password_auth = (
-                ssh2_session_obj._session_password_auth  # pylint: disable=W0212
-            )
-            self._channel_open_driver = (
-                ssh2_session_obj._channel_open_driver  # pylint: disable=W0212
-            )
-            self._channel_invoke_shell = (
-                ssh2_session_obj._channel_invoke_shell  # pylint: disable=W0212
-            )
+            driver_session_obj = SSH2NetSessionSSH2(self)
         else:
-            miko_sesion_obj = SSH2NetSessionParamiko(self)
-            self._session_open_connect = (
-                miko_sesion_obj._session_open_connect  # pylint: disable=W0212
-            )
-            self._session_public_key_auth = (
-                miko_sesion_obj._session_public_key_auth  # pylint: disable=W0212
-            )
-            self._session_password_auth = (
-                miko_sesion_obj._session_password_auth  # pylint: disable=W0212
-            )
-            self._channel_open_driver = (
-                miko_sesion_obj._channel_open_driver  # pylint: disable=W0212
-            )
-            self._channel_invoke_shell = (
-                miko_sesion_obj._channel_invoke_shell  # pylint: disable=W0212
-            )
+            driver_session_obj = SSH2NetSessionParamiko(self)
+        self._session_open_connect = (
+            driver_session_obj._session_open_connect  # pylint: disable=W0212
+        )
+        self._session_public_key_auth = (
+            driver_session_obj._session_public_key_auth  # pylint: disable=W0212
+        )
+        self._session_password_auth = (
+            driver_session_obj._session_password_auth  # pylint: disable=W0212
+        )
+        self._channel_open_driver = driver_session_obj._channel_open_driver  # pylint: disable=W0212
+        self._channel_invoke_shell = (
+            driver_session_obj._channel_invoke_shell  # pylint: disable=W0212
+        )
 
         if not self._socket_alive():
             self._socket_open()

@@ -8,7 +8,7 @@ import ssh2net
 
 TEST_DEVICE = {"setup_host": "172.18.0.12", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
-dummy_conn = ssh2net.NXOSDriver(**TEST_DEVICE)
+dummy_conn = ssh2net.core.NXOSDriver(**TEST_DEVICE)
 PRIV_LEVELS = dummy_conn.privs
 # remove exec priv level as it is not configured on the vrnetlab host for testing
 PRIV_LEVELS.pop("exec")
@@ -16,7 +16,7 @@ PRIV_LEVELS.pop("exec")
 
 class TestNXOS(BaseFunctionalTest):
     def setup_method(self):
-        self.platform_driver = ssh2net.NXOSDriver
+        self.platform_driver = ssh2net.core.NXOSDriver
 
         self.device_type = Path(__file__).resolve().parts[-2]
         self.func_test_dir = (

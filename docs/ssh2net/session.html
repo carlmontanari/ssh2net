@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>ssh2net.session API documentation</title>
 <meta name="description" content="ssh2net.session" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -31,7 +31,6 @@ from datetime import datetime
 import logging
 from threading import Lock
 import time
-
 
 from ssh2net.channel import SSH2NetChannel
 from ssh2net.session_miko import SSH2NetSessionParamiko
@@ -166,39 +165,22 @@ class SSH2NetSession(SSH2NetChannel):
 
         &#34;&#34;&#34;
         if self.setup_use_paramiko is False:
-            ssh2_session_obj = SSH2NetSessionSSH2(self)
-            self._session_open_connect = (
-                ssh2_session_obj._session_open_connect  # pylint: disable=W0212
-            )
-            self._session_public_key_auth = (
-                ssh2_session_obj._session_public_key_auth  # pylint: disable=W0212
-            )
-            self._session_password_auth = (
-                ssh2_session_obj._session_password_auth  # pylint: disable=W0212
-            )
-            self._channel_open_driver = (
-                ssh2_session_obj._channel_open_driver  # pylint: disable=W0212
-            )
-            self._channel_invoke_shell = (
-                ssh2_session_obj._channel_invoke_shell  # pylint: disable=W0212
-            )
+            driver_session_obj = SSH2NetSessionSSH2(self)
         else:
-            miko_sesion_obj = SSH2NetSessionParamiko(self)
-            self._session_open_connect = (
-                miko_sesion_obj._session_open_connect  # pylint: disable=W0212
-            )
-            self._session_public_key_auth = (
-                miko_sesion_obj._session_public_key_auth  # pylint: disable=W0212
-            )
-            self._session_password_auth = (
-                miko_sesion_obj._session_password_auth  # pylint: disable=W0212
-            )
-            self._channel_open_driver = (
-                miko_sesion_obj._channel_open_driver  # pylint: disable=W0212
-            )
-            self._channel_invoke_shell = (
-                miko_sesion_obj._channel_invoke_shell  # pylint: disable=W0212
-            )
+            driver_session_obj = SSH2NetSessionParamiko(self)
+        self._session_open_connect = (
+            driver_session_obj._session_open_connect  # pylint: disable=W0212
+        )
+        self._session_public_key_auth = (
+            driver_session_obj._session_public_key_auth  # pylint: disable=W0212
+        )
+        self._session_password_auth = (
+            driver_session_obj._session_password_auth  # pylint: disable=W0212
+        )
+        self._channel_open_driver = driver_session_obj._channel_open_driver  # pylint: disable=W0212
+        self._channel_invoke_shell = (
+            driver_session_obj._channel_invoke_shell  # pylint: disable=W0212
+        )
 
         if not self._socket_alive():
             self._socket_open()
@@ -331,7 +313,6 @@ class SSH2NetSession(SSH2NetChannel):
 <dl>
 <dt id="ssh2net.session.SSH2NetSession"><code class="flex name class">
 <span>class <span class="ident">SSH2NetSession</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -467,39 +448,22 @@ class SSH2NetSession(SSH2NetChannel):
 
         &#34;&#34;&#34;
         if self.setup_use_paramiko is False:
-            ssh2_session_obj = SSH2NetSessionSSH2(self)
-            self._session_open_connect = (
-                ssh2_session_obj._session_open_connect  # pylint: disable=W0212
-            )
-            self._session_public_key_auth = (
-                ssh2_session_obj._session_public_key_auth  # pylint: disable=W0212
-            )
-            self._session_password_auth = (
-                ssh2_session_obj._session_password_auth  # pylint: disable=W0212
-            )
-            self._channel_open_driver = (
-                ssh2_session_obj._channel_open_driver  # pylint: disable=W0212
-            )
-            self._channel_invoke_shell = (
-                ssh2_session_obj._channel_invoke_shell  # pylint: disable=W0212
-            )
+            driver_session_obj = SSH2NetSessionSSH2(self)
         else:
-            miko_sesion_obj = SSH2NetSessionParamiko(self)
-            self._session_open_connect = (
-                miko_sesion_obj._session_open_connect  # pylint: disable=W0212
-            )
-            self._session_public_key_auth = (
-                miko_sesion_obj._session_public_key_auth  # pylint: disable=W0212
-            )
-            self._session_password_auth = (
-                miko_sesion_obj._session_password_auth  # pylint: disable=W0212
-            )
-            self._channel_open_driver = (
-                miko_sesion_obj._channel_open_driver  # pylint: disable=W0212
-            )
-            self._channel_invoke_shell = (
-                miko_sesion_obj._channel_invoke_shell  # pylint: disable=W0212
-            )
+            driver_session_obj = SSH2NetSessionParamiko(self)
+        self._session_open_connect = (
+            driver_session_obj._session_open_connect  # pylint: disable=W0212
+        )
+        self._session_public_key_auth = (
+            driver_session_obj._session_public_key_auth  # pylint: disable=W0212
+        )
+        self._session_password_auth = (
+            driver_session_obj._session_password_auth  # pylint: disable=W0212
+        )
+        self._channel_open_driver = driver_session_obj._channel_open_driver  # pylint: disable=W0212
+        self._channel_invoke_shell = (
+            driver_session_obj._channel_invoke_shell  # pylint: disable=W0212
+        )
 
         if not self._socket_alive():
             self._socket_open()
@@ -665,7 +629,7 @@ class SSH2NetSession(SSH2NetChannel):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
