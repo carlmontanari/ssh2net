@@ -1,6 +1,6 @@
 """ssh2net.response"""
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 
 class SSH2NetResult:
@@ -38,15 +38,15 @@ class SSH2NetResult:
         """
         self.host = host
         self.start_time = datetime.now()
-        self.finish_time = None
-        self.elapsed_time = None
+        self.finish_time: Optional[datetime] = None
+        self.elapsed_time: Optional[float] = None
 
         self.channel_input = channel_input
         self.expectation = expectation
         self.response = response
         self.finale = finale
-        self.result = None
-        self.structured_result = None
+        self.result: Optional[str] = None
+        self.structured_result: Optional[Union[Dict, List]] = None
 
         # for future use -- could add failed when terms in each driver, then check for those strings
         # in results to determine if the command failed, could also set this at send_inputs level

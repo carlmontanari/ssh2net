@@ -214,6 +214,6 @@ class BaseNetworkDriver(SSH2Net):
         template = _textfsm_get_template(self.textfsm_platform, command)
         if template:
             output = textfsm_parse(template, output)
-        if isinstance(output, dict) or isinstance(output, list):
+        if isinstance(output, (dict, list)):
             return output
         return {}

@@ -51,14 +51,14 @@ remove_delay_dev_env:
 	tc qdisc del dev br_ssh2net root
 
 test_unit:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
 	tests/unit/.
 
 test_functional:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
@@ -66,14 +66,14 @@ test_functional:
 	--ignore tests/functional/comparison_tests
 
 test_all:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
 	tests/.
 
 test_iosxe:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
@@ -81,7 +81,7 @@ test_iosxe:
 	tests/functional/cisco_iosxe
 
 test_nxos:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
@@ -89,7 +89,7 @@ test_nxos:
 	tests/functional/cisco_nxos
 
 test_iosxr:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
@@ -97,7 +97,7 @@ test_iosxr:
 	tests/functional/cisco_iosxr
 
 test_junos:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
@@ -105,7 +105,7 @@ test_junos:
 	tests/functional/juniper_junos
 
 test_eos:
-	python -m pytest \
+	python -m pytest -v \
 	--cov=ssh2net \
 	--cov-report html \
 	--cov-report term \
