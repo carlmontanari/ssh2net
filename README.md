@@ -18,6 +18,29 @@ ssh2net is focused on being lightweight and pluggable so that it *should* be fle
  connecting to, sending commands to, and reading output from most any network device with a traditional SSH driven CLI.
 
 
+# Table of Contents
+
+- [Documentation](#documentation)
+- [Supported Platforms](#supported-platforms)
+- [Installation](#installation)
+- [Examples Links](#examples-links)
+- [Basic Usage](#basic-usage)
+  - [Native and Platform Drivers Examples](#native-and-platform-drivers-examples)
+  - [Platform Regex](#platform-regex)
+  - [Basic Operations -- Sending and Receiving](#basic-operations----sending-and-receiving)
+  - [Result Objects](#result-objects)
+  - [Handling Prompts](#handling-prompts)
+  - [Driver Privilege Levels](#driver-privilege-levels)
+  - [Sending Configurations](#sending-configurations)
+  - [TextFSM/NTC-Templates Integration](#textfsmntc-templates-integration)
+  - [Timeouts](#timeouts)
+  - [Disabling Paging](#disabling-paging)
+  - [Login Handlers](#login-handlers)
+  - [SSH Config Support](#ssh-config-support)
+- [FAQ](#faq)
+- [Linting and Testing](#linting-and-testing)
+
+
 # Documentation
 
 Documentation is auto-generated [using pdoc3](https://github.com/pdoc3/pdoc). Documentation is linted (see Linting and Testing section) via [pydocstyle](https://github.com/PyCQA/pydocstyle/) and [darglint](https://github.com/terrencepreilly/darglint).
@@ -46,13 +69,9 @@ On top of the "base" class ssh2net has the concept of "drivers" -- pretty much e
   device specific functionality such as privilege escalation/de-escalation, setting appropriate prompts to search for
   , and picking out appropriate [ntc templates](https://github.com/napalm-automation/napalm) for use with TextFSM. 
   
-At the moment there are five "core" drivers representing the most common networking platforms, however in the future
- it would be possible for folks to contribute additional "community" drivers. It is unlikely that any additional
-  "core" platforms would be added at the moment.
-
-## Core Drivers
-
-The following platforms are considered "core":
+At the moment there are five "core" drivers representing the most common networking platforms (outlined below)
+, however in the future it would be possible for folks to contribute additional "community" drivers. It is unlikely
+ that any additional "core" platforms would be added at the moment.
 
 - Cisco IOS-XE (tested on: 16.04.01)
 - Cisco NX-OS (tested on: 9.2.4)
@@ -68,6 +87,43 @@ The following platforms are considered "core":
 The goal for all "core" devices will be to include functional tests that can run against [vrnetlab](https://github.com/plajjan/vrnetlab) containers to
  ensure that the "core" devices are as thoroughly tested as is practical. 
 
+
+# Installation
+
+You should be able to pip install it "normally":
+
+```
+pip install ssh2net
+```
+
+To install from this repositories master branch:
+
+```
+pip install git+https://github.com/carlmontanari/ssh2net
+```
+
+To install from source:
+
+```
+git clone https://github.com/carlmontanari/ssh2net
+cd ssh2net
+python setup.py install
+```
+
+As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and Ubuntu regularly and should work on any POSIX system. It has had minimal testing on Windows, however I have no plans on supporting Windows as I don't have access or desire to do so. In general I believe everything other than the TextFSM support should work though!
+
+
+# Examples Links
+
+- [Basic "native" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_native_style.py)
+- [Basic "driver" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_driver_style.py)
+- [Basic "ConnectHandler" (i.e. Netmiko) SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_connecthandler_style.py)
+- [Setting session and channel logging](/examples/logging/session_and_channel_log_diff_files.py)
+- [Using SSH Key for authentication](/examples/ssh_keys/ssh_key_basic.py)
+
+
+# Basic Usage
+
 ## Native and Platform Drivers Examples
 
 Example SSH2Net "native/base" connection:
@@ -75,7 +131,7 @@ Example SSH2Net "native/base" connection:
 ```python
 from ssh2net import SSH2Net
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 conn = SSH2Net(**my_device)
 conn.open_shell()
 ```
@@ -86,7 +142,7 @@ Example IOS-XE driver setup. This also shows using context manager which is also
 ```python
 from ssh2net.core import IOSXEDriver
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 with IOSXEDriver(**my_device) as conn:
     print(conn)
     # do stuff!
@@ -131,10 +187,10 @@ Sending inputs and receiving outputs all ultimately is done through the base SSH
 ```python
 from ssh2net import SSH2Net
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 with SSH2Net(**my_device) as conn:
-    output = conn.send_inputs("show version")
-    outputs = conn.send_inputs(("show version", "show run"))
+    results = conn.send_inputs("show version")
+    results = conn.send_inputs(("show version", "show run"))
 ```
 
 When using a network "driver", it is more desirable to use the `send_commands` method to send commands (commands that
@@ -145,10 +201,10 @@ When using a network "driver", it is more desirable to use the `send_commands` m
 ```python
 from ssh2net.core import IOSXEDriver
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 with IOSXEDriver(**my_device) as conn:
-    output = conn.send_commands("show version")
-    outputs = conn.send_inputs(("show version", "show run"))
+    results = conn.send_commands("show version")
+    results = conn.send_inputs(("show version", "show run"))
 ```
 
 
@@ -161,11 +217,11 @@ The `send_inputs` method (used directly, or via `send_commands` in a network dri
 ```python
 from ssh2net.core import IOSXEDriver
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 with IOSXEDriver(**my_device) as conn:
-    output = conn.send_commands("show version")
-    print(output[0].elapsed_time)
-    print(output[0].result)
+    results = conn.send_commands("show version")
+    print(results[0].elapsed_time)
+    print(results[0].result)
 ```
 
 
@@ -181,7 +237,7 @@ In some cases you may need to run an "interactive" command on your device. The `
 ```python
 from ssh2net.core import IOSXEDriver
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 interact = ["clear logging", "Clear logging buffer [confirm]", "\n"]
 
 with IOSXEDriver(**my_device) as conn:
@@ -224,7 +280,7 @@ If you wish to manually enter a privilege level you can use the `acquire_priv` m
 ```python
 from ssh2net.core import IOSXEDriver
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 interact = ["clear logging", "Clear logging buffer [confirm]", "\n"]
 
 with IOSXEDriver(**my_device) as conn:
@@ -244,7 +300,7 @@ When using any of the core drivers, you can send configurations via the `send_co
 ```python
 from ssh2net.core import IOSXEDriver
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 interact = ["clear logging", "Clear logging buffer [confirm]", "\n"]
 
 with IOSXEDriver(**my_device) as conn:
@@ -254,23 +310,45 @@ with IOSXEDriver(**my_device) as conn:
 
 ## TextFSM/NTC-Templates Integration
 
-ssh2net supports parsing output with TextFSM. This of course requires installing TextFSM and ntc-templates. At the
- moment ssh2net only supports ntc-templates as installed by pip, however this could be updated to handle manually
-  cloned ntc-templates fairly easily.
+ssh2net supports parsing output with TextFSM. This of course requires installing TextFSM and having ntc-templates
+ somewhere on your system. When using a driver you can pass `textfsm=True` to the `send_commands` method to
+  automatically try to parse all output. Parsed/structured output is stored in the `SSH2NetResult` object in the
+   `structured_result` attribute. Alternatively you can use the `textfsm_parse_output` method of the driver to parse
+    output in a more manual fashion. This method accepts the string command (channel_input) and the text result and
+     returns structured data; the driver is already configured with the ntc-templates device type to find the correct
+      template. 
 
 ```python
 from ssh2net.core import IOSXEDriver
 
-my_device = {"setup_host": "1.2.3.4", "auth_user": "person", "auth_password": "password"}
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 interact = ["clear logging", "Clear logging buffer [confirm]", "\n"]
 
 with IOSXEDriver(**my_device) as conn:
-    output = conn.send_command("show version")
-    structured_output = conn.textfsm_parse_output("show version", output[0].result)
+    results = conn.send_commands("show version", textfsm_parse=True)
+    print(results[0].structured_result)
+    # or parse manually...
+    results = conn.send_command("show version")
+    structured_output = conn.textfsm_parse_output("show version", results[0].result)
 ```
 
-*NOTE*: at the moment if a template does not return structured data, the original text is returned, this will change
- in the near future to return an empty dict or something else to more clearly indicate that parsing the data failed.
+ssh2net also supports passing in templates manually (meaning not using the pip installed ntc-templates directory to
+ find templates) if desired. The `ssh2net.helper.textfsm_parse` function accepts a string or loaded (TextIOWrapper
+ ) template and output to parse. This can be useful if you have custom or one off templates or don't want to pip
+  install ntc-templates.
+  
+```python
+from ssh2net import SSH2Net
+from ssh2net.helper import textfsm_parse
+
+my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
+
+with SSH2Net(**my_device) as conn:
+    results = conn.send_inputs("show version")
+    structured_result = textfsm_parse("/path/to/my/template", results[0].result)
+```
+
+*NOTE*: If a template does not return structured data an empty dict will be returned!
 
 
 ## Timeouts
@@ -278,20 +356,19 @@ with IOSXEDriver(**my_device) as conn:
 ssh2net supports three different timeout settings.
 
 1. `setup_timeout`:
-  - This governs the underlying socket timeout and is set in seconds.
+    - This governs the underlying socket timeout and is set in seconds.
 2. `session_timeout`:
-  - This governs the time in milliseconds for each read operation.
-  - This is basically the ssh2-python or paramiko timeout setting. If there is no response from the remote device for
+    - This governs the time in milliseconds for each read operation.
+    - This is basically the ssh2-python or paramiko timeout setting. If there is no response from the remote device for
    this duration the underlying driver will raise a timeout.
-  - When this timer expires a decorator will catch the exception raised from the driver and a basic backoff algorithm
+    - When this timer expires a decorator will catch the exception raised from the driver and a basic backoff algorithm
    is triggered. This algorithm will retry five times with a starting delay of 0.1 and a backoff of 2 seconds.
-    - Set this timer with this in mind, or just leave the default which seems to work well enough!
-  - If setting this to `0` the sessions are blocking and will be "forever" (with the caveat that the following
+      - Set this timer with this in mind, or just leave the default which seems to work well enough!
+    - If setting this to `0` the sessions are blocking and will be "forever" (with the caveat that the following
     timeout will also raise an exception if set!)
 3. `comms_operation_timeout`:
-  - This governs the timeout for any given "operation" -- where an operation is any command being sent via
+    - This governs the timeout for any given "operation" -- where an operation is any command being sent via
    `send_inputs` or `send_inputs_interact`
-
 
 
 ## Disabling Paging
@@ -343,41 +420,6 @@ with IOSXEDriver(**my_device) as conn:
 ```
 
 *Note* In this case I have user and identity file configured so I can ignore passing those arguments to the driver.
-
-
-# Installation
-
-
-You should be able to pip install it "normally":
-
-```
-pip install ssh2net
-```
-
-To install from this repositories master branch:
-
-```
-pip install git+https://github.com/carlmontanari/ssh2net
-```
-
-To install from source:
-
-```
-git clone https://github.com/carlmontanari/ssh2net
-cd ssh2net
-python setup.py install
-```
-
-As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and Ubuntu regularly and should work on any POSIX system. It has had minimal testing on Windows, however I have no plans on supporting Windows as I don't have access or desire to do so. In general I believe everything other than the TextFSM support should work though!
-
-
-# Examples
-
-- [Basic "native" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_native_style.py)
-- [Basic "driver" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_driver_style.py)
-- [Basic "ConnectHandler" (i.e. Netmiko) SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_connecthandler_style.py)
-- [Setting session and channel logging](/examples/logging/session_and_channel_log_diff_files.py)
-- [Using SSH Key for authentication](/examples/ssh_keys/ssh_key_basic.py)
 
 
 # FAQ

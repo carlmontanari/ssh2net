@@ -115,8 +115,8 @@ class SSH2NetChannel:
         channel_log.debug(f"Read: {repr(output)}")
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
-        self.channel.write(self.comms_return_char)
         channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
+        self.channel.write(self.comms_return_char)
 
     @channel_timeout(Timeout)
     def _read_until_prompt(self, output=None, prompt=None):
@@ -191,13 +191,13 @@ class SSH2NetChannel:
 
         """
         self._acquire_session_lock()
-        result = SSH2NetResult(channel_input)
+        result = SSH2NetResult(self.host, channel_input)
         session_log.debug(
             f"Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}"
         )
         self.channel.flush()
-        self.channel.write(channel_input)
         channel_log.debug(f"Write: {repr(channel_input)}")
+        self.channel.write(channel_input)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         self.session_lock.release_lock()
@@ -232,7 +232,7 @@ class SSH2NetChannel:
 
         """
         self._acquire_session_lock()
-        result = SSH2NetResult(channel_input)
+        result = SSH2NetResult(self.host, channel_input)
         session_log.debug(
             f"Attempting to send input interact: {channel_input}; "
             f"expecting: {expectation}; responding: {response}; "

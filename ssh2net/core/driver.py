@@ -1,11 +1,12 @@
 """ssh2net.core.driver"""
 import collections
 import re
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ssh2net.base import SSH2Net
 from ssh2net.exceptions import CouldNotAcquirePrivLevel, UnknownPrivLevel
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
+from ssh2net.result import SSH2NetResult
 
 
 PrivilegeLevel = collections.namedtuple(
@@ -143,29 +144,45 @@ class BaseNetworkDriver(SSH2Net):
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_commands(self, commands):
+    def send_commands(
+        self,
+        commands: Union[str, List],
+        strip_prompt: Optional[bool] = True,
+        textfsm: Optional[bool] = False,
+    ) -> List[SSH2NetResult]:
         """
         Send command(s)
 
         Args:
             commands: string or list of strings to send to device in privilege exec mode
+            strip_prompt: True/False strip prompt from returned output
+            textfsm: True/False try to parse each command with textfsm
 
         Returns:
-            N/A  # noqa
+            results: list of SSH2NetResult objects
 
         Raises:
             N/A  # noqa
         """
         self.acquire_priv(self.default_desired_priv)
-        result = self.send_inputs(commands)
-        return result
+        results = self.send_inputs(commands, strip_prompt)
+        if not textfsm:
+            return results
+        for result in results:
+            result.structured_result = self.textfsm_parse_output(
+                result.channel_input, result.result
+            )
+        return results
 
-    def send_configs(self, configs):
+    def send_configs(
+        self, configs: Union[str, List], strip_prompt: Optional[bool] = True
+    ) -> List[SSH2NetResult]:
         """
         Send configuration(s)
 
         Args:
             configs: string or list of strings to send to device in config mode
+            strip_prompt: True/False strip prompt from returned output
 
         Returns:
             N/A  # noqa
@@ -174,13 +191,15 @@ class BaseNetworkDriver(SSH2Net):
             N/A  # noqa
         """
         self.acquire_priv("configuration")
-        result = self.send_inputs(configs)
+        result = self.send_inputs(configs, strip_prompt)
         self.acquire_priv(self.default_desired_priv)
         return result
 
     def textfsm_parse_output(self, command: str, output: str) -> str:
         """
         Parse output with TextFSM and ntc-templates
+
+        Always return a non-string value -- if parsing fails to produce list/dict, return empty dict
 
         Args:
             command: command used to get output
@@ -195,4 +214,6 @@ class BaseNetworkDriver(SSH2Net):
         template = _textfsm_get_template(self.textfsm_platform, command)
         if template:
             output = textfsm_parse(template, output)
-        return output
+        if isinstance(output, dict) or isinstance(output, list):
+            return output
+        return {}

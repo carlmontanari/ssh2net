@@ -6,6 +6,7 @@ from typing import List, Optional
 class SSH2NetResult:
     def __init__(
         self,
+        host: str,
         channel_input: str,
         expectation: Optional[str] = None,
         response: Optional[str] = None,
@@ -19,6 +20,7 @@ class SSH2NetResult:
         determine if command was successful or not and reflect that in a failed attribute.
 
         Args:
+            host: host that was operated on
             channel_input: input that got sent down the channel
             expectation: used for send_inputs_interact -- string to expect back from the channel
                 after initial input
@@ -34,6 +36,7 @@ class SSH2NetResult:
             N/A  # noqa
 
         """
+        self.host = host
         self.start_time = datetime.now()
         self.finish_time = None
         self.elapsed_time = None
@@ -43,6 +46,7 @@ class SSH2NetResult:
         self.response = response
         self.finale = finale
         self.result = None
+        self.structured_result = None
 
         # for future use -- could add failed when terms in each driver, then check for those strings
         # in results to determine if the command failed, could also set this at send_inputs level

@@ -51,15 +51,7 @@ multilink bundle-name authenticated
 !
 !
 !
-crypto pki trustpoint TP-self-signed-2656125433
- enrollment selfsigned
- subject-name cn=IOS-Self-Signed-Certificate-2656125433
- revocation-check none
- rsakeypair TP-self-signed-2656125433
 !
-!
-crypto pki certificate chain TP-self-signed-2656125433
-CRYPTO_REPLACED
 
 
 !
