@@ -23,16 +23,18 @@ PrivilegeLevel = collections.namedtuple(
     "level",
 )
 
-PRIVS = {}
+PRIVS: Dict[str, PrivilegeLevel] = {}
 
 
 class BaseNetworkDriver(SSH2Net):
-    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
+    # Note: don't like the Any for typing here but it did make mypy happy...
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Any):
         """
         Initialize SSH2Net BaseNetworkDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)
+            **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
             N/A  # noqa
@@ -43,8 +45,8 @@ class BaseNetworkDriver(SSH2Net):
         self.auth_secondary = auth_secondary
         super().__init__(**kwargs)
         self.privs = PRIVS
-        self.default_desired_priv = None
-        self.textfsm_platform = None
+        self.default_desired_priv: Optional[str] = None
+        self.textfsm_platform: str = ""
 
     def _determine_current_priv(self, current_prompt: str):
         """
@@ -87,7 +89,7 @@ class BaseNetworkDriver(SSH2Net):
                     (
                         current_priv.escalate,
                         current_priv.escalate_prompt,
-                        self.auth_enable,
+                        self.auth_secondary,
                         self.privs.get("escalate_priv"),
                     ),
                     hidden_response=True,
@@ -195,7 +197,7 @@ class BaseNetworkDriver(SSH2Net):
         self.acquire_priv(self.default_desired_priv)
         return result
 
-    def textfsm_parse_output(self, command: str, output: str) -> str:
+    def textfsm_parse_output(self, command: str, output: str) -> Union[List, Dict[str, Any]]:
         """
         Parse output with TextFSM and ntc-templates
 

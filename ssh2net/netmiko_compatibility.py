@@ -183,7 +183,17 @@ def netmiko_send_command(self, command_string: Union[str, List[str]], **kwargs) 
         warning = "\n" + msg + "\n" + fix + "\n" + msg
         warnings.warn(warning)
 
-    results = self.send_commands(command_string, strip_prompt)
+    if isinstance(command_string, list):
+        err = "netmiko does not support sending list of commands, using only the first command!"
+        msg = f"***** {err} {'*' * (80 - len(err))}"
+        fix = f"To resolve this issue, use native or driver mode with `send_inputs` method."
+        warning = "\n" + msg + "\n" + fix + "\n" + msg
+        warnings.warn(warning)
+        command = command_string[0]
+    else:
+        command = command_string
+
+    results = self.send_commands(command, strip_prompt)
     # netmiko supports sending single commands only and has no "result" object, peel out just result
     result = results[0].result
 
@@ -191,7 +201,7 @@ def netmiko_send_command(self, command_string: Union[str, List[str]], **kwargs) 
         if textfsm_template:
             structured_result = textfsm_parse(textfsm_template, result)
         else:
-            textfsm_template = _textfsm_get_template(self.textfsm_platform, command_string)
+            textfsm_template = _textfsm_get_template(self.textfsm_platform, command)
             structured_result = textfsm_parse(textfsm_template, result)
         # netmiko returns unstructured data if no structured data was generated
         if structured_result:

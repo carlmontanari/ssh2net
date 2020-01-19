@@ -26,7 +26,21 @@ class SSH2NetSessionSSH2:
             N/A  # noqa
 
         """
+        # due to somewhat shitty composition and problematic  multiple inheritance (how do i know to
+        # inherit session_miko vs session_ssh2) we copy the base session object dict to the driver
+        # session object dict. this angers mypy as it doesn't understand/like this darkness, so we
+        # also explicitly map all of the vars that are created at time of instantiating this class
+        # into this class so we have appropriate typing/hinting data... sorry...
         self.__dict__ = p_self.__dict__
+
+        # mypy did not like these being set w/ setattr, so we'll do it manually
+        self.sock = p_self.sock
+        self.host = p_self.host
+        self.auth_user = p_self.auth_user
+        self.auth_password = p_self.auth_password
+        self.auth_public_key = p_self.auth_public_key
+        self.session_timeout = p_self.session_timeout
+
         self._session_alive = p_self._session_alive
         self._session_open = p_self._session_open
         self._channel_alive = p_self._channel_alive

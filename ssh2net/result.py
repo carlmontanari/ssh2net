@@ -45,7 +45,7 @@ class SSH2NetResult:
         self.expectation = expectation
         self.response = response
         self.finale = finale
-        self.result: Optional[str] = None
+        self.result: str = ""
         self.structured_result: Optional[Union[Dict, List]] = None
 
         # for future use -- could add failed when terms in each driver, then check for those strings

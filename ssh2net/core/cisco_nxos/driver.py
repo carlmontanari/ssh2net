@@ -1,6 +1,6 @@
 """ssh2net.core.cisco_nxos.driver"""
 import re
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 
 from ssh2net.core.driver import BaseNetworkDriver, PrivilegeLevel
 
@@ -73,11 +73,12 @@ PRIVS = {
 
 
 class NXOSDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         """
         Initialize SSH2Net NXOSDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -86,6 +87,6 @@ class NXOSDriver(BaseNetworkDriver):
         Raises:
             N/A  # noqa
         """
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = "privilege_exec"

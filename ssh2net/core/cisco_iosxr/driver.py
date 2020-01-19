@@ -1,7 +1,7 @@
 """ssh2net.core.cisco_iosxr.driver"""
 import re
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 
 from ssh2net.core.driver import BaseNetworkDriver, PrivilegeLevel
 
@@ -65,11 +65,12 @@ def comms_pre_login_handler(cls):  # pylint: disable=W0613
 
 
 class IOSXRDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         """
         Initialize SSH2Net IOSXRDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -78,7 +79,7 @@ class IOSXRDriver(BaseNetworkDriver):
         Raises:
             N/A  # noqa
         """
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = "privilege_exec"
         self.textfsm_platform = "cisco_xr"

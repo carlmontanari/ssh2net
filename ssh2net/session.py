@@ -10,6 +10,9 @@ from ssh2net.session_miko import SSH2NetSessionParamiko
 from ssh2net.session_ssh2 import SSH2NetSessionSSH2
 
 
+TRANSPORT_CLASS_SELECTOR = {True: SSH2NetSessionParamiko, False: SSH2NetSessionSSH2}
+
+
 class SSH2NetSession(SSH2NetChannel):
     def _session_alive(self):
         """
@@ -137,10 +140,14 @@ class SSH2NetSession(SSH2NetChannel):
             N/A  # noqa
 
         """
-        if self.setup_use_paramiko is False:
-            driver_session_obj = SSH2NetSessionSSH2(self)
-        else:
-            driver_session_obj = SSH2NetSessionParamiko(self)
+        # setup the socket prior to creating composite transport class so we can point to it in the
+        # child class
+        if not self._socket_alive():
+            self._socket_open()
+
+        driver_session_obj = TRANSPORT_CLASS_SELECTOR.get(self.setup_use_paramiko)(self)
+
+        # assign methods from transport class to this base class
         self._session_open_connect = (
             driver_session_obj._session_open_connect  # pylint: disable=W0212
         )
@@ -155,8 +162,6 @@ class SSH2NetSession(SSH2NetChannel):
             driver_session_obj._channel_invoke_shell  # pylint: disable=W0212
         )
 
-        if not self._socket_alive():
-            self._socket_open()
         if not self._session_alive():
             self._session_open_connect()
 

@@ -21,7 +21,7 @@ session_log = logging.getLogger("ssh2net_session")
 
 class SSH2NetChannel:
     @staticmethod
-    def _rstrip_all_lines(output: bytes) -> str:
+    def _rstrip_all_lines(output: bytes) -> bytes:
         """
         Right strip all lines in provided output
 
@@ -35,9 +35,10 @@ class SSH2NetChannel:
             N/A  # noqa
 
         """
-        output = output.decode("unicode_escape").strip().splitlines()
-        output = [line.rstrip() for line in output]
-        return "\n".join(output)
+        split_output: List[str] = output.decode("unicode_escape").strip().splitlines()
+        split_output = [line.rstrip() for line in split_output]
+        rejoined_output = "\n".join(split_output)
+        return rejoined_output
 
     @staticmethod
     def _strip_ansi(output: bytes) -> bytes:
@@ -73,17 +74,17 @@ class SSH2NetChannel:
             N/A  # noqa
 
         """
-        output = output.splitlines()
+        split_output = output.splitlines()
         # purge empty rows before actual output
-        for row in output.copy():
+        for row in split_output.copy():
             if row == "":
-                output = output[1:]
+                split_output = split_output[1:]
             else:
                 break
 
-        output = "\n".join(output)
+        output = "\n".join(split_output)
         if strip_prompt:
-            # could be compiled somewhere else, btu this allows for users to modify the prompt on
+            # could be compiled somewhere else, but this allows for users to modify the prompt on
             # the fly if they want to
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
             output = re.sub(prompt_pattern, "", output)
@@ -260,7 +261,7 @@ class SSH2NetChannel:
         result.record_result(output)
         return result
 
-    def open_and_execute(self, command: str):
+    def open_and_execute(self, command: str) -> str:
         """
         Open ssh channel and execute a command; closes channel when done.
 
