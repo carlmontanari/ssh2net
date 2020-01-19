@@ -33,4 +33,4 @@ my_device = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_passwor
 with ssh2net.SSH2Net(**my_device) as conn:
     show_run = conn.send_inputs("show run")
 
-print(show_run[0])
+print(show_run[0].result)

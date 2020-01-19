@@ -132,8 +132,10 @@ class BaseNetworkDriver(SSH2Net):
             current_priv = self._determine_current_priv(self.get_prompt())
             if current_priv == self.privs[desired_priv]:
                 return
-            elif priv_attempt_counter > len(self.privs):
-                raise CouldNotAcquirePrivLevel(f"Could not get to '{desired_priv}' privilege level.")
+            if priv_attempt_counter > len(self.privs):
+                raise CouldNotAcquirePrivLevel(
+                    f"Could not get to '{desired_priv}' privilege level."
+                )
 
             if current_priv.level > self.privs[desired_priv].level:
                 self._deescalate()
@@ -141,7 +143,7 @@ class BaseNetworkDriver(SSH2Net):
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_command(self, commands):
+    def send_commands(self, commands):
         """
         Send command(s)
 
@@ -158,7 +160,7 @@ class BaseNetworkDriver(SSH2Net):
         result = self.send_inputs(commands)
         return result
 
-    def send_config_set(self, configs):
+    def send_configs(self, configs):
         """
         Send configuration(s)
 

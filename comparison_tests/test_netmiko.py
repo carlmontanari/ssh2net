@@ -3,7 +3,7 @@ from datetime import datetime
 
 from netmiko import ConnectHandler
 
-import hosts
+from . import hosts
 
 IOSXE_TEST = hosts.IOSXE_TEST
 NXOS_TEST = hosts.NXOS_TEST
@@ -18,7 +18,7 @@ def main():
             print(f"Sending command: '{command}'")
             print("*" * 80)
             command_start_time = datetime.now()
-            r = conn.send_command(command)
+            r = conn.send_commands(command)
             command_end_time = datetime.now()
             print(r)
             print("*" * 80)

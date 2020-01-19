@@ -219,14 +219,40 @@ class SSH2NetSessionParamiko:
             else:
                 return
 
-    def _set_blocking(self, blocking):
-        # TODO -- Add docstring
-        # need to reset timeout because it seems paramiko sets it to 0 if you set to non blocking
-        # paramiko uses seconds instead of ms
+    def _set_blocking(self, blocking) -> None:
+        """
+        Set blocking and timeout values for underlying Paramiko driver
+
+        When setting paramiko to non-blocking paramiko resets the timeout to 0, so we also reset
+        timeout whenever we set blocking. Convert milliseconds to seconds for Paramiko.
+
+        Args:
+            blocking:
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
         self.channel.setblocking(blocking)
         self.channel.settimeout(self.session_timeout / 1000)
 
-    def _set_timeout(self, timeout):
-        # TODO -- Add docstring
-        # paramiko uses seconds instead of ms
+    def _set_timeout(self, timeout: int) -> None:
+        """
+        Set timeout for Paramiko driver.
+
+        Convert milliseconds to seconds for Paramiko.
+
+        Args:
+            timeout: timeout in milliseconds
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
         self.channel.settimeout(timeout / 1000)

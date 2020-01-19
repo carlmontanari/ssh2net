@@ -159,8 +159,10 @@ class BaseNetworkDriver(SSH2Net):
             current_priv = self._determine_current_priv(self.get_prompt())
             if current_priv == self.privs[desired_priv]:
                 return
-            elif priv_attempt_counter &gt; len(self.privs):
-                raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+            if priv_attempt_counter &gt; len(self.privs):
+                raise CouldNotAcquirePrivLevel(
+                    f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;
+                )
 
             if current_priv.level &gt; self.privs[desired_priv].level:
                 self._deescalate()
@@ -168,7 +170,7 @@ class BaseNetworkDriver(SSH2Net):
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_command(self, commands):
+    def send_commands(self, commands):
         &#34;&#34;&#34;
         Send command(s)
 
@@ -185,7 +187,7 @@ class BaseNetworkDriver(SSH2Net):
         result = self.send_inputs(commands)
         return result
 
-    def send_config_set(self, configs):
+    def send_configs(self, configs):
         &#34;&#34;&#34;
         Send configuration(s)
 
@@ -366,8 +368,10 @@ class BaseNetworkDriver(SSH2Net):
             current_priv = self._determine_current_priv(self.get_prompt())
             if current_priv == self.privs[desired_priv]:
                 return
-            elif priv_attempt_counter &gt; len(self.privs):
-                raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+            if priv_attempt_counter &gt; len(self.privs):
+                raise CouldNotAcquirePrivLevel(
+                    f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;
+                )
 
             if current_priv.level &gt; self.privs[desired_priv].level:
                 self._deescalate()
@@ -375,7 +379,7 @@ class BaseNetworkDriver(SSH2Net):
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_command(self, commands):
+    def send_commands(self, commands):
         &#34;&#34;&#34;
         Send command(s)
 
@@ -392,7 +396,7 @@ class BaseNetworkDriver(SSH2Net):
         result = self.send_inputs(commands)
         return result
 
-    def send_config_set(self, configs):
+    def send_configs(self, configs):
         &#34;&#34;&#34;
         Send configuration(s)
 
@@ -491,8 +495,10 @@ class BaseNetworkDriver(SSH2Net):
         current_priv = self._determine_current_priv(self.get_prompt())
         if current_priv == self.privs[desired_priv]:
             return
-        elif priv_attempt_counter &gt; len(self.privs):
-            raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+        if priv_attempt_counter &gt; len(self.privs):
+            raise CouldNotAcquirePrivLevel(
+                f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;
+            )
 
         if current_priv.level &gt; self.privs[desired_priv].level:
             self._deescalate()
@@ -501,8 +507,8 @@ class BaseNetworkDriver(SSH2Net):
         priv_attempt_counter += 1</code></pre>
 </details>
 </dd>
-<dt id="ssh2net.core.driver.BaseNetworkDriver.send_command"><code class="name flex">
-<span>def <span class="ident">send_command</span></span>(<span>self, commands)</span>
+<dt id="ssh2net.core.driver.BaseNetworkDriver.send_commands"><code class="name flex">
+<span>def <span class="ident">send_commands</span></span>(<span>self, commands)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send command(s)</p>
@@ -527,7 +533,7 @@ class BaseNetworkDriver(SSH2Net):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_command(self, commands):
+<pre><code class="python">def send_commands(self, commands):
     &#34;&#34;&#34;
     Send command(s)
 
@@ -545,8 +551,8 @@ class BaseNetworkDriver(SSH2Net):
     return result</code></pre>
 </details>
 </dd>
-<dt id="ssh2net.core.driver.BaseNetworkDriver.send_config_set"><code class="name flex">
-<span>def <span class="ident">send_config_set</span></span>(<span>self, configs)</span>
+<dt id="ssh2net.core.driver.BaseNetworkDriver.send_configs"><code class="name flex">
+<span>def <span class="ident">send_configs</span></span>(<span>self, configs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send configuration(s)</p>
@@ -571,7 +577,7 @@ class BaseNetworkDriver(SSH2Net):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_config_set(self, configs):
+<pre><code class="python">def send_configs(self, configs):
     &#34;&#34;&#34;
     Send configuration(s)
 
@@ -725,8 +731,8 @@ class BaseNetworkDriver(SSH2Net):
 <h4><code><a title="ssh2net.core.driver.BaseNetworkDriver" href="#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></code></h4>
 <ul class="">
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_command" href="#ssh2net.core.driver.BaseNetworkDriver.send_command">send_command</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_config_set" href="#ssh2net.core.driver.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_commands" href="#ssh2net.core.driver.BaseNetworkDriver.send_commands">send_commands</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_configs" href="#ssh2net.core.driver.BaseNetworkDriver.send_configs">send_configs</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output" href="#ssh2net.core.driver.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
 </ul>
 </li>

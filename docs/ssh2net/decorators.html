@@ -67,7 +67,7 @@ def operation_timeout(attribute):
         def timeout_wrapper(self, *args, **kwargs):
             timeout_duration = getattr(self, attribute)
             if not timeout_duration:
-                return wrapped_func
+                return wrapped_func(self, *args, **kwargs)
             old = signal.signal(signal.SIGALRM, _raise_exception)
             signal.setitimer(signal.ITIMER_REAL, timeout_duration)
             try:
@@ -303,7 +303,7 @@ a OS dependant decorator, but for now this works!</p>
         def timeout_wrapper(self, *args, **kwargs):
             timeout_duration = getattr(self, attribute)
             if not timeout_duration:
-                return wrapped_func
+                return wrapped_func(self, *args, **kwargs)
             old = signal.signal(signal.SIGALRM, _raise_exception)
             signal.setitimer(signal.ITIMER_REAL, timeout_duration)
             try:

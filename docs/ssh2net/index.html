@@ -107,9 +107,9 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
 <dd>
 <section class="desc"><p>ssh2net.netmiko_compatibility</p></section>
 </dd>
-<dt><code class="name"><a title="ssh2net.response" href="response.html">ssh2net.response</a></code></dt>
+<dt><code class="name"><a title="ssh2net.result" href="result.html">ssh2net.result</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>ssh2net.response</p></section>
 </dd>
 <dt><code class="name"><a title="ssh2net.session" href="session.html">ssh2net.session</a></code></dt>
 <dd>
@@ -333,8 +333,10 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
             current_priv = self._determine_current_priv(self.get_prompt())
             if current_priv == self.privs[desired_priv]:
                 return
-            elif priv_attempt_counter &gt; len(self.privs):
-                raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+            if priv_attempt_counter &gt; len(self.privs):
+                raise CouldNotAcquirePrivLevel(
+                    f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;
+                )
 
             if current_priv.level &gt; self.privs[desired_priv].level:
                 self._deescalate()
@@ -342,7 +344,7 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_command(self, commands):
+    def send_commands(self, commands):
         &#34;&#34;&#34;
         Send command(s)
 
@@ -359,7 +361,7 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
         result = self.send_inputs(commands)
         return result
 
-    def send_config_set(self, configs):
+    def send_configs(self, configs):
         &#34;&#34;&#34;
         Send configuration(s)
 
@@ -458,8 +460,10 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
         current_priv = self._determine_current_priv(self.get_prompt())
         if current_priv == self.privs[desired_priv]:
             return
-        elif priv_attempt_counter &gt; len(self.privs):
-            raise CouldNotAcquirePrivLevel(f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;)
+        if priv_attempt_counter &gt; len(self.privs):
+            raise CouldNotAcquirePrivLevel(
+                f&#34;Could not get to &#39;{desired_priv}&#39; privilege level.&#34;
+            )
 
         if current_priv.level &gt; self.privs[desired_priv].level:
             self._deescalate()
@@ -468,8 +472,8 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
         priv_attempt_counter += 1</code></pre>
 </details>
 </dd>
-<dt id="ssh2net.BaseNetworkDriver.send_command"><code class="name flex">
-<span>def <span class="ident">send_command</span></span>(<span>self, commands)</span>
+<dt id="ssh2net.BaseNetworkDriver.send_commands"><code class="name flex">
+<span>def <span class="ident">send_commands</span></span>(<span>self, commands)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send command(s)</p>
@@ -494,7 +498,7 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_command(self, commands):
+<pre><code class="python">def send_commands(self, commands):
     &#34;&#34;&#34;
     Send command(s)
 
@@ -512,8 +516,8 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
     return result</code></pre>
 </details>
 </dd>
-<dt id="ssh2net.BaseNetworkDriver.send_config_set"><code class="name flex">
-<span>def <span class="ident">send_config_set</span></span>(<span>self, configs)</span>
+<dt id="ssh2net.BaseNetworkDriver.send_configs"><code class="name flex">
+<span>def <span class="ident">send_configs</span></span>(<span>self, configs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send configuration(s)</p>
@@ -538,7 +542,7 @@ logging.getLogger(f&#34;{__name__}_channel&#34;).addHandler(NullHandler())</code
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_config_set(self, configs):
+<pre><code class="python">def send_configs(self, configs):
     &#34;&#34;&#34;
     Send configuration(s)
 
@@ -1404,7 +1408,25 @@ string to send to device to disable paging</dd>
         return &#34;\n&#34;.join(output)
 
     @staticmethod
-    def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
+    def _strip_ansi(output: bytes) -&gt; bytes:
+        &#34;&#34;&#34;
+        Strip ansi characters from bytes string
+
+        Args:
+            output: bytes from channel that need ansi stripped
+
+        Returns:
+            output: bytes string with ansi stripped
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
+        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        return output
+
+    def _restructure_output(self, output: str, strip_prompt: bool = False) -&gt; str:
         &#34;&#34;&#34;
         Clean up preceding empty lines, and strip prompt if desired
 
@@ -1426,29 +1448,13 @@ string to send to device to disable paging</dd>
                 output = output[1:]
             else:
                 break
-        # should improve -- simply peels the last line out of the list...
-        if strip_prompt:
-            output = output[:-1]
+
         output = &#34;\n&#34;.join(output)
-        return output
-
-    @staticmethod
-    def _strip_ansi(output: bytes) -&gt; bytes:
-        &#34;&#34;&#34;
-        Strip ansi characters from bytes string
-
-        Args:
-            output: bytes from channel that need ansi stripped
-
-        Returns:
-            output: bytes string with ansi stripped
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
-        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        if strip_prompt:
+            # could be compiled somewhere else, btu this allows for users to modify the prompt on
+            # the fly if they want to
+            prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+            output = re.sub(prompt_pattern, &#34;&#34;, output)
         return output
 
     @channel_timeout(Timeout)
@@ -1537,7 +1543,7 @@ string to send to device to disable paging</dd>
                 return output
 
     @operation_timeout(&#34;comms_operation_timeout&#34;)
-    def _send_input(self, channel_input: str, strip_prompt: bool):
+    def _send_input(self, channel_input: str, strip_prompt: bool) -&gt; SSH2NetResult:
         &#34;&#34;&#34;
         Send input to device and return results
 
@@ -1546,13 +1552,14 @@ string to send to device to disable paging</dd>
             strip_prompt: bool True/False for whether or not to strip prompt
 
         Returns:
-            output: string of cleaned channel data
+            result: SSH2NetResult object
 
         Raises:
             N/A  # noqa
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
+        result = SSH2NetResult(channel_input)
         session_log.debug(
             f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
         )
@@ -1562,7 +1569,9 @@ string to send to device to disable paging</dd>
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         self.session_lock.release_lock()
-        return self._restructure_output(output, strip_prompt=strip_prompt)
+        output = self._restructure_output(output, strip_prompt=strip_prompt)
+        result.record_result(output)
+        return result
 
     @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input_interact(
@@ -1572,7 +1581,7 @@ string to send to device to disable paging</dd>
         response: str,
         finale: str,
         hidden_response: bool = False,
-    ) -&gt; str:
+    ) -&gt; SSH2NetResult:
         &#34;&#34;&#34;
         Respond to a single &#34;staged&#34; prompt and return results
 
@@ -1591,6 +1600,7 @@ string to send to device to disable paging</dd>
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
+        result = SSH2NetResult(channel_input)
         session_log.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
             f&#34;expecting: {expectation}; responding: {response}; &#34;
@@ -1614,7 +1624,9 @@ string to send to device to disable paging</dd>
         channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
         self.session_lock.release_lock()
-        return self._restructure_output(output)
+        output = self._restructure_output(output)
+        result.record_result(output)
+        return result
 
     def open_and_execute(self, command: str):
         &#34;&#34;&#34;
@@ -1714,7 +1726,9 @@ string to send to device to disable paging</dd>
                 current_prompt = channel_match.group(0)
                 return current_prompt
 
-    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+    def send_inputs(
+        self, inputs: Union[str, List, Tuple], strip_prompt: Optional[bool] = True
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Primary entry point to send data to devices in shell mode; accept inputs and return results
 
@@ -1723,7 +1737,7 @@ string to send to device to disable paging</dd>
             strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
-            result: list of output from the input command(s)
+            results: list of SSH2NetResult object(s)
 
         Raises:
             N/A  # noqa
@@ -1733,8 +1747,8 @@ string to send to device to disable paging</dd>
             inputs = [inputs]
         results = []
         for channel_input in inputs:
-            output = self._send_input(channel_input, strip_prompt)
-            results.append(output)
+            result = self._send_input(channel_input, strip_prompt)
+            results.append(result)
         return results
 
     def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
@@ -1815,7 +1829,7 @@ operations.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>result</code></strong></dt>
+<dt><strong><a title="ssh2net.result" href="result.html"><code>ssh2net.result</code></a></strong></dt>
 <dd>output from command sent over the channel</dd>
 </dl>
 <h2 id="raises">Raises</h2>
@@ -1937,8 +1951,8 @@ operations.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>result</code></strong></dt>
-<dd>list of output from the input command(s)</dd>
+<dt><strong><code>results</code></strong></dt>
+<dd>list of SSH2NetResult object(s)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -1950,7 +1964,9 @@ operations.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+<pre><code class="python">def send_inputs(
+    self, inputs: Union[str, List, Tuple], strip_prompt: Optional[bool] = True
+) -&gt; List[SSH2NetResult]:
     &#34;&#34;&#34;
     Primary entry point to send data to devices in shell mode; accept inputs and return results
 
@@ -1959,7 +1975,7 @@ operations.</p>
         strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
     Returns:
-        result: list of output from the input command(s)
+        results: list of SSH2NetResult object(s)
 
     Raises:
         N/A  # noqa
@@ -1969,8 +1985,8 @@ operations.</p>
         inputs = [inputs]
     results = []
     for channel_input in inputs:
-        output = self._send_input(channel_input, strip_prompt)
-        results.append(output)
+        result = self._send_input(channel_input, strip_prompt)
+        results.append(result)
     return results</code></pre>
 </details>
 </dd>
@@ -1996,7 +2012,7 @@ finale (what should ssh2net expect when "done")</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>result</code></strong></dt>
+<dt><strong><a title="ssh2net.result" href="result.html"><code>ssh2net.result</code></a></strong></dt>
 <dd>list of output from the input command(s)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
@@ -2743,7 +2759,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
 <li><code><a title="ssh2net.exceptions" href="exceptions.html">ssh2net.exceptions</a></code></li>
 <li><code><a title="ssh2net.helper" href="helper.html">ssh2net.helper</a></code></li>
 <li><code><a title="ssh2net.netmiko_compatibility" href="netmiko_compatibility.html">ssh2net.netmiko_compatibility</a></code></li>
-<li><code><a title="ssh2net.response" href="response.html">ssh2net.response</a></code></li>
+<li><code><a title="ssh2net.result" href="result.html">ssh2net.result</a></code></li>
 <li><code><a title="ssh2net.session" href="session.html">ssh2net.session</a></code></li>
 <li><code><a title="ssh2net.session_miko" href="session_miko.html">ssh2net.session_miko</a></code></li>
 <li><code><a title="ssh2net.session_ssh2" href="session_ssh2.html">ssh2net.session_ssh2</a></code></li>
@@ -2761,8 +2777,8 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
 <h4><code><a title="ssh2net.BaseNetworkDriver" href="#ssh2net.BaseNetworkDriver">BaseNetworkDriver</a></code></h4>
 <ul class="">
 <li><code><a title="ssh2net.BaseNetworkDriver.acquire_priv" href="#ssh2net.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.BaseNetworkDriver.send_command" href="#ssh2net.BaseNetworkDriver.send_command">send_command</a></code></li>
-<li><code><a title="ssh2net.BaseNetworkDriver.send_config_set" href="#ssh2net.BaseNetworkDriver.send_config_set">send_config_set</a></code></li>
+<li><code><a title="ssh2net.BaseNetworkDriver.send_commands" href="#ssh2net.BaseNetworkDriver.send_commands">send_commands</a></code></li>
+<li><code><a title="ssh2net.BaseNetworkDriver.send_configs" href="#ssh2net.BaseNetworkDriver.send_configs">send_configs</a></code></li>
 <li><code><a title="ssh2net.BaseNetworkDriver.textfsm_parse_output" href="#ssh2net.BaseNetworkDriver.textfsm_parse_output">textfsm_parse_output</a></code></li>
 </ul>
 </li>

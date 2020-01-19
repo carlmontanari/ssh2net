@@ -10,8 +10,6 @@ TEST_DEVICE = {"setup_host": "172.18.0.12", "auth_user": "vrnetlab", "auth_passw
 
 dummy_conn = ssh2net.core.NXOSDriver(**TEST_DEVICE)
 PRIV_LEVELS = dummy_conn.privs
-# remove exec priv level as it is not configured on the vrnetlab host for testing
-PRIV_LEVELS.pop("exec")
 
 
 class TestNXOS(BaseFunctionalTest):
@@ -63,6 +61,9 @@ class TestNXOS(BaseFunctionalTest):
     @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
     @pytest.mark.parametrize("priv_level", [priv for priv in PRIV_LEVELS.values()])
     def test_acquire_all_priv_levels(self, setup_use_paramiko, priv_level):
+        if priv_level.name == "exec":
+            # vrnetlab n9k not setup to drop to exec mode, skip this test
+            return
         super().test_acquire_all_priv_levels(setup_use_paramiko, priv_level)
 
     @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])

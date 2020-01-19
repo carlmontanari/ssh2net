@@ -29,11 +29,12 @@
 import logging
 import re
 import sys
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from ssh2.exceptions import SocketRecvError, Timeout
 
 from ssh2net.decorators import channel_timeout
+from ssh2net.result import SSH2NetResult
 
 if not sys.platform.startswith(&#34;win&#34;):
     from ssh2net.decorators import operation_timeout
@@ -66,7 +67,25 @@ class SSH2NetChannel:
         return &#34;\n&#34;.join(output)
 
     @staticmethod
-    def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
+    def _strip_ansi(output: bytes) -&gt; bytes:
+        &#34;&#34;&#34;
+        Strip ansi characters from bytes string
+
+        Args:
+            output: bytes from channel that need ansi stripped
+
+        Returns:
+            output: bytes string with ansi stripped
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
+        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        return output
+
+    def _restructure_output(self, output: str, strip_prompt: bool = False) -&gt; str:
         &#34;&#34;&#34;
         Clean up preceding empty lines, and strip prompt if desired
 
@@ -88,29 +107,13 @@ class SSH2NetChannel:
                 output = output[1:]
             else:
                 break
-        # should improve -- simply peels the last line out of the list...
-        if strip_prompt:
-            output = output[:-1]
+
         output = &#34;\n&#34;.join(output)
-        return output
-
-    @staticmethod
-    def _strip_ansi(output: bytes) -&gt; bytes:
-        &#34;&#34;&#34;
-        Strip ansi characters from bytes string
-
-        Args:
-            output: bytes from channel that need ansi stripped
-
-        Returns:
-            output: bytes string with ansi stripped
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
-        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        if strip_prompt:
+            # could be compiled somewhere else, btu this allows for users to modify the prompt on
+            # the fly if they want to
+            prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+            output = re.sub(prompt_pattern, &#34;&#34;, output)
         return output
 
     @channel_timeout(Timeout)
@@ -199,7 +202,7 @@ class SSH2NetChannel:
                 return output
 
     @operation_timeout(&#34;comms_operation_timeout&#34;)
-    def _send_input(self, channel_input: str, strip_prompt: bool):
+    def _send_input(self, channel_input: str, strip_prompt: bool) -&gt; SSH2NetResult:
         &#34;&#34;&#34;
         Send input to device and return results
 
@@ -208,13 +211,14 @@ class SSH2NetChannel:
             strip_prompt: bool True/False for whether or not to strip prompt
 
         Returns:
-            output: string of cleaned channel data
+            result: SSH2NetResult object
 
         Raises:
             N/A  # noqa
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
+        result = SSH2NetResult(channel_input)
         session_log.debug(
             f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
         )
@@ -224,7 +228,9 @@ class SSH2NetChannel:
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         self.session_lock.release_lock()
-        return self._restructure_output(output, strip_prompt=strip_prompt)
+        output = self._restructure_output(output, strip_prompt=strip_prompt)
+        result.record_result(output)
+        return result
 
     @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input_interact(
@@ -234,7 +240,7 @@ class SSH2NetChannel:
         response: str,
         finale: str,
         hidden_response: bool = False,
-    ) -&gt; str:
+    ) -&gt; SSH2NetResult:
         &#34;&#34;&#34;
         Respond to a single &#34;staged&#34; prompt and return results
 
@@ -253,6 +259,7 @@ class SSH2NetChannel:
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
+        result = SSH2NetResult(channel_input)
         session_log.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
             f&#34;expecting: {expectation}; responding: {response}; &#34;
@@ -276,7 +283,9 @@ class SSH2NetChannel:
         channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
         self.session_lock.release_lock()
-        return self._restructure_output(output)
+        output = self._restructure_output(output)
+        result.record_result(output)
+        return result
 
     def open_and_execute(self, command: str):
         &#34;&#34;&#34;
@@ -376,7 +385,9 @@ class SSH2NetChannel:
                 current_prompt = channel_match.group(0)
                 return current_prompt
 
-    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+    def send_inputs(
+        self, inputs: Union[str, List, Tuple], strip_prompt: Optional[bool] = True
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Primary entry point to send data to devices in shell mode; accept inputs and return results
 
@@ -385,7 +396,7 @@ class SSH2NetChannel:
             strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
-            result: list of output from the input command(s)
+            results: list of SSH2NetResult object(s)
 
         Raises:
             N/A  # noqa
@@ -395,8 +406,8 @@ class SSH2NetChannel:
             inputs = [inputs]
         results = []
         for channel_input in inputs:
-            output = self._send_input(channel_input, strip_prompt)
-            results.append(output)
+            result = self._send_input(channel_input, strip_prompt)
+            results.append(result)
         return results
 
     def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
@@ -474,7 +485,25 @@ class SSH2NetChannel:
         return &#34;\n&#34;.join(output)
 
     @staticmethod
-    def _restructure_output(output: str, strip_prompt: bool = False) -&gt; str:
+    def _strip_ansi(output: bytes) -&gt; bytes:
+        &#34;&#34;&#34;
+        Strip ansi characters from bytes string
+
+        Args:
+            output: bytes from channel that need ansi stripped
+
+        Returns:
+            output: bytes string with ansi stripped
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
+        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        return output
+
+    def _restructure_output(self, output: str, strip_prompt: bool = False) -&gt; str:
         &#34;&#34;&#34;
         Clean up preceding empty lines, and strip prompt if desired
 
@@ -496,29 +525,13 @@ class SSH2NetChannel:
                 output = output[1:]
             else:
                 break
-        # should improve -- simply peels the last line out of the list...
-        if strip_prompt:
-            output = output[:-1]
+
         output = &#34;\n&#34;.join(output)
-        return output
-
-    @staticmethod
-    def _strip_ansi(output: bytes) -&gt; bytes:
-        &#34;&#34;&#34;
-        Strip ansi characters from bytes string
-
-        Args:
-            output: bytes from channel that need ansi stripped
-
-        Returns:
-            output: bytes string with ansi stripped
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        ansi_escape_pattern = re.compile(rb&#34;\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])&#34;)
-        output = re.sub(ansi_escape_pattern, b&#34;&#34;, output)
+        if strip_prompt:
+            # could be compiled somewhere else, btu this allows for users to modify the prompt on
+            # the fly if they want to
+            prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
+            output = re.sub(prompt_pattern, &#34;&#34;, output)
         return output
 
     @channel_timeout(Timeout)
@@ -607,7 +620,7 @@ class SSH2NetChannel:
                 return output
 
     @operation_timeout(&#34;comms_operation_timeout&#34;)
-    def _send_input(self, channel_input: str, strip_prompt: bool):
+    def _send_input(self, channel_input: str, strip_prompt: bool) -&gt; SSH2NetResult:
         &#34;&#34;&#34;
         Send input to device and return results
 
@@ -616,13 +629,14 @@ class SSH2NetChannel:
             strip_prompt: bool True/False for whether or not to strip prompt
 
         Returns:
-            output: string of cleaned channel data
+            result: SSH2NetResult object
 
         Raises:
             N/A  # noqa
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
+        result = SSH2NetResult(channel_input)
         session_log.debug(
             f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
         )
@@ -632,7 +646,9 @@ class SSH2NetChannel:
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
         self.session_lock.release_lock()
-        return self._restructure_output(output, strip_prompt=strip_prompt)
+        output = self._restructure_output(output, strip_prompt=strip_prompt)
+        result.record_result(output)
+        return result
 
     @operation_timeout(&#34;comms_operation_timeout&#34;)
     def _send_input_interact(
@@ -642,7 +658,7 @@ class SSH2NetChannel:
         response: str,
         finale: str,
         hidden_response: bool = False,
-    ) -&gt; str:
+    ) -&gt; SSH2NetResult:
         &#34;&#34;&#34;
         Respond to a single &#34;staged&#34; prompt and return results
 
@@ -661,6 +677,7 @@ class SSH2NetChannel:
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
+        result = SSH2NetResult(channel_input)
         session_log.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
             f&#34;expecting: {expectation}; responding: {response}; &#34;
@@ -684,7 +701,9 @@ class SSH2NetChannel:
         channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
         self.session_lock.release_lock()
-        return self._restructure_output(output)
+        output = self._restructure_output(output)
+        result.record_result(output)
+        return result
 
     def open_and_execute(self, command: str):
         &#34;&#34;&#34;
@@ -784,7 +803,9 @@ class SSH2NetChannel:
                 current_prompt = channel_match.group(0)
                 return current_prompt
 
-    def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+    def send_inputs(
+        self, inputs: Union[str, List, Tuple], strip_prompt: Optional[bool] = True
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Primary entry point to send data to devices in shell mode; accept inputs and return results
 
@@ -793,7 +814,7 @@ class SSH2NetChannel:
             strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
         Returns:
-            result: list of output from the input command(s)
+            results: list of SSH2NetResult object(s)
 
         Raises:
             N/A  # noqa
@@ -803,8 +824,8 @@ class SSH2NetChannel:
             inputs = [inputs]
         results = []
         for channel_input in inputs:
-            output = self._send_input(channel_input, strip_prompt)
-            results.append(output)
+            result = self._send_input(channel_input, strip_prompt)
+            results.append(result)
         return results
 
     def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
@@ -1007,8 +1028,8 @@ operations.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>result</code></strong></dt>
-<dd>list of output from the input command(s)</dd>
+<dt><strong><code>results</code></strong></dt>
+<dd>list of SSH2NetResult object(s)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -1020,7 +1041,9 @@ operations.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_inputs(self, inputs, strip_prompt: Optional[bool] = True) -&gt; List[bytes]:
+<pre><code class="python">def send_inputs(
+    self, inputs: Union[str, List, Tuple], strip_prompt: Optional[bool] = True
+) -&gt; List[SSH2NetResult]:
     &#34;&#34;&#34;
     Primary entry point to send data to devices in shell mode; accept inputs and return results
 
@@ -1029,7 +1052,7 @@ operations.</p>
         strip_prompt: strip prompt or not, defaults to True (yes, strip the prompt)
 
     Returns:
-        result: list of output from the input command(s)
+        results: list of SSH2NetResult object(s)
 
     Raises:
         N/A  # noqa
@@ -1039,8 +1062,8 @@ operations.</p>
         inputs = [inputs]
     results = []
     for channel_input in inputs:
-        output = self._send_input(channel_input, strip_prompt)
-        results.append(output)
+        result = self._send_input(channel_input, strip_prompt)
+        results.append(result)
     return results</code></pre>
 </details>
 </dd>

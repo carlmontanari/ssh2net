@@ -50,13 +50,13 @@ class BaseFunctionalTest:
 
     def show_run_inputs(self, setup_use_paramiko, command):
         with ssh2net.SSH2Net(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
-            show_run = conn.send_inputs(command)[0]
+            show_run = conn.send_inputs(command)[0].result
         show_run = self.clean_input_data(show_run)
         return show_run
 
     def show_run_inputs_no_strip_prompt(self, setup_use_paramiko, command):
         with ssh2net.SSH2Net(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
-            show_run = conn.send_inputs(command, strip_prompt=False)[0]
+            show_run = conn.send_inputs(command, strip_prompt=False)[0].result
         show_run = self.clean_input_data(show_run)
         return show_run
 
@@ -68,7 +68,7 @@ class BaseFunctionalTest:
                 current_prompt = conn.get_prompt()
             interactive = conn.send_inputs_interact(
                 (interact[0], interact[1], interact[2], current_prompt), **kwargs
-            )[0]
+            )[0].result
         return interactive
 
     def _disable_paging_function(self, setup_use_paramiko):
@@ -77,7 +77,7 @@ class BaseFunctionalTest:
             setup_use_paramiko=setup_use_paramiko,
             comms_disable_paging=self.disable_paging,
         ) as conn:
-            show_run = conn.send_inputs("show run")[0]
+            show_run = conn.send_inputs("show run")[0].result
         show_run = self.clean_input_data(show_run)
         return show_run
 
@@ -87,7 +87,7 @@ class BaseFunctionalTest:
             setup_use_paramiko=setup_use_paramiko,
             comms_disable_paging=self.disable_paging_ext_function,
         ) as conn:
-            show_run = conn.send_inputs("show run")[0]
+            show_run = conn.send_inputs("show run")[0].result
         show_run = self.clean_input_data(show_run)
         return show_run
 

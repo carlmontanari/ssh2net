@@ -3,7 +3,7 @@ from datetime import datetime
 
 from ssh2net import SSH2Net
 
-import hosts
+from . import hosts
 
 IOSXE_TEST = hosts.IOSXE_TEST
 NXOS_TEST = hosts.NXOS_TEST
@@ -25,7 +25,7 @@ def main():
             command_start_time = datetime.now()
             r = conn.send_inputs(command)
             command_end_time = datetime.now()
-            print(r[0])
+            print(r[0].result)
             print("*" * 80)
             print(
                 f"Sending command: '{command}' took {command_end_time - command_start_time} seconds!"
