@@ -1,8 +1,9 @@
 """ssh2net.helper"""
 import importlib
-from io import TextIOWrapper
-import pkg_resources  # pylint: disable=C0411
 import warnings
+from io import TextIOWrapper
+
+import pkg_resources  # pylint: disable=C0411
 
 
 def validate_external_function(possible_function):

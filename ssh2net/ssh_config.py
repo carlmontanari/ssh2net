@@ -1,8 +1,8 @@
 """ssh2net.ssh_config"""
 import os
-from pathlib import Path
 import re
 import shlex
+from pathlib import Path
 
 
 class SSH2NetSSHConfig:

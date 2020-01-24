@@ -8,7 +8,6 @@ from ssh2net.exceptions import CouldNotAcquirePrivLevel, UnknownPrivLevel
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
 from ssh2net.result import SSH2NetResult
 
-
 PrivilegeLevel = collections.namedtuple(
     "PrivLevel",
     "pattern "

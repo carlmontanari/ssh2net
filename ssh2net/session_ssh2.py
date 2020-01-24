@@ -1,8 +1,8 @@
 """ssh2net.session_ssh2"""
 import logging
 
-from ssh2.session import Session
 from ssh2.exceptions import AuthenticationError
+from ssh2.session import Session
 
 from ssh2net.exceptions import AuthenticationFailed
 

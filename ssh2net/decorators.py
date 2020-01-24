@@ -3,7 +3,6 @@ import logging
 import multiprocessing.pool
 import time
 
-
 channel_log = logging.getLogger("ssh2net_channel")
 
 

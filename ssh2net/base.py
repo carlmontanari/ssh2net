@@ -6,11 +6,10 @@ import re
 import socket
 from typing import Callable, Optional, Union
 
-from ssh2net.session import SSH2NetSession
-from ssh2net.exceptions import ValidationError, SetupTimeout
+from ssh2net.exceptions import SetupTimeout, ValidationError
 from ssh2net.helper import validate_external_function
+from ssh2net.session import SSH2NetSession
 from ssh2net.ssh_config import SSH2NetSSHConfig
-
 
 session_log = logging.getLogger("ssh2net_session")
 

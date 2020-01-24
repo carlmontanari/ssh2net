@@ -4,7 +4,6 @@ from typing import Any, Dict, Optional, Union
 
 from ssh2net.core.driver import BaseNetworkDriver, PrivilegeLevel
 
-
 EOS_ARG_MAPPER = {
     "comms_prompt_regex": r"^[a-z0-9.\-@()/:]{1,32}[#>$]$",
     "comms_return_char": "\n",

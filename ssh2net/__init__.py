@@ -4,11 +4,10 @@ from logging import NullHandler
 
 from ssh2net.base import SSH2Net
 from ssh2net.channel import SSH2NetChannel
-from ssh2net.session import SSH2NetSession
-from ssh2net.netmiko_compatibility import connect_handler as ConnectHandler
-from ssh2net.ssh_config import SSH2NetSSHConfig
 from ssh2net.core.driver import BaseNetworkDriver
-
+from ssh2net.netmiko_compatibility import connect_handler as ConnectHandler
+from ssh2net.session import SSH2NetSession
+from ssh2net.ssh_config import SSH2NetSSHConfig
 
 __version__ = "2020.01.10"
 __all__ = (

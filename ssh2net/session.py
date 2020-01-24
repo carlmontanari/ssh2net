@@ -1,14 +1,13 @@
 """ssh2net.session"""
+import logging
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-import logging
 from threading import Lock
-import time
 
 from ssh2net.channel import SSH2NetChannel
 from ssh2net.session_miko import SSH2NetSessionParamiko
 from ssh2net.session_ssh2 import SSH2NetSessionSSH2
-
 
 TRANSPORT_CLASS_SELECTOR = {True: SSH2NetSessionParamiko, False: SSH2NetSessionSSH2}
 

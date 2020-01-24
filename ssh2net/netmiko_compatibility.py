@@ -1,20 +1,15 @@
 """ssh2net.netmiko_compatibility"""
 import types
-from typing import List, Union
 import warnings
+from typing import List, Union
 
-from ssh2net.core import IOSXEDriver
-from ssh2net.core import NXOSDriver
-from ssh2net.core import IOSXRDriver
-from ssh2net.core import EOSDriver
-from ssh2net.core import JunosDriver
-from ssh2net.core.cisco_iosxe.driver import IOSXE_ARG_MAPPER
-from ssh2net.core.cisco_nxos.driver import NXOS_ARG_MAPPER
-from ssh2net.core.cisco_iosxr.driver import IOSXR_ARG_MAPPER
+from ssh2net.core import EOSDriver, IOSXEDriver, IOSXRDriver, JunosDriver, NXOSDriver
 from ssh2net.core.arista_eos.driver import EOS_ARG_MAPPER
+from ssh2net.core.cisco_iosxe.driver import IOSXE_ARG_MAPPER
+from ssh2net.core.cisco_iosxr.driver import IOSXR_ARG_MAPPER
+from ssh2net.core.cisco_nxos.driver import NXOS_ARG_MAPPER
 from ssh2net.core.juniper_junos.driver import JUNOS_ARG_MAPPER
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
-
 
 VALID_SSH2NET_KWARGS = {
     "setup_host",
