@@ -331,7 +331,7 @@ class SSH2NetChannel:
         session_log.info("Interactive shell opened")
 
     @channel_timeout(Timeout)
-    def get_prompt(self) -> bool:
+    def get_prompt(self) -> Union[str, bytes]:
         """
         Read from shell and get the current shell prompt
 
@@ -384,7 +384,7 @@ class SSH2NetChannel:
             results.append(result)
         return results
 
-    def send_inputs_interact(self, inputs, hidden_response=False) -> List[Tuple[str, bytes]]:
+    def send_inputs_interact(self, inputs, hidden_response=False) -> List[SSH2NetResult]:
         """
         Primary entry point to interact with devices in shell mode; used to handle prompts
 
