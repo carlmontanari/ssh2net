@@ -4,8 +4,6 @@ from typing import Dict, List, Optional, Union
 
 
 class SSH2NetResult:
-    """SSH2NetResult Object"""
-
     def __init__(
         self,
         host: str,

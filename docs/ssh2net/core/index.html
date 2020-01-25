@@ -26,11 +26,11 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net core platform drivers&#34;&#34;&#34;
-from ssh2net.core.driver import BaseNetworkDriver
 from ssh2net.core.arista_eos.driver import EOSDriver
 from ssh2net.core.cisco_iosxe.driver import IOSXEDriver
 from ssh2net.core.cisco_iosxr.driver import IOSXRDriver
 from ssh2net.core.cisco_nxos.driver import NXOSDriver
+from ssh2net.core.driver import BaseNetworkDriver
 from ssh2net.core.juniper_junos.driver import JunosDriver
 
 __all__ = (
@@ -84,11 +84,14 @@ __all__ = (
 <span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net BaseNetworkDriver Object</p>
+<section class="desc"><p>BaseNetworkDriver</p>
+<p>BaseNetworkDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>auth_secondary</code></strong></dt>
 <dd>password to use for secondary authentication (enable)</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -107,12 +110,15 @@ __all__ = (
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BaseNetworkDriver(SSH2Net):
-    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;BaseNetworkDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Any):
         &#34;&#34;&#34;
-        Initialize SSH2Net BaseNetworkDriver Object
+        BaseNetworkDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)
+            **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
             N/A  # noqa
@@ -123,8 +129,8 @@ __all__ = (
         self.auth_secondary = auth_secondary
         super().__init__(**kwargs)
         self.privs = PRIVS
-        self.default_desired_priv = None
-        self.textfsm_platform = None
+        self.default_desired_priv: Optional[str] = None
+        self.textfsm_platform: str = &#34;&#34;
 
     def _determine_current_priv(self, current_prompt: str):
         &#34;&#34;&#34;
@@ -167,7 +173,7 @@ __all__ = (
                     (
                         current_priv.escalate,
                         current_priv.escalate_prompt,
-                        self.auth_enable,
+                        self.auth_secondary,
                         self.privs.get(&#34;escalate_priv&#34;),
                     ),
                     hidden_response=True,
@@ -224,29 +230,45 @@ __all__ = (
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_commands(self, commands):
+    def send_commands(
+        self,
+        commands: Union[str, List],
+        strip_prompt: Optional[bool] = True,
+        textfsm: Optional[bool] = False,
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Send command(s)
 
         Args:
             commands: string or list of strings to send to device in privilege exec mode
+            strip_prompt: True/False strip prompt from returned output
+            textfsm: True/False try to parse each command with textfsm
 
         Returns:
-            N/A  # noqa
+            results: list of SSH2NetResult objects
 
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
         self.acquire_priv(self.default_desired_priv)
-        result = self.send_inputs(commands)
-        return result
+        results = self.send_inputs(commands, strip_prompt)
+        if not textfsm:
+            return results
+        for result in results:
+            result.structured_result = self.textfsm_parse_output(
+                result.channel_input, result.result
+            )
+        return results
 
-    def send_configs(self, configs):
+    def send_configs(
+        self, configs: Union[str, List], strip_prompt: Optional[bool] = True
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Send configuration(s)
 
         Args:
             configs: string or list of strings to send to device in config mode
+            strip_prompt: True/False strip prompt from returned output
 
         Returns:
             N/A  # noqa
@@ -255,13 +277,15 @@ __all__ = (
             N/A  # noqa
         &#34;&#34;&#34;
         self.acquire_priv(&#34;configuration&#34;)
-        result = self.send_inputs(configs)
+        result = self.send_inputs(configs, strip_prompt)
         self.acquire_priv(self.default_desired_priv)
         return result
 
-    def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+    def textfsm_parse_output(self, command: str, output: str) -&gt; Union[List, Dict[str, Any]]:
         &#34;&#34;&#34;
         Parse output with TextFSM and ntc-templates
+
+        Always return a non-string value -- if parsing fails to produce list/dict, return empty dict
 
         Args:
             command: command used to get output
@@ -276,13 +300,16 @@ __all__ = (
         template = _textfsm_get_template(self.textfsm_platform, command)
         if template:
             output = textfsm_parse(template, output)
-        return output</code></pre>
+        if isinstance(output, (dict, list)):
+            return output
+        return {}</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -353,7 +380,7 @@ __all__ = (
 </details>
 </dd>
 <dt id="ssh2net.core.BaseNetworkDriver.send_commands"><code class="name flex">
-<span>def <span class="ident">send_commands</span></span>(<span>self, commands)</span>
+<span>def <span class="ident">send_commands</span></span>(<span>self, commands, strip_prompt=True, textfsm=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send command(s)</p>
@@ -361,12 +388,15 @@ __all__ = (
 <dl>
 <dt><strong><code>commands</code></strong></dt>
 <dd>string or list of strings to send to device in privilege exec mode</dd>
+<dt><strong><code>strip_prompt</code></strong></dt>
+<dd>True/False strip prompt from returned output</dd>
+<dt><strong><code>textfsm</code></strong></dt>
+<dd>True/False try to parse each command with textfsm</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code>
-# <code>noqa</code></dt>
-<dd>&nbsp;</dd>
+<dt><strong><code>results</code></strong></dt>
+<dd>list of SSH2NetResult objects</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -378,26 +408,39 @@ __all__ = (
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_commands(self, commands):
+<pre><code class="python">def send_commands(
+    self,
+    commands: Union[str, List],
+    strip_prompt: Optional[bool] = True,
+    textfsm: Optional[bool] = False,
+) -&gt; List[SSH2NetResult]:
     &#34;&#34;&#34;
     Send command(s)
 
     Args:
         commands: string or list of strings to send to device in privilege exec mode
+        strip_prompt: True/False strip prompt from returned output
+        textfsm: True/False try to parse each command with textfsm
 
     Returns:
-        N/A  # noqa
+        results: list of SSH2NetResult objects
 
     Raises:
         N/A  # noqa
     &#34;&#34;&#34;
     self.acquire_priv(self.default_desired_priv)
-    result = self.send_inputs(commands)
-    return result</code></pre>
+    results = self.send_inputs(commands, strip_prompt)
+    if not textfsm:
+        return results
+    for result in results:
+        result.structured_result = self.textfsm_parse_output(
+            result.channel_input, result.result
+        )
+    return results</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.core.BaseNetworkDriver.send_configs"><code class="name flex">
-<span>def <span class="ident">send_configs</span></span>(<span>self, configs)</span>
+<span>def <span class="ident">send_configs</span></span>(<span>self, configs, strip_prompt=True)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send configuration(s)</p>
@@ -405,6 +448,8 @@ __all__ = (
 <dl>
 <dt><strong><code>configs</code></strong></dt>
 <dd>string or list of strings to send to device in config mode</dd>
+<dt><strong><code>strip_prompt</code></strong></dt>
+<dd>True/False strip prompt from returned output</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -422,12 +467,15 @@ __all__ = (
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_configs(self, configs):
+<pre><code class="python">def send_configs(
+    self, configs: Union[str, List], strip_prompt: Optional[bool] = True
+) -&gt; List[SSH2NetResult]:
     &#34;&#34;&#34;
     Send configuration(s)
 
     Args:
         configs: string or list of strings to send to device in config mode
+        strip_prompt: True/False strip prompt from returned output
 
     Returns:
         N/A  # noqa
@@ -436,7 +484,7 @@ __all__ = (
         N/A  # noqa
     &#34;&#34;&#34;
     self.acquire_priv(&#34;configuration&#34;)
-    result = self.send_inputs(configs)
+    result = self.send_inputs(configs, strip_prompt)
     self.acquire_priv(self.default_desired_priv)
     return result</code></pre>
 </details>
@@ -446,6 +494,7 @@ __all__ = (
 </code></dt>
 <dd>
 <section class="desc"><p>Parse output with TextFSM and ntc-templates</p>
+<p>Always return a non-string value &ndash; if parsing fails to produce list/dict, return empty dict</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>command</code></strong></dt>
@@ -468,9 +517,11 @@ __all__ = (
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+<pre><code class="python">def textfsm_parse_output(self, command: str, output: str) -&gt; Union[List, Dict[str, Any]]:
     &#34;&#34;&#34;
     Parse output with TextFSM and ntc-templates
+
+    Always return a non-string value -- if parsing fails to produce list/dict, return empty dict
 
     Args:
         command: command used to get output
@@ -485,7 +536,9 @@ __all__ = (
     template = _textfsm_get_template(self.textfsm_platform, command)
     if template:
         output = textfsm_parse(template, output)
-    return output</code></pre>
+    if isinstance(output, (dict, list)):
+        return output
+    return {}</code></pre>
 </details>
 </dd>
 </dl>
@@ -493,7 +546,7 @@ __all__ = (
 <ul class="hlist">
 <li><code><b><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></b></code>:
 <ul class="hlist">
-<li><code><a title="ssh2net.base.SSH2Net.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.close" href="../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.base.SSH2Net.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.base.SSH2Net.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.base.SSH2Net.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
@@ -504,12 +557,15 @@ __all__ = (
 </dd>
 <dt id="ssh2net.core.EOSDriver"><code class="flex name class">
 <span>class <span class="ident">EOSDriver</span></span>
-<span>(</span><span>**kwargs)</span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net EOSDriver Object</p>
+<section class="desc"><p>EOSDriver</p>
+<p>EOSDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword args to pass to inherited class(es)</dd>
 </dl>
@@ -530,11 +586,14 @@ __all__ = (
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class EOSDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;EOSDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net EOSDriver Object
+        EOSDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -543,7 +602,7 @@ __all__ = (
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;
         self.textfsm_platform = &#34;arista_eos&#34;</code></pre>
@@ -552,15 +611,16 @@ __all__ = (
 <ul class="hlist">
 <li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 <li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_commands" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_commands">send_commands</a></code></li>
@@ -574,12 +634,15 @@ __all__ = (
 </dd>
 <dt id="ssh2net.core.IOSXEDriver"><code class="flex name class">
 <span>class <span class="ident">IOSXEDriver</span></span>
-<span>(</span><span>**kwargs)</span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<section class="desc"><p>IOSXEDriver</p>
+<p>IOSXEDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword args to pass to inherited class(es)</dd>
 </dl>
@@ -600,11 +663,14 @@ __all__ = (
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class IOSXEDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;IOSXEDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net IOSXEDriver Object
+        IOSXEDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -613,7 +679,7 @@ __all__ = (
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;
         self.textfsm_platform = &#34;cisco_ios&#34;</code></pre>
@@ -622,15 +688,16 @@ __all__ = (
 <ul class="hlist">
 <li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 <li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_commands" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_commands">send_commands</a></code></li>
@@ -644,12 +711,15 @@ __all__ = (
 </dd>
 <dt id="ssh2net.core.IOSXRDriver"><code class="flex name class">
 <span>class <span class="ident">IOSXRDriver</span></span>
-<span>(</span><span>**kwargs)</span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net IOSXRDriver Object</p>
+<section class="desc"><p>IOSXRDriver</p>
+<p>IOSXRDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword args to pass to inherited class(es)</dd>
 </dl>
@@ -670,11 +740,14 @@ __all__ = (
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class IOSXRDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;IOSXRDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net IOSXRDriver Object
+        IOSXRDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -683,7 +756,7 @@ __all__ = (
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;
         self.textfsm_platform = &#34;cisco_xr&#34;</code></pre>
@@ -692,15 +765,16 @@ __all__ = (
 <ul class="hlist">
 <li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 <li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_commands" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_commands">send_commands</a></code></li>
@@ -714,12 +788,15 @@ __all__ = (
 </dd>
 <dt id="ssh2net.core.JunosDriver"><code class="flex name class">
 <span>class <span class="ident">JunosDriver</span></span>
-<span>(</span><span>**kwargs)</span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<section class="desc"><p>JunosDriver</p>
+<p>JunosDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword args to pass to inherited class(es)</dd>
 </dl>
@@ -740,11 +817,14 @@ __all__ = (
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class JunosDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;JunosDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net IOSXEDriver Object
+        JunosDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -753,7 +833,7 @@ __all__ = (
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;exec&#34;</code></pre>
 </details>
@@ -761,15 +841,16 @@ __all__ = (
 <ul class="hlist">
 <li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 <li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_commands" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_commands">send_commands</a></code></li>
@@ -783,12 +864,15 @@ __all__ = (
 </dd>
 <dt id="ssh2net.core.NXOSDriver"><code class="flex name class">
 <span>class <span class="ident">NXOSDriver</span></span>
-<span>(</span><span>**kwargs)</span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net NXOSDriver Object</p>
+<section class="desc"><p>NXOSDriver</p>
+<p>NXOSDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword args to pass to inherited class(es)</dd>
 </dl>
@@ -809,11 +893,14 @@ __all__ = (
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class NXOSDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;NXOSDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net NXOSDriver Object
+        NXOSDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -822,7 +909,7 @@ __all__ = (
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;</code></pre>
 </details>
@@ -830,15 +917,16 @@ __all__ = (
 <ul class="hlist">
 <li><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 <li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_commands" href="driver.html#ssh2net.core.driver.BaseNetworkDriver.send_commands">send_commands</a></code></li>

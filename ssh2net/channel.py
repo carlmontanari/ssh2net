@@ -22,7 +22,7 @@ class SSH2NetChannel(SSH2NetSession):
     """
     SSH2NetChannel
 
-    SSH2NetBase <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
+    SSH2Net <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
 
     SSH2NetChannel is responsible for all channel input and output. SSH2NetChannel should not care
     about what is providing the channel. At time of writing the channel can be provided by

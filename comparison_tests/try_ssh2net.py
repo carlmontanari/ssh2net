@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from datetime import datetime
 
-from ssh2net import SSH2NetBase
+from ssh2net import SSH2Net
 
 IOSXE_TEST = {
     "host": "172.18.0.11",
@@ -53,7 +53,7 @@ def main():
         host["setup_host"] = host.pop("host")
         host["auth_user"] = host.pop("username")
         host["auth_password"] = host.pop("password")
-        conn = SSH2NetBase(**host)
+        conn = SSH2Net(**host)
         conn.open_shell()
         for command in commands:
             print(f"Sending command: '{command}'")

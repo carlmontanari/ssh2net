@@ -26,20 +26,17 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.netmiko_compatibility&#34;&#34;&#34;
-from ssh2net.core.cisco_iosxe.driver import IOSXEDriver, IOSXE_ARG_MAPPER
-from ssh2net.core.cisco_nxos.driver import NXOSDriver, NXOS_ARG_MAPPER
-from ssh2net.core.cisco_iosxr.driver import IOSXRDriver, IOSXR_ARG_MAPPER
-from ssh2net.core.arista_eos.driver import EOSDriver, EOS_ARG_MAPPER
-from ssh2net.core.juniper_junos.driver import JunosDriver, JUNOS_ARG_MAPPER
+import types
+import warnings
+from typing import Any, Dict, List, Union
 
-NETMIKO_DEVICE_TYPE_MAPPER = {
-    &#34;cisco_ios&#34;: {&#34;driver&#34;: IOSXEDriver, &#34;arg_mapper&#34;: IOSXE_ARG_MAPPER},
-    &#34;cisco_xe&#34;: {&#34;driver&#34;: IOSXEDriver, &#34;arg_mapper&#34;: IOSXE_ARG_MAPPER},
-    &#34;cisco_nxos&#34;: {&#34;driver&#34;: NXOSDriver, &#34;arg_mapper&#34;: NXOS_ARG_MAPPER},
-    &#34;cisco_xr&#34;: {&#34;driver&#34;: IOSXRDriver, &#34;arg_mapper&#34;: IOSXR_ARG_MAPPER},
-    &#34;arista_eos&#34;: {&#34;driver&#34;: EOSDriver, &#34;arg_mapper&#34;: EOS_ARG_MAPPER},
-    &#34;juniper_junos&#34;: {&#34;driver&#34;: JunosDriver, &#34;arg_mapper&#34;: JUNOS_ARG_MAPPER},
-}
+from ssh2net.core import EOSDriver, IOSXEDriver, IOSXRDriver, JunosDriver, NXOSDriver
+from ssh2net.core.arista_eos.driver import EOS_ARG_MAPPER
+from ssh2net.core.cisco_iosxe.driver import IOSXE_ARG_MAPPER
+from ssh2net.core.cisco_iosxr.driver import IOSXR_ARG_MAPPER
+from ssh2net.core.cisco_nxos.driver import NXOS_ARG_MAPPER
+from ssh2net.core.juniper_junos.driver import JUNOS_ARG_MAPPER
+from ssh2net.helper import _textfsm_get_template, textfsm_parse
 
 VALID_SSH2NET_KWARGS = {
     &#34;setup_host&#34;,
@@ -62,6 +59,15 @@ VALID_SSH2NET_KWARGS = {
     &#34;comms_return_char&#34;,
     &#34;comms_pre_login_handler&#34;,
     &#34;comms_disable_paging&#34;,
+}
+
+NETMIKO_DEVICE_TYPE_MAPPER = {
+    &#34;cisco_ios&#34;: {&#34;driver&#34;: IOSXEDriver, &#34;arg_mapper&#34;: IOSXE_ARG_MAPPER},
+    &#34;cisco_xe&#34;: {&#34;driver&#34;: IOSXEDriver, &#34;arg_mapper&#34;: IOSXE_ARG_MAPPER},
+    &#34;cisco_nxos&#34;: {&#34;driver&#34;: NXOSDriver, &#34;arg_mapper&#34;: NXOS_ARG_MAPPER},
+    &#34;cisco_xr&#34;: {&#34;driver&#34;: IOSXRDriver, &#34;arg_mapper&#34;: IOSXR_ARG_MAPPER},
+    &#34;arista_eos&#34;: {&#34;driver&#34;: EOSDriver, &#34;arg_mapper&#34;: EOS_ARG_MAPPER},
+    &#34;juniper_junos&#34;: {&#34;driver&#34;: JunosDriver, &#34;arg_mapper&#34;: JUNOS_ARG_MAPPER},
 }
 
 
@@ -93,13 +99,20 @@ def connect_handler(auto_open=True, **kwargs):
 
     driver = driver_class(**final_kwargs)
 
+    # Below is a dirty way to patch netmiko methods into ssh2net without having a factory function
+    # and a million classes... as this is just for testing interoperability we&#39;ll let this slide...
+    driver.find_prompt = types.MethodType(netmiko_find_prompt, driver)
+    driver.send_command = types.MethodType(netmiko_send_command, driver)
+    driver.send_command_timing = types.MethodType(netmiko_send_command_timing, driver)
+    driver.send_config_set = types.MethodType(netmiko_send_config_set, driver)
+
     if auto_open:
         driver.open_shell()
 
     return driver
 
 
-def transform_netmiko_kwargs(kwargs):
+def transform_netmiko_kwargs(kwargs: Dict[str, Any]) -&gt; Dict[str, Any]:
     &#34;&#34;&#34;
     Transform netmiko style ConnectHandler arguments to ssh2net style
 
@@ -108,6 +121,9 @@ def transform_netmiko_kwargs(kwargs):
 
     Returns:
         transformed_kwargs: converted keyword arguments
+
+    Raises:
+        N/A  # noqa
 
     &#34;&#34;&#34;
     host = kwargs.pop(&#34;host&#34;, None)
@@ -135,7 +151,168 @@ def transform_netmiko_kwargs(kwargs):
 
     transformed_kwargs = {k: v for (k, v) in kwargs.items() if k in VALID_SSH2NET_KWARGS}
 
-    return transformed_kwargs</code></pre>
+    return transformed_kwargs
+
+
+def netmiko_find_prompt(self) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `find_prompt` in netmiko connect handler to `get_prompt` in ssh2net
+
+    Args:
+        N/A  # noqa
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    return self.get_prompt()
+
+
+def netmiko_send_command(self, command_string: Union[str, List[str]], **kwargs) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `send_command` in netmiko connect handler
+
+    Patch and support strip_prompt, use_textfsm, and textfsm_template args. Return a single string
+    to match netmiko functionality (instead of ssh2net result object)
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        command_string: string or list of strings to send as commands
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    strip_prompt = kwargs.pop(&#34;strip_prompt&#34;, True)
+    expect_string = kwargs.pop(&#34;expect_string&#34;, None)
+    use_textfsm = kwargs.pop(&#34;use_textfsm&#34;, False)
+    textfsm_template = kwargs.pop(&#34;textfsm_template&#34;, None)
+
+    if expect_string:
+        err = &#34;ssh2net netmiko interoperability does not support expect_string!&#34;
+        msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
+        fix = (
+            f&#34;To resolve this issue, use native or driver mode with `send_inputs_interact` method.&#34;
+        )
+        warning = &#34;\n&#34; + msg + &#34;\n&#34; + fix + &#34;\n&#34; + msg
+        warnings.warn(warning)
+
+    if isinstance(command_string, list):
+        err = &#34;netmiko does not support sending list of commands, using only the first command!&#34;
+        msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
+        fix = f&#34;To resolve this issue, use native or driver mode with `send_inputs` method.&#34;
+        warning = &#34;\n&#34; + msg + &#34;\n&#34; + fix + &#34;\n&#34; + msg
+        warnings.warn(warning)
+        command = command_string[0]
+    else:
+        command = command_string
+
+    results = self.send_commands(command, strip_prompt)
+    # netmiko supports sending single commands only and has no &#34;result&#34; object, peel out just result
+    result = results[0].result
+
+    if use_textfsm:
+        if textfsm_template:
+            structured_result = textfsm_parse(textfsm_template, result)
+        else:
+            textfsm_template = _textfsm_get_template(self.textfsm_platform, command)
+            structured_result = textfsm_parse(textfsm_template, result)
+        # netmiko returns unstructured data if no structured data was generated
+        if structured_result:
+            result = structured_result
+    return result
+
+
+def netmiko_send_command_timing(self, *args: str, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;
+    Patch `send_command_timing` in netmiko connect handler
+
+    Really just a shim to send_command, ssh2net doesnt support/need timing mechanics -- adjust the
+    timers on the connection object if needed, or adjust them on the fly in your code.
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        *args: positional arguments to support other netmiko args without blowing up
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    return self.send_command(*args, **kwargs)
+
+
+def netmiko_send_config_set(self, config_commands: Union[str, List[str]], **kwargs) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `send_config_set` in netmiko connect handler
+
+    Note: ssh2net strips commands always (as it retains them in the result object anyway), so there
+    is no interesting output from this as there would be in netmiko.
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        config_commands: configuration command(s) to send to device
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    strip_prompt = kwargs.pop(&#34;strip_prompt&#34;, True)
+    enter_config_mode = kwargs.pop(&#34;enter_config_mode&#34;, True)
+    exit_config_mode = kwargs.pop(&#34;exit_config_mode&#34;, True)
+
+    if not enter_config_mode:
+        results = self.send_commands(config_commands, strip_prompt)
+    elif not exit_config_mode:
+        self.acquire_priv(&#34;configuration&#34;)
+        results = self.send_inputs(config_commands, strip_prompt)
+    else:
+        results = self.send_configs(config_commands, strip_prompt)
+    # ssh2net always strips command, so there isn&#39;t typically anything useful coming back from this
+    result = &#34;\n&#34;.join([r.result for r in results])
+    return result
+
+
+def netmiko_send_config_from_file(self, config_file: str, **kwargs: Dict[str, Any]) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `send_config_from_file` in netmiko connect handler
+
+    Note: ssh2net strips commands always (as it retains them in the result object anyway), so there
+    is no interesting output from this as there would be in netmiko.
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        config_file: path to text file; will send each line as a config
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    with open(config_file, &#34;r&#34;) as f:
+        config_commands = list(f)
+    return self.send_config_set(config_commands, **kwargs)</code></pre>
 </details>
 </section>
 <section>
@@ -199,10 +376,334 @@ def transform_netmiko_kwargs(kwargs):
 
     driver = driver_class(**final_kwargs)
 
+    # Below is a dirty way to patch netmiko methods into ssh2net without having a factory function
+    # and a million classes... as this is just for testing interoperability we&#39;ll let this slide...
+    driver.find_prompt = types.MethodType(netmiko_find_prompt, driver)
+    driver.send_command = types.MethodType(netmiko_send_command, driver)
+    driver.send_command_timing = types.MethodType(netmiko_send_command_timing, driver)
+    driver.send_config_set = types.MethodType(netmiko_send_config_set, driver)
+
     if auto_open:
         driver.open_shell()
 
     return driver</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.netmiko_compatibility.netmiko_find_prompt"><code class="name flex">
+<span>def <span class="ident">netmiko_find_prompt</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Patch <code>find_prompt</code> in netmiko connect handler to <code>get_prompt</code> in ssh2net</p>
+<h2 id="args">Args</h2>
+<p>N/A
+# noqa</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def netmiko_find_prompt(self) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `find_prompt` in netmiko connect handler to `get_prompt` in ssh2net
+
+    Args:
+        N/A  # noqa
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    return self.get_prompt()</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.netmiko_compatibility.netmiko_send_command"><code class="name flex">
+<span>def <span class="ident">netmiko_send_command</span></span>(<span>self, command_string, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Patch <code>send_command</code> in netmiko connect handler</p>
+<p>Patch and support strip_prompt, use_textfsm, and textfsm_template args. Return a single string
+to match netmiko functionality (instead of ssh2net result object)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>self</code></strong></dt>
+<dd>do not use! this function gets patched in as a method and therefore needs a reference
+to the class instance.</dd>
+<dt><strong><code>command_string</code></strong></dt>
+<dd>string or list of strings to send as commands</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword arguments to support other netmiko args without blowing up</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def netmiko_send_command(self, command_string: Union[str, List[str]], **kwargs) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `send_command` in netmiko connect handler
+
+    Patch and support strip_prompt, use_textfsm, and textfsm_template args. Return a single string
+    to match netmiko functionality (instead of ssh2net result object)
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        command_string: string or list of strings to send as commands
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    strip_prompt = kwargs.pop(&#34;strip_prompt&#34;, True)
+    expect_string = kwargs.pop(&#34;expect_string&#34;, None)
+    use_textfsm = kwargs.pop(&#34;use_textfsm&#34;, False)
+    textfsm_template = kwargs.pop(&#34;textfsm_template&#34;, None)
+
+    if expect_string:
+        err = &#34;ssh2net netmiko interoperability does not support expect_string!&#34;
+        msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
+        fix = (
+            f&#34;To resolve this issue, use native or driver mode with `send_inputs_interact` method.&#34;
+        )
+        warning = &#34;\n&#34; + msg + &#34;\n&#34; + fix + &#34;\n&#34; + msg
+        warnings.warn(warning)
+
+    if isinstance(command_string, list):
+        err = &#34;netmiko does not support sending list of commands, using only the first command!&#34;
+        msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
+        fix = f&#34;To resolve this issue, use native or driver mode with `send_inputs` method.&#34;
+        warning = &#34;\n&#34; + msg + &#34;\n&#34; + fix + &#34;\n&#34; + msg
+        warnings.warn(warning)
+        command = command_string[0]
+    else:
+        command = command_string
+
+    results = self.send_commands(command, strip_prompt)
+    # netmiko supports sending single commands only and has no &#34;result&#34; object, peel out just result
+    result = results[0].result
+
+    if use_textfsm:
+        if textfsm_template:
+            structured_result = textfsm_parse(textfsm_template, result)
+        else:
+            textfsm_template = _textfsm_get_template(self.textfsm_platform, command)
+            structured_result = textfsm_parse(textfsm_template, result)
+        # netmiko returns unstructured data if no structured data was generated
+        if structured_result:
+            result = structured_result
+    return result</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.netmiko_compatibility.netmiko_send_command_timing"><code class="name flex">
+<span>def <span class="ident">netmiko_send_command_timing</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Patch <code>send_command_timing</code> in netmiko connect handler</p>
+<p>Really just a shim to send_command, ssh2net doesnt support/need timing mechanics &ndash; adjust the
+timers on the connection object if needed, or adjust them on the fly in your code.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>self</code></strong></dt>
+<dd>do not use! this function gets patched in as a method and therefore needs a reference
+to the class instance.</dd>
+<dt><strong><code>*args</code></strong></dt>
+<dd>positional arguments to support other netmiko args without blowing up</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword arguments to support other netmiko args without blowing up</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def netmiko_send_command_timing(self, *args: str, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;
+    Patch `send_command_timing` in netmiko connect handler
+
+    Really just a shim to send_command, ssh2net doesnt support/need timing mechanics -- adjust the
+    timers on the connection object if needed, or adjust them on the fly in your code.
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        *args: positional arguments to support other netmiko args without blowing up
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    return self.send_command(*args, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.netmiko_compatibility.netmiko_send_config_from_file"><code class="name flex">
+<span>def <span class="ident">netmiko_send_config_from_file</span></span>(<span>self, config_file, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Patch <code>send_config_from_file</code> in netmiko connect handler</p>
+<p>Note: ssh2net strips commands always (as it retains them in the result object anyway), so there
+is no interesting output from this as there would be in netmiko.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>self</code></strong></dt>
+<dd>do not use! this function gets patched in as a method and therefore needs a reference
+to the class instance.</dd>
+<dt><strong><code>config_file</code></strong></dt>
+<dd>path to text file; will send each line as a config</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword arguments to support other netmiko args without blowing up</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def netmiko_send_config_from_file(self, config_file: str, **kwargs: Dict[str, Any]) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `send_config_from_file` in netmiko connect handler
+
+    Note: ssh2net strips commands always (as it retains them in the result object anyway), so there
+    is no interesting output from this as there would be in netmiko.
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        config_file: path to text file; will send each line as a config
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    with open(config_file, &#34;r&#34;) as f:
+        config_commands = list(f)
+    return self.send_config_set(config_commands, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="ssh2net.netmiko_compatibility.netmiko_send_config_set"><code class="name flex">
+<span>def <span class="ident">netmiko_send_config_set</span></span>(<span>self, config_commands, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Patch <code>send_config_set</code> in netmiko connect handler</p>
+<p>Note: ssh2net strips commands always (as it retains them in the result object anyway), so there
+is no interesting output from this as there would be in netmiko.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>self</code></strong></dt>
+<dd>do not use! this function gets patched in as a method and therefore needs a reference
+to the class instance.</dd>
+<dt><strong><code>config_commands</code></strong></dt>
+<dd>configuration command(s) to send to device</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword arguments to support other netmiko args without blowing up</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def netmiko_send_config_set(self, config_commands: Union[str, List[str]], **kwargs) -&gt; str:
+    &#34;&#34;&#34;
+    Patch `send_config_set` in netmiko connect handler
+
+    Note: ssh2net strips commands always (as it retains them in the result object anyway), so there
+    is no interesting output from this as there would be in netmiko.
+
+    Args:
+        self: do not use! this function gets patched in as a method and therefore needs a reference
+            to the class instance.
+        config_commands: configuration command(s) to send to device
+        **kwargs: keyword arguments to support other netmiko args without blowing up
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    &#34;&#34;&#34;
+    strip_prompt = kwargs.pop(&#34;strip_prompt&#34;, True)
+    enter_config_mode = kwargs.pop(&#34;enter_config_mode&#34;, True)
+    exit_config_mode = kwargs.pop(&#34;exit_config_mode&#34;, True)
+
+    if not enter_config_mode:
+        results = self.send_commands(config_commands, strip_prompt)
+    elif not exit_config_mode:
+        self.acquire_priv(&#34;configuration&#34;)
+        results = self.send_inputs(config_commands, strip_prompt)
+    else:
+        results = self.send_configs(config_commands, strip_prompt)
+    # ssh2net always strips command, so there isn&#39;t typically anything useful coming back from this
+    result = &#34;\n&#34;.join([r.result for r in results])
+    return result</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.netmiko_compatibility.transform_netmiko_kwargs"><code class="name flex">
@@ -219,12 +720,18 @@ def transform_netmiko_kwargs(kwargs):
 <dl>
 <dt><strong><code>transformed_kwargs</code></strong></dt>
 <dd>converted keyword arguments</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>N</code>/<code>A</code>
+# <code>noqa</code></dt>
+<dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transform_netmiko_kwargs(kwargs):
+<pre><code class="python">def transform_netmiko_kwargs(kwargs: Dict[str, Any]) -&gt; Dict[str, Any]:
     &#34;&#34;&#34;
     Transform netmiko style ConnectHandler arguments to ssh2net style
 
@@ -233,6 +740,9 @@ def transform_netmiko_kwargs(kwargs):
 
     Returns:
         transformed_kwargs: converted keyword arguments
+
+    Raises:
+        N/A  # noqa
 
     &#34;&#34;&#34;
     host = kwargs.pop(&#34;host&#34;, None)
@@ -282,6 +792,11 @@ def transform_netmiko_kwargs(kwargs):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="ssh2net.netmiko_compatibility.connect_handler" href="#ssh2net.netmiko_compatibility.connect_handler">connect_handler</a></code></li>
+<li><code><a title="ssh2net.netmiko_compatibility.netmiko_find_prompt" href="#ssh2net.netmiko_compatibility.netmiko_find_prompt">netmiko_find_prompt</a></code></li>
+<li><code><a title="ssh2net.netmiko_compatibility.netmiko_send_command" href="#ssh2net.netmiko_compatibility.netmiko_send_command">netmiko_send_command</a></code></li>
+<li><code><a title="ssh2net.netmiko_compatibility.netmiko_send_command_timing" href="#ssh2net.netmiko_compatibility.netmiko_send_command_timing">netmiko_send_command_timing</a></code></li>
+<li><code><a title="ssh2net.netmiko_compatibility.netmiko_send_config_from_file" href="#ssh2net.netmiko_compatibility.netmiko_send_config_from_file">netmiko_send_config_from_file</a></code></li>
+<li><code><a title="ssh2net.netmiko_compatibility.netmiko_send_config_set" href="#ssh2net.netmiko_compatibility.netmiko_send_config_set">netmiko_send_config_set</a></code></li>
 <li><code><a title="ssh2net.netmiko_compatibility.transform_netmiko_kwargs" href="#ssh2net.netmiko_compatibility.transform_netmiko_kwargs">transform_netmiko_kwargs</a></code></li>
 </ul>
 </li>

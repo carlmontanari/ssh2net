@@ -27,10 +27,9 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.core.cisco_iosxe.driver&#34;&#34;&#34;
 import re
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 
 from ssh2net.core.driver import BaseNetworkDriver, PrivilegeLevel
-
 
 IOSXE_ARG_MAPPER = {
     &#34;comms_prompt_regex&#34;: r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
@@ -100,11 +99,14 @@ PRIVS = {
 
 
 class IOSXEDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;IOSXEDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net IOSXEDriver Object
+        IOSXEDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -113,7 +115,7 @@ class IOSXEDriver(BaseNetworkDriver):
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;
         self.textfsm_platform = &#34;cisco_ios&#34;</code></pre>
@@ -130,12 +132,15 @@ class IOSXEDriver(BaseNetworkDriver):
 <dl>
 <dt id="ssh2net.core.cisco_iosxe.driver.IOSXEDriver"><code class="flex name class">
 <span>class <span class="ident">IOSXEDriver</span></span>
-<span>(</span><span>**kwargs)</span>
+<span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net IOSXEDriver Object</p>
+<section class="desc"><p>IOSXEDriver</p>
+<p>IOSXEDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>auth_secondary</code></strong></dt>
+<dd>password to use for secondary authentication (enable)</dd>
 <dt><strong><code>**kwargs</code></strong></dt>
 <dd>keyword args to pass to inherited class(es)</dd>
 </dl>
@@ -156,11 +161,14 @@ class IOSXEDriver(BaseNetworkDriver):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class IOSXEDriver(BaseNetworkDriver):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;IOSXEDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         &#34;&#34;&#34;
-        Initialize SSH2Net IOSXEDriver Object
+        IOSXEDriver Object
 
         Args:
+            auth_secondary: password to use for secondary authentication (enable)
             **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
@@ -169,7 +177,7 @@ class IOSXEDriver(BaseNetworkDriver):
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
-        super().__init__(**kwargs)
+        super().__init__(auth_secondary, **kwargs)
         self.privs = PRIVS
         self.default_desired_priv = &#34;privilege_exec&#34;
         self.textfsm_platform = &#34;cisco_ios&#34;</code></pre>
@@ -178,15 +186,16 @@ class IOSXEDriver(BaseNetworkDriver):
 <ul class="hlist">
 <li><a title="ssh2net.core.driver.BaseNetworkDriver" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 <li><a title="ssh2net.base.SSH2Net" href="../../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="ssh2net.core.driver.BaseNetworkDriver" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.acquire_priv" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver.acquire_priv">acquire_priv</a></code></li>
-<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.core.driver.BaseNetworkDriver.close" href="../../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_and_execute" href="../../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.open_shell" href="../../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.core.driver.BaseNetworkDriver.send_commands" href="../driver.html#ssh2net.core.driver.BaseNetworkDriver.send_commands">send_commands</a></code></li>

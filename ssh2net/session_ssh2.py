@@ -6,8 +6,6 @@ from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 
 
 class SSH2NetSessionSSH2:
-    """SSH2NetSessionSSH2"""
-
     def __init__(self, p_self):
         """
         SSH2NetSessionSSH2 Object

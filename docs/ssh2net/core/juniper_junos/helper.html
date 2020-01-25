@@ -26,14 +26,15 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.core.juniper_junos.helper&#34;&#34;&#34;
+from ssh2net.core import JunosDriver
 
 
-def disable_paging(cls):
+def disable_paging(cls: JunosDriver) -&gt; None:
     &#34;&#34;&#34;
     Disable paging and set screen width for Junos
 
     Args:
-        cls: SSH2Net connection object
+        cls: SSH2NetSocket connection object
 
     Returns:
         N/A  # noqa
@@ -60,7 +61,7 @@ def disable_paging(cls):
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>cls</code></strong></dt>
-<dd>SSH2Net connection object</dd>
+<dd>SSH2NetSocket connection object</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -78,12 +79,12 @@ def disable_paging(cls):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def disable_paging(cls):
+<pre><code class="python">def disable_paging(cls: JunosDriver) -&gt; None:
     &#34;&#34;&#34;
     Disable paging and set screen width for Junos
 
     Args:
-        cls: SSH2Net connection object
+        cls: SSH2NetSocket connection object
 
     Returns:
         N/A  # noqa

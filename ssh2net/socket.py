@@ -11,7 +11,7 @@ class SSH2NetSocket:
     """
     SSH2NetSocket
 
-    SSH2NetBase <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
+    SSH2Net <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
 
     SSH2NetSession is responsible for handling the actual socket that the SSH session uses.
 

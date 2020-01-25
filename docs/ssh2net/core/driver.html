@@ -28,12 +28,12 @@
 <pre><code class="python">&#34;&#34;&#34;ssh2net.core.driver&#34;&#34;&#34;
 import collections
 import re
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ssh2net.base import SSH2Net
 from ssh2net.exceptions import CouldNotAcquirePrivLevel, UnknownPrivLevel
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
-
+from ssh2net.result import SSH2NetResult
 
 PrivilegeLevel = collections.namedtuple(
     &#34;PrivLevel&#34;,
@@ -49,16 +49,19 @@ PrivilegeLevel = collections.namedtuple(
     &#34;level&#34;,
 )
 
-PRIVS = {}
+PRIVS: Dict[str, PrivilegeLevel] = {}
 
 
 class BaseNetworkDriver(SSH2Net):
-    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;BaseNetworkDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Any):
         &#34;&#34;&#34;
-        Initialize SSH2Net BaseNetworkDriver Object
+        BaseNetworkDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)
+            **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
             N/A  # noqa
@@ -69,8 +72,8 @@ class BaseNetworkDriver(SSH2Net):
         self.auth_secondary = auth_secondary
         super().__init__(**kwargs)
         self.privs = PRIVS
-        self.default_desired_priv = None
-        self.textfsm_platform = None
+        self.default_desired_priv: Optional[str] = None
+        self.textfsm_platform: str = &#34;&#34;
 
     def _determine_current_priv(self, current_prompt: str):
         &#34;&#34;&#34;
@@ -113,7 +116,7 @@ class BaseNetworkDriver(SSH2Net):
                     (
                         current_priv.escalate,
                         current_priv.escalate_prompt,
-                        self.auth_enable,
+                        self.auth_secondary,
                         self.privs.get(&#34;escalate_priv&#34;),
                     ),
                     hidden_response=True,
@@ -170,29 +173,45 @@ class BaseNetworkDriver(SSH2Net):
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_commands(self, commands):
+    def send_commands(
+        self,
+        commands: Union[str, List],
+        strip_prompt: Optional[bool] = True,
+        textfsm: Optional[bool] = False,
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Send command(s)
 
         Args:
             commands: string or list of strings to send to device in privilege exec mode
+            strip_prompt: True/False strip prompt from returned output
+            textfsm: True/False try to parse each command with textfsm
 
         Returns:
-            N/A  # noqa
+            results: list of SSH2NetResult objects
 
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
         self.acquire_priv(self.default_desired_priv)
-        result = self.send_inputs(commands)
-        return result
+        results = self.send_inputs(commands, strip_prompt)
+        if not textfsm:
+            return results
+        for result in results:
+            result.structured_result = self.textfsm_parse_output(
+                result.channel_input, result.result
+            )
+        return results
 
-    def send_configs(self, configs):
+    def send_configs(
+        self, configs: Union[str, List], strip_prompt: Optional[bool] = True
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Send configuration(s)
 
         Args:
             configs: string or list of strings to send to device in config mode
+            strip_prompt: True/False strip prompt from returned output
 
         Returns:
             N/A  # noqa
@@ -201,13 +220,15 @@ class BaseNetworkDriver(SSH2Net):
             N/A  # noqa
         &#34;&#34;&#34;
         self.acquire_priv(&#34;configuration&#34;)
-        result = self.send_inputs(configs)
+        result = self.send_inputs(configs, strip_prompt)
         self.acquire_priv(self.default_desired_priv)
         return result
 
-    def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+    def textfsm_parse_output(self, command: str, output: str) -&gt; Union[List, Dict[str, Any]]:
         &#34;&#34;&#34;
         Parse output with TextFSM and ntc-templates
+
+        Always return a non-string value -- if parsing fails to produce list/dict, return empty dict
 
         Args:
             command: command used to get output
@@ -222,7 +243,9 @@ class BaseNetworkDriver(SSH2Net):
         template = _textfsm_get_template(self.textfsm_platform, command)
         if template:
             output = textfsm_parse(template, output)
-        return output</code></pre>
+        if isinstance(output, (dict, list)):
+            return output
+        return {}</code></pre>
 </details>
 </section>
 <section>
@@ -239,11 +262,14 @@ class BaseNetworkDriver(SSH2Net):
 <span>(</span><span>auth_secondary=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net BaseNetworkDriver Object</p>
+<section class="desc"><p>BaseNetworkDriver</p>
+<p>BaseNetworkDriver Object</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>auth_secondary</code></strong></dt>
 <dd>password to use for secondary authentication (enable)</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>keyword args to pass to inherited class(es)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -262,12 +288,15 @@ class BaseNetworkDriver(SSH2Net):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BaseNetworkDriver(SSH2Net):
-    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
+    &#34;&#34;&#34;BaseNetworkDriver&#34;&#34;&#34;
+
+    def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Any):
         &#34;&#34;&#34;
-        Initialize SSH2Net BaseNetworkDriver Object
+        BaseNetworkDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)
+            **kwargs: keyword args to pass to inherited class(es)
 
         Returns:
             N/A  # noqa
@@ -278,8 +307,8 @@ class BaseNetworkDriver(SSH2Net):
         self.auth_secondary = auth_secondary
         super().__init__(**kwargs)
         self.privs = PRIVS
-        self.default_desired_priv = None
-        self.textfsm_platform = None
+        self.default_desired_priv: Optional[str] = None
+        self.textfsm_platform: str = &#34;&#34;
 
     def _determine_current_priv(self, current_prompt: str):
         &#34;&#34;&#34;
@@ -322,7 +351,7 @@ class BaseNetworkDriver(SSH2Net):
                     (
                         current_priv.escalate,
                         current_priv.escalate_prompt,
-                        self.auth_enable,
+                        self.auth_secondary,
                         self.privs.get(&#34;escalate_priv&#34;),
                     ),
                     hidden_response=True,
@@ -379,29 +408,45 @@ class BaseNetworkDriver(SSH2Net):
                 self._escalate()
             priv_attempt_counter += 1
 
-    def send_commands(self, commands):
+    def send_commands(
+        self,
+        commands: Union[str, List],
+        strip_prompt: Optional[bool] = True,
+        textfsm: Optional[bool] = False,
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Send command(s)
 
         Args:
             commands: string or list of strings to send to device in privilege exec mode
+            strip_prompt: True/False strip prompt from returned output
+            textfsm: True/False try to parse each command with textfsm
 
         Returns:
-            N/A  # noqa
+            results: list of SSH2NetResult objects
 
         Raises:
             N/A  # noqa
         &#34;&#34;&#34;
         self.acquire_priv(self.default_desired_priv)
-        result = self.send_inputs(commands)
-        return result
+        results = self.send_inputs(commands, strip_prompt)
+        if not textfsm:
+            return results
+        for result in results:
+            result.structured_result = self.textfsm_parse_output(
+                result.channel_input, result.result
+            )
+        return results
 
-    def send_configs(self, configs):
+    def send_configs(
+        self, configs: Union[str, List], strip_prompt: Optional[bool] = True
+    ) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Send configuration(s)
 
         Args:
             configs: string or list of strings to send to device in config mode
+            strip_prompt: True/False strip prompt from returned output
 
         Returns:
             N/A  # noqa
@@ -410,13 +455,15 @@ class BaseNetworkDriver(SSH2Net):
             N/A  # noqa
         &#34;&#34;&#34;
         self.acquire_priv(&#34;configuration&#34;)
-        result = self.send_inputs(configs)
+        result = self.send_inputs(configs, strip_prompt)
         self.acquire_priv(self.default_desired_priv)
         return result
 
-    def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+    def textfsm_parse_output(self, command: str, output: str) -&gt; Union[List, Dict[str, Any]]:
         &#34;&#34;&#34;
         Parse output with TextFSM and ntc-templates
+
+        Always return a non-string value -- if parsing fails to produce list/dict, return empty dict
 
         Args:
             command: command used to get output
@@ -431,13 +478,16 @@ class BaseNetworkDriver(SSH2Net):
         template = _textfsm_get_template(self.textfsm_platform, command)
         if template:
             output = textfsm_parse(template, output)
-        return output</code></pre>
+        if isinstance(output, (dict, list)):
+            return output
+        return {}</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
-<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="../channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="../session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="../socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -508,7 +558,7 @@ class BaseNetworkDriver(SSH2Net):
 </details>
 </dd>
 <dt id="ssh2net.core.driver.BaseNetworkDriver.send_commands"><code class="name flex">
-<span>def <span class="ident">send_commands</span></span>(<span>self, commands)</span>
+<span>def <span class="ident">send_commands</span></span>(<span>self, commands, strip_prompt=True, textfsm=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send command(s)</p>
@@ -516,12 +566,15 @@ class BaseNetworkDriver(SSH2Net):
 <dl>
 <dt><strong><code>commands</code></strong></dt>
 <dd>string or list of strings to send to device in privilege exec mode</dd>
+<dt><strong><code>strip_prompt</code></strong></dt>
+<dd>True/False strip prompt from returned output</dd>
+<dt><strong><code>textfsm</code></strong></dt>
+<dd>True/False try to parse each command with textfsm</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>N</code>/<code>A</code>
-# <code>noqa</code></dt>
-<dd>&nbsp;</dd>
+<dt><strong><code>results</code></strong></dt>
+<dd>list of SSH2NetResult objects</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -533,26 +586,39 @@ class BaseNetworkDriver(SSH2Net):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_commands(self, commands):
+<pre><code class="python">def send_commands(
+    self,
+    commands: Union[str, List],
+    strip_prompt: Optional[bool] = True,
+    textfsm: Optional[bool] = False,
+) -&gt; List[SSH2NetResult]:
     &#34;&#34;&#34;
     Send command(s)
 
     Args:
         commands: string or list of strings to send to device in privilege exec mode
+        strip_prompt: True/False strip prompt from returned output
+        textfsm: True/False try to parse each command with textfsm
 
     Returns:
-        N/A  # noqa
+        results: list of SSH2NetResult objects
 
     Raises:
         N/A  # noqa
     &#34;&#34;&#34;
     self.acquire_priv(self.default_desired_priv)
-    result = self.send_inputs(commands)
-    return result</code></pre>
+    results = self.send_inputs(commands, strip_prompt)
+    if not textfsm:
+        return results
+    for result in results:
+        result.structured_result = self.textfsm_parse_output(
+            result.channel_input, result.result
+        )
+    return results</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.core.driver.BaseNetworkDriver.send_configs"><code class="name flex">
-<span>def <span class="ident">send_configs</span></span>(<span>self, configs)</span>
+<span>def <span class="ident">send_configs</span></span>(<span>self, configs, strip_prompt=True)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Send configuration(s)</p>
@@ -560,6 +626,8 @@ class BaseNetworkDriver(SSH2Net):
 <dl>
 <dt><strong><code>configs</code></strong></dt>
 <dd>string or list of strings to send to device in config mode</dd>
+<dt><strong><code>strip_prompt</code></strong></dt>
+<dd>True/False strip prompt from returned output</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -577,12 +645,15 @@ class BaseNetworkDriver(SSH2Net):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_configs(self, configs):
+<pre><code class="python">def send_configs(
+    self, configs: Union[str, List], strip_prompt: Optional[bool] = True
+) -&gt; List[SSH2NetResult]:
     &#34;&#34;&#34;
     Send configuration(s)
 
     Args:
         configs: string or list of strings to send to device in config mode
+        strip_prompt: True/False strip prompt from returned output
 
     Returns:
         N/A  # noqa
@@ -591,7 +662,7 @@ class BaseNetworkDriver(SSH2Net):
         N/A  # noqa
     &#34;&#34;&#34;
     self.acquire_priv(&#34;configuration&#34;)
-    result = self.send_inputs(configs)
+    result = self.send_inputs(configs, strip_prompt)
     self.acquire_priv(self.default_desired_priv)
     return result</code></pre>
 </details>
@@ -601,6 +672,7 @@ class BaseNetworkDriver(SSH2Net):
 </code></dt>
 <dd>
 <section class="desc"><p>Parse output with TextFSM and ntc-templates</p>
+<p>Always return a non-string value &ndash; if parsing fails to produce list/dict, return empty dict</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>command</code></strong></dt>
@@ -623,9 +695,11 @@ class BaseNetworkDriver(SSH2Net):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def textfsm_parse_output(self, command: str, output: str) -&gt; str:
+<pre><code class="python">def textfsm_parse_output(self, command: str, output: str) -&gt; Union[List, Dict[str, Any]]:
     &#34;&#34;&#34;
     Parse output with TextFSM and ntc-templates
+
+    Always return a non-string value -- if parsing fails to produce list/dict, return empty dict
 
     Args:
         command: command used to get output
@@ -640,7 +714,9 @@ class BaseNetworkDriver(SSH2Net):
     template = _textfsm_get_template(self.textfsm_platform, command)
     if template:
         output = textfsm_parse(template, output)
-    return output</code></pre>
+    if isinstance(output, (dict, list)):
+        return output
+    return {}</code></pre>
 </details>
 </dd>
 </dl>
@@ -648,7 +724,7 @@ class BaseNetworkDriver(SSH2Net):
 <ul class="hlist">
 <li><code><b><a title="ssh2net.base.SSH2Net" href="../base.html#ssh2net.base.SSH2Net">SSH2Net</a></b></code>:
 <ul class="hlist">
-<li><code><a title="ssh2net.base.SSH2Net.close" href="../base.html#ssh2net.base.SSH2Net.close">close</a></code></li>
+<li><code><a title="ssh2net.base.SSH2Net.close" href="../session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
 <li><code><a title="ssh2net.base.SSH2Net.open_and_execute" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
 <li><code><a title="ssh2net.base.SSH2Net.open_shell" href="../channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
 <li><code><a title="ssh2net.base.SSH2Net.send_inputs" href="../channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>

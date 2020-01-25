@@ -7,8 +7,6 @@ from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 
 
 class SSH2NetSessionParamiko:
-    """SSH2NetSessionParamiko"""
-
     def __init__(self, p_self):
         """
         SSH2NetSessionParamiko Object

@@ -1,4 +1,4 @@
-from ssh2net import SSH2NetBase, SSH2NetChannel
+from ssh2net import SSH2Net, SSH2NetChannel
 
 
 def test__rstrip_all_lines():
@@ -14,7 +14,7 @@ one final line
 
 def test__restructure_output():
     test_host = {"setup_host": "my_device  ", "auth_user": "username", "auth_password": "password"}
-    conn = SSH2NetBase(**test_host)
+    conn = SSH2Net(**test_host)
     output = "\n\nsomedata\n3560CX#"
     output = conn._restructure_output(output)
     assert output.splitlines()[0] != ""
@@ -23,7 +23,7 @@ def test__restructure_output():
 
 def test__restructure_output_strip_prompt():
     test_host = {"setup_host": "my_device  ", "auth_user": "username", "auth_password": "password"}
-    conn = SSH2NetBase(**test_host)
+    conn = SSH2Net(**test_host)
     output = "\n\nsomedata\n3560CX#"
     output = conn._restructure_output(output, strip_prompt=True)
     assert output.splitlines()[0] != ""

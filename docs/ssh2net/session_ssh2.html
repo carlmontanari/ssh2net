@@ -27,17 +27,15 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.session_ssh2&#34;&#34;&#34;
 import logging
+import warnings
 
-from ssh2.session import Session
-from ssh2.exceptions import AuthenticationError
-
-from ssh2net.exceptions import AuthenticationFailed
+from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 
 
 class SSH2NetSessionSSH2:
     def __init__(self, p_self):
         &#34;&#34;&#34;
-        Initialize SSH2NetSessionSSH2 Object
+        SSH2NetSessionSSH2 Object
 
         This is the default underlying &#34;driver&#34; for ssh2net. This has been pulled out of the
         &#34;base&#34; SSH2NetSession class to provide a mechanism for supporting both &#34;ssh2-python&#34; and
@@ -53,7 +51,21 @@ class SSH2NetSessionSSH2:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        # due to somewhat shitty composition and problematic  multiple inheritance (how do i know to
+        # inherit session_miko vs session_ssh2) we copy the base session object dict to the driver
+        # session object dict. this angers mypy as it doesn&#39;t understand/like this darkness, so we
+        # also explicitly map all of the vars that are created at time of instantiating this class
+        # into this class so we have appropriate typing/hinting data... sorry...
         self.__dict__ = p_self.__dict__
+
+        # mypy did not like these being set w/ setattr, so we&#39;ll do it manually
+        self.sock = p_self.sock
+        self.host = p_self.host
+        self.auth_user = p_self.auth_user
+        self.auth_password = p_self.auth_password
+        self.auth_public_key = p_self.auth_public_key
+        self.session_timeout = p_self.session_timeout
+
         self._session_alive = p_self._session_alive
         self._session_open = p_self._session_open
         self._channel_alive = p_self._channel_alive
@@ -72,6 +84,25 @@ class SSH2NetSessionSSH2:
             Exception: catch all for unknown exceptions during session handshake
 
         &#34;&#34;&#34;
+        try:
+            from ssh2.session import Session  # pylint: disable=C0415
+            from ssh2.exceptions import AuthenticationError, Timeout  # pylint: disable=C0415
+
+            self.SSH2AuthenticationException = AuthenticationError
+            self.session_driver_timeout_exception = Timeout
+        except ModuleNotFoundError as exc:
+            err = f&#34;Module &#39;{exc.name}&#39; not installed!&#34;
+            msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
+            fix = (
+                f&#34;To resolve this issue, install &#39;{exc.name}&#39;. You can do this in one of the &#34;
+                &#34;following ways:\n&#34;
+                &#34;1: &#39;pip install -r requirements-ssh2.txt&#39;\n&#34;
+                &#34;2: &#39;pip install ssh2net[ssh2]&#39;&#34;
+            )
+            warning = &#34;\n&#34; + msg + &#34;\n&#34; + fix + &#34;\n&#34; + msg
+            warnings.warn(warning)
+            raise RequirementsNotSatisfied
+
         self.session = Session()
         if self.session_timeout:
             self.session.set_timeout(self.session_timeout)
@@ -99,7 +130,7 @@ class SSH2NetSessionSSH2:
         &#34;&#34;&#34;
         try:
             self.session.userauth_publickey_fromfile(self.auth_user, self.auth_public_key)
-        except AuthenticationError:
+        except self.SSH2AuthenticationException:
             logging.critical(f&#34;Public key authentication with host {self.host} failed. &#34;)
         except Exception as exc:
             logging.critical(
@@ -125,14 +156,16 @@ class SSH2NetSessionSSH2:
         &#34;&#34;&#34;
         try:
             self.session.userauth_password(self.auth_user, self.auth_password)
-        except AuthenticationError as exc:
+        except self.SSH2AuthenticationException as exc:
             logging.critical(
                 f&#34;Password authentication with host {self.host} failed. Exception: {exc}.&#34;
                 f&#34;\n\tTrying keyboard interactive auth...&#34;
             )
             try:
-                self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
-            except AuthenticationError as exc:
+                self.session.userauth_keyboardinteractive(  # pylint: disable=E1101
+                    self.auth_user, self.auth_password
+                )
+            except self.SSH2AuthenticationException as exc:
                 logging.critical(
                     f&#34;Keyboard interactive authentication with host {self.host} failed. &#34;
                     f&#34;Exception: {exc}.&#34;
@@ -201,7 +234,7 @@ class SSH2NetSessionSSH2:
 <span>(</span><span>p_self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2NetSessionSSH2 Object</p>
+<section class="desc"><p>SSH2NetSessionSSH2 Object</p>
 <p>This is the default underlying "driver" for ssh2net. This has been pulled out of the
 "base" SSH2NetSession class to provide a mechanism for supporting both "ssh2-python" and
 "paramiko".</p>
@@ -229,7 +262,7 @@ class SSH2NetSessionSSH2:
 <pre><code class="python">class SSH2NetSessionSSH2:
     def __init__(self, p_self):
         &#34;&#34;&#34;
-        Initialize SSH2NetSessionSSH2 Object
+        SSH2NetSessionSSH2 Object
 
         This is the default underlying &#34;driver&#34; for ssh2net. This has been pulled out of the
         &#34;base&#34; SSH2NetSession class to provide a mechanism for supporting both &#34;ssh2-python&#34; and
@@ -245,7 +278,21 @@ class SSH2NetSessionSSH2:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        # due to somewhat shitty composition and problematic  multiple inheritance (how do i know to
+        # inherit session_miko vs session_ssh2) we copy the base session object dict to the driver
+        # session object dict. this angers mypy as it doesn&#39;t understand/like this darkness, so we
+        # also explicitly map all of the vars that are created at time of instantiating this class
+        # into this class so we have appropriate typing/hinting data... sorry...
         self.__dict__ = p_self.__dict__
+
+        # mypy did not like these being set w/ setattr, so we&#39;ll do it manually
+        self.sock = p_self.sock
+        self.host = p_self.host
+        self.auth_user = p_self.auth_user
+        self.auth_password = p_self.auth_password
+        self.auth_public_key = p_self.auth_public_key
+        self.session_timeout = p_self.session_timeout
+
         self._session_alive = p_self._session_alive
         self._session_open = p_self._session_open
         self._channel_alive = p_self._channel_alive
@@ -264,6 +311,25 @@ class SSH2NetSessionSSH2:
             Exception: catch all for unknown exceptions during session handshake
 
         &#34;&#34;&#34;
+        try:
+            from ssh2.session import Session  # pylint: disable=C0415
+            from ssh2.exceptions import AuthenticationError, Timeout  # pylint: disable=C0415
+
+            self.SSH2AuthenticationException = AuthenticationError
+            self.session_driver_timeout_exception = Timeout
+        except ModuleNotFoundError as exc:
+            err = f&#34;Module &#39;{exc.name}&#39; not installed!&#34;
+            msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
+            fix = (
+                f&#34;To resolve this issue, install &#39;{exc.name}&#39;. You can do this in one of the &#34;
+                &#34;following ways:\n&#34;
+                &#34;1: &#39;pip install -r requirements-ssh2.txt&#39;\n&#34;
+                &#34;2: &#39;pip install ssh2net[ssh2]&#39;&#34;
+            )
+            warning = &#34;\n&#34; + msg + &#34;\n&#34; + fix + &#34;\n&#34; + msg
+            warnings.warn(warning)
+            raise RequirementsNotSatisfied
+
         self.session = Session()
         if self.session_timeout:
             self.session.set_timeout(self.session_timeout)
@@ -291,7 +357,7 @@ class SSH2NetSessionSSH2:
         &#34;&#34;&#34;
         try:
             self.session.userauth_publickey_fromfile(self.auth_user, self.auth_public_key)
-        except AuthenticationError:
+        except self.SSH2AuthenticationException:
             logging.critical(f&#34;Public key authentication with host {self.host} failed. &#34;)
         except Exception as exc:
             logging.critical(
@@ -317,14 +383,16 @@ class SSH2NetSessionSSH2:
         &#34;&#34;&#34;
         try:
             self.session.userauth_password(self.auth_user, self.auth_password)
-        except AuthenticationError as exc:
+        except self.SSH2AuthenticationException as exc:
             logging.critical(
                 f&#34;Password authentication with host {self.host} failed. Exception: {exc}.&#34;
                 f&#34;\n\tTrying keyboard interactive auth...&#34;
             )
             try:
-                self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
-            except AuthenticationError as exc:
+                self.session.userauth_keyboardinteractive(  # pylint: disable=E1101
+                    self.auth_user, self.auth_password
+                )
+            except self.SSH2AuthenticationException as exc:
                 logging.critical(
                     f&#34;Keyboard interactive authentication with host {self.host} failed. &#34;
                     f&#34;Exception: {exc}.&#34;

@@ -6,8 +6,6 @@ from pathlib import Path
 
 
 class SSH2NetSSHConfig:
-    """SSH2NetSSHConfig"""
-
     def __init__(self, ssh_config_file="") -> None:
         """
         SSH2NetSSHConfig Object

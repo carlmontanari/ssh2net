@@ -14,9 +14,7 @@ from ssh2net.ssh_config import SSH2NetSSHConfig
 LOG = logging.getLogger("ssh2net_base")
 
 
-class SSH2NetBase(SSH2NetChannel):
-    """SSH2NetBase Object"""
-
+class SSH2Net(SSH2NetChannel):
     def __init__(
         self,
         setup_host: str = "",
@@ -41,7 +39,11 @@ class SSH2NetBase(SSH2NetChannel):
         comms_disable_paging: Union[str, Callable] = "terminal length 0",
     ):
         r"""
-        SSH2NetBase Object
+        SSH2Net Object
+
+        SSH2Net Inheritance/Mixin flow:
+
+        SSH2Net <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
 
         Setup basic parameters required to connect to devices via ssh. Pay extra attention
         to the "comms_prompt_regex" as this is highly critical to this tool working well!

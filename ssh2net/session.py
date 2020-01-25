@@ -20,7 +20,7 @@ class SSH2NetSession(SSH2NetSocket):
     """
     SSH2NetSession
 
-    SSH2NetBase <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
+    SSH2Net <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
 
     SSH2NetSession is responsible for handling the actual SSH session that gets built atop the
     socket connection. SSH2NetSession should not care about what is providing the session. At time

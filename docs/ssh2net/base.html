@@ -33,41 +33,46 @@ import re
 import socket
 from typing import Callable, Optional, Union
 
-from ssh2net.session import SSH2NetSession
-from ssh2net.exceptions import ValidationError, SetupTimeout
+from ssh2net.channel import SSH2NetChannel
+from ssh2net.exceptions import ValidationError
 from ssh2net.helper import validate_external_function
 from ssh2net.ssh_config import SSH2NetSSHConfig
 
+LOG = logging.getLogger(&#34;ssh2net_base&#34;)
 
-session_log = logging.getLogger(&#34;ssh2net_session&#34;)
+__pdoc__ = {&#34;ssh2net.channel&#34;: False, &#34;ssh2net.session&#34;: False, &#34;ssh2net.socket&#34;: False}
 
 
-class SSH2Net(SSH2NetSession):
+class SSH2Net(SSH2NetChannel):
     def __init__(
         self,
         setup_host: str = &#34;&#34;,
-        setup_validate_host: Optional[bool] = False,
-        setup_port: Optional[int] = 22,
-        setup_timeout: Optional[int] = 5,
-        setup_ssh_config_file: Optional[Union[str, bool]] = False,
-        setup_use_paramiko: Optional[bool] = False,
-        session_timeout: Optional[int] = 5000,
-        session_keepalive: Optional[bool] = False,
-        session_keepalive_interval: Optional[int] = 10,
-        session_keepalive_type: Optional[str] = &#34;network&#34;,
-        session_keepalive_pattern: Optional[str] = &#34;\005&#34;,
+        setup_validate_host: bool = False,
+        setup_port: int = 22,
+        setup_timeout: int = 5,
+        setup_ssh_config_file: Union[str, bool] = False,
+        setup_use_paramiko: bool = False,
+        session_timeout: int = 5000,
+        session_keepalive: bool = False,
+        session_keepalive_interval: int = 10,
+        session_keepalive_type: str = &#34;network&#34;,
+        session_keepalive_pattern: str = &#34;\005&#34;,
         auth_user: str = &#34;&#34;,
-        auth_password: Optional[Union[str]] = None,
-        auth_public_key: Optional[Union[str]] = None,
-        comms_strip_ansi: Optional[bool] = False,
-        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
-        comms_operation_timeout: Optional[int] = 10,
-        comms_return_char: Optional[str] = &#34;\n&#34;,
-        comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
-        comms_disable_paging: Optional[Union[str, Callable]] = &#34;terminal length 0&#34;,
+        auth_password: Optional[str] = None,
+        auth_public_key: Optional[str] = None,
+        comms_strip_ansi: bool = False,
+        comms_prompt_regex: str = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
+        comms_operation_timeout: int = 10,
+        comms_return_char: str = &#34;\n&#34;,
+        comms_pre_login_handler: Union[str, Callable] = &#34;&#34;,
+        comms_disable_paging: Union[str, Callable] = &#34;terminal length 0&#34;,
     ):
         r&#34;&#34;&#34;
-        Initialize SSH2Net Object
+        SSH2Net Object
+
+        SSH2Net Inheritance/Mixin flow:
+
+        SSH2Net &lt;- SSH2NetChannel &lt;- SSH2NetSession &lt;- SSH2NetSocket
 
         Setup basic parameters required to connect to devices via ssh. Pay extra attention
         to the &#34;comms_prompt_regex&#34; as this is highly critical to this tool working well!
@@ -87,7 +92,7 @@ class SSH2Net(SSH2NetSession):
                 &#34;normal&#34; ssh keepalives via ssh2 library. In both cases a thread is spawned in
                 which the keepalives are sent. This introduces a locking mechanism which in
                 theory will slow things down slightly, however provides the ability to keep the
-                session alive indefinitely.
+                session alive indefinitely. # TODO dont support &#34;normal&#34; via paramiko?
             session_keepalive_pattern: pattern to send to keep network channel alive. Default is
                 u&#34;\005&#34; which is equivalent to &#34;ctrl+e&#34;. This pattern moves cursor to end of the
                 line which should be an innocuous pattern. This will only be entered *if* a lock
@@ -162,42 +167,7 @@ class SSH2Net(SSH2NetSession):
                 setup_ssh_config_file = &#34;&#34;
             self._setup_ssh_config_args(setup_ssh_config_file)
 
-        session_log.info(f&#34;{str(self)}; {repr(self)}&#34;)
-
-    def __enter__(self):
-        &#34;&#34;&#34;
-        Enter method for context manager
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            self: instance of self
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        self.open_shell()
-        return self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        &#34;&#34;&#34;
-        Exit method to cleanup for context manager
-
-        Args:
-            exception_type: exception type being raised
-            exception_value: message from exception being raised
-            traceback: traceback from exception being raised
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        self.close()
+        LOG.info(f&#34;{str(self)}; {repr(self)}&#34;)
 
     def __str__(self):
         &#34;&#34;&#34;
@@ -235,19 +205,54 @@ class SSH2Net(SSH2NetSession):
 
     def __bool__(self):
         &#34;&#34;&#34;
-        Magic bool method based on result of session_alive
+        Magic bool method for SSH2Net
 
         Args:
             N/A  # noqa
 
         Returns:
-            bool: True/False if session is alive or not
+            bool: True/False if socket is alive or not
 
         Raises:
             N/A  # noqa
 
         &#34;&#34;&#34;
         return self._session_alive()
+
+    def __enter__(self):
+        &#34;&#34;&#34;
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        self.open_shell()
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        &#34;&#34;&#34;
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        self.close()
 
     @staticmethod
     def _set_comms_pre_login_handler(
@@ -273,7 +278,7 @@ class SSH2Net(SSH2NetSession):
             ext_func = validate_external_function(comms_pre_login_handler)
             if ext_func:
                 return ext_func
-            session_log.critical(f&#34;Invalid comms_pre_login_handler: {comms_pre_login_handler}&#34;)
+            LOG.critical(f&#34;Invalid comms_pre_login_handler: {comms_pre_login_handler}&#34;)
             raise ValueError(
                 f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
                 &#34;or path to a function.&#34;
@@ -306,7 +311,7 @@ class SSH2Net(SSH2NetSession):
                 return ext_func
             if isinstance(comms_disable_paging, str):
                 return comms_disable_paging
-            session_log.critical(f&#34;Invalid comms_disable_paging: {comms_disable_paging}&#34;)
+            LOG.critical(f&#34;Invalid comms_disable_paging: {comms_disable_paging}&#34;)
             raise ValueError(
                 f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
                 &#34;path to a function, or is not a string.&#34;
@@ -330,7 +335,7 @@ class SSH2Net(SSH2NetSession):
             TypeError
 
         &#34;&#34;&#34;
-        session_log.critical(f&#34;Invalid &#39;{arg_name}&#39;: {arg}&#34;)
+        LOG.critical(f&#34;Invalid &#39;{arg_name}&#39;: {arg}&#34;)
         raise TypeError(f&#34;&#39;{arg_name}&#39; must be {target_type}, got: {type(arg)}&#39;&#34;)
 
     def _setup_setup_args(
@@ -494,7 +499,7 @@ class SSH2Net(SSH2NetSession):
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
-    def _setup_ssh_config_args(self, setup_ssh_config_file) -&gt; None:
+    def _setup_ssh_config_args(self, setup_ssh_config_file: Union[str, bool]) -&gt; None:
         &#34;&#34;&#34;
         Set any args from ssh config file to override existing settings
 
@@ -517,8 +522,6 @@ class SSH2Net(SSH2NetSession):
         if host_config.identity_file:
             self.auth_public_key = os.path.expanduser(host_config.identity_file.strip().encode())
 
-    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;  # noqa
-
     def _validate_host(self) -&gt; None:
         &#34;&#34;&#34;
         Validate host is valid IP or resolvable DNS name
@@ -537,106 +540,13 @@ class SSH2Net(SSH2NetSession):
             ipaddress.ip_address(self.host)
             return
         except ValueError:
-            session_log.info(f&#34;Failed to validate host {self.host} as an ip address&#34;)
+            LOG.info(f&#34;Failed to validate host {self.host} as an ip address&#34;)
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
-            session_log.info(f&#34;Failed to validate host {self.host} as a resolvable dns name&#34;)
-        raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)
-
-    &#34;&#34;&#34; socket setup &#34;&#34;&#34;  # noqa
-
-    def _socket_alive(self) -&gt; bool:
-        &#34;&#34;&#34;
-        Check if underlying socket is alive
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            bool True/False if socket is alive
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        try:
-            self.sock.send(b&#34;&#34;)
-            return True
-        except OSError:
-            # socket is not alive
-            session_log.debug(f&#34;Socket to host {self.host} is not alive&#34;)
-            return False
-        except AttributeError:
-            # socket never created yet
-            session_log.debug(f&#34;Socket to host {self.host} has never been created&#34;)
-            return False
-
-    def _socket_open(self) -&gt; None:
-        &#34;&#34;&#34;
-        Open underlying socket
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            SetupTimeout: if socket connection times out
-
-        &#34;&#34;&#34;
-        if not self._socket_alive():
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(self.setup_timeout)
-            try:
-                self.sock.connect((self.host, self.port))
-            except socket.timeout:
-                session_log.critical(
-                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
-                )
-                raise SetupTimeout(
-                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
-                )
-            session_log.debug(f&#34;Socket to host {self.host} opened&#34;)
-
-    def _socket_close(self) -&gt; None:
-        &#34;&#34;&#34;
-        Close underlying socket
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        if self._socket_alive():
-            self.sock.close()
-            session_log.debug(f&#34;Socket to host {self.host} closed&#34;)
-
-    def close(self) -&gt; None:
-        &#34;&#34;&#34;
-        Fully close socket, session, and channel
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        self._channel_close()
-        self._session_close()
-        self._socket_close()
-        session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
+            LOG.info(f&#34;Failed to validate host {self.host} as a resolvable dns name&#34;)
+        raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -653,7 +563,33 @@ class SSH2Net(SSH2NetSession):
 <span>(</span><span>setup_host='', setup_validate_host=False, setup_port=22, setup_timeout=5, setup_ssh_config_file=False, setup_use_paramiko=False, session_timeout=5000, session_keepalive=False, session_keepalive_interval=10, session_keepalive_type='network', session_keepalive_pattern='\x05', auth_user='', auth_password=None, auth_public_key=None, comms_strip_ansi=False, comms_prompt_regex=&#x27;^[a-z0-9.\\-@()/:]{1,32}[#&gt;$]$&#x27;, comms_operation_timeout=10, comms_return_char='\n', comms_pre_login_handler='', comms_disable_paging='terminal length 0')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net Object</p>
+<section class="desc"><p>SSH2NetChannel</p>
+<p>SSH2Net &lt;- SSH2NetChannel &lt;- SSH2NetSession &lt;- SSH2NetSocket</p>
+<p>SSH2NetChannel is responsible for all channel input and output. SSH2NetChannel should not care
+about what is providing the channel. At time of writing the channel can be provided by
+ssh2-python or paramiko. The channel provided must provide the following methods:</p>
+<pre><code>write:
+    accept channel input as a string and write it to the channel
+
+read:
+    read data from the channel
+
+flush:
+    flush the channel -- pull all data off the channel basically
+
+close:
+    close the channel object
+</code></pre>
+<p>The channel object should also provide an <code>execute</code> method, though this is really only useful
+for ssh2-python at the moment so it could just raise a NotImplemented exception for that method.</p>
+<p>The following arguments are type hinted here at the base class. ssh2net uses a mixin type
+structure to divide each logical component of the overall ssh2net object into its own class.
+Because of the mixin structure there are no init methods in the Channel, Session, or Socket
+classes. In order to appease mypy and ensure that ssh2net is typed reasonably well the typing
+information for these classes are done at the class level as found here.</p>
+<p>SSH2Net Object</p>
+<p>SSH2Net Inheritance/Mixin flow:</p>
+<p>SSH2Net &lt;- SSH2NetChannel &lt;- SSH2NetSession &lt;- SSH2NetSocket</p>
 <p>Setup basic parameters required to connect to devices via ssh. Pay extra attention
 to the "comms_prompt_regex" as this is highly critical to this tool working well!</p>
 <h2 id="args">Args</h2>
@@ -682,7 +618,7 @@ channel as "normal" ssh keepalive doesn't keep sessions open. "standard" sends
 "normal" ssh keepalives via ssh2 library. In both cases a thread is spawned in
 which the keepalives are sent. This introduces a locking mechanism which in
 theory will slow things down slightly, however provides the ability to keep the
-session alive indefinitely.</dd>
+session alive indefinitely. # TODO dont support "normal" via paramiko?</dd>
 <dt><strong><code>session_keepalive_pattern</code></strong></dt>
 <dd>pattern to send to keep network channel alive. Default is
 u"\005" which is equivalent to "ctrl+e". This pattern moves cursor to end of the
@@ -740,32 +676,36 @@ string to send to device to disable paging</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SSH2Net(SSH2NetSession):
+<pre><code class="python">class SSH2Net(SSH2NetChannel):
     def __init__(
         self,
         setup_host: str = &#34;&#34;,
-        setup_validate_host: Optional[bool] = False,
-        setup_port: Optional[int] = 22,
-        setup_timeout: Optional[int] = 5,
-        setup_ssh_config_file: Optional[Union[str, bool]] = False,
-        setup_use_paramiko: Optional[bool] = False,
-        session_timeout: Optional[int] = 5000,
-        session_keepalive: Optional[bool] = False,
-        session_keepalive_interval: Optional[int] = 10,
-        session_keepalive_type: Optional[str] = &#34;network&#34;,
-        session_keepalive_pattern: Optional[str] = &#34;\005&#34;,
+        setup_validate_host: bool = False,
+        setup_port: int = 22,
+        setup_timeout: int = 5,
+        setup_ssh_config_file: Union[str, bool] = False,
+        setup_use_paramiko: bool = False,
+        session_timeout: int = 5000,
+        session_keepalive: bool = False,
+        session_keepalive_interval: int = 10,
+        session_keepalive_type: str = &#34;network&#34;,
+        session_keepalive_pattern: str = &#34;\005&#34;,
         auth_user: str = &#34;&#34;,
-        auth_password: Optional[Union[str]] = None,
-        auth_public_key: Optional[Union[str]] = None,
-        comms_strip_ansi: Optional[bool] = False,
-        comms_prompt_regex: Optional[str] = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
-        comms_operation_timeout: Optional[int] = 10,
-        comms_return_char: Optional[str] = &#34;\n&#34;,
-        comms_pre_login_handler: Optional[Union[str, Callable]] = &#34;&#34;,
-        comms_disable_paging: Optional[Union[str, Callable]] = &#34;terminal length 0&#34;,
+        auth_password: Optional[str] = None,
+        auth_public_key: Optional[str] = None,
+        comms_strip_ansi: bool = False,
+        comms_prompt_regex: str = r&#34;^[a-z0-9.\-@()/:]{1,32}[#&gt;$]$&#34;,
+        comms_operation_timeout: int = 10,
+        comms_return_char: str = &#34;\n&#34;,
+        comms_pre_login_handler: Union[str, Callable] = &#34;&#34;,
+        comms_disable_paging: Union[str, Callable] = &#34;terminal length 0&#34;,
     ):
         r&#34;&#34;&#34;
-        Initialize SSH2Net Object
+        SSH2Net Object
+
+        SSH2Net Inheritance/Mixin flow:
+
+        SSH2Net &lt;- SSH2NetChannel &lt;- SSH2NetSession &lt;- SSH2NetSocket
 
         Setup basic parameters required to connect to devices via ssh. Pay extra attention
         to the &#34;comms_prompt_regex&#34; as this is highly critical to this tool working well!
@@ -785,7 +725,7 @@ string to send to device to disable paging</dd>
                 &#34;normal&#34; ssh keepalives via ssh2 library. In both cases a thread is spawned in
                 which the keepalives are sent. This introduces a locking mechanism which in
                 theory will slow things down slightly, however provides the ability to keep the
-                session alive indefinitely.
+                session alive indefinitely. # TODO dont support &#34;normal&#34; via paramiko?
             session_keepalive_pattern: pattern to send to keep network channel alive. Default is
                 u&#34;\005&#34; which is equivalent to &#34;ctrl+e&#34;. This pattern moves cursor to end of the
                 line which should be an innocuous pattern. This will only be entered *if* a lock
@@ -860,42 +800,7 @@ string to send to device to disable paging</dd>
                 setup_ssh_config_file = &#34;&#34;
             self._setup_ssh_config_args(setup_ssh_config_file)
 
-        session_log.info(f&#34;{str(self)}; {repr(self)}&#34;)
-
-    def __enter__(self):
-        &#34;&#34;&#34;
-        Enter method for context manager
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            self: instance of self
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        self.open_shell()
-        return self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        &#34;&#34;&#34;
-        Exit method to cleanup for context manager
-
-        Args:
-            exception_type: exception type being raised
-            exception_value: message from exception being raised
-            traceback: traceback from exception being raised
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        self.close()
+        LOG.info(f&#34;{str(self)}; {repr(self)}&#34;)
 
     def __str__(self):
         &#34;&#34;&#34;
@@ -933,19 +838,54 @@ string to send to device to disable paging</dd>
 
     def __bool__(self):
         &#34;&#34;&#34;
-        Magic bool method based on result of session_alive
+        Magic bool method for SSH2Net
 
         Args:
             N/A  # noqa
 
         Returns:
-            bool: True/False if session is alive or not
+            bool: True/False if socket is alive or not
 
         Raises:
             N/A  # noqa
 
         &#34;&#34;&#34;
         return self._session_alive()
+
+    def __enter__(self):
+        &#34;&#34;&#34;
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        self.open_shell()
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        &#34;&#34;&#34;
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        self.close()
 
     @staticmethod
     def _set_comms_pre_login_handler(
@@ -971,7 +911,7 @@ string to send to device to disable paging</dd>
             ext_func = validate_external_function(comms_pre_login_handler)
             if ext_func:
                 return ext_func
-            session_log.critical(f&#34;Invalid comms_pre_login_handler: {comms_pre_login_handler}&#34;)
+            LOG.critical(f&#34;Invalid comms_pre_login_handler: {comms_pre_login_handler}&#34;)
             raise ValueError(
                 f&#34;{comms_pre_login_handler} is an invalid comms_pre_login_handler function &#34;
                 &#34;or path to a function.&#34;
@@ -1004,7 +944,7 @@ string to send to device to disable paging</dd>
                 return ext_func
             if isinstance(comms_disable_paging, str):
                 return comms_disable_paging
-            session_log.critical(f&#34;Invalid comms_disable_paging: {comms_disable_paging}&#34;)
+            LOG.critical(f&#34;Invalid comms_disable_paging: {comms_disable_paging}&#34;)
             raise ValueError(
                 f&#34;{comms_disable_paging} is an invalid comms_disable_paging function, &#34;
                 &#34;path to a function, or is not a string.&#34;
@@ -1028,7 +968,7 @@ string to send to device to disable paging</dd>
             TypeError
 
         &#34;&#34;&#34;
-        session_log.critical(f&#34;Invalid &#39;{arg_name}&#39;: {arg}&#34;)
+        LOG.critical(f&#34;Invalid &#39;{arg_name}&#39;: {arg}&#34;)
         raise TypeError(f&#34;&#39;{arg_name}&#39; must be {target_type}, got: {type(arg)}&#39;&#34;)
 
     def _setup_setup_args(
@@ -1192,7 +1132,7 @@ string to send to device to disable paging</dd>
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
-    def _setup_ssh_config_args(self, setup_ssh_config_file) -&gt; None:
+    def _setup_ssh_config_args(self, setup_ssh_config_file: Union[str, bool]) -&gt; None:
         &#34;&#34;&#34;
         Set any args from ssh config file to override existing settings
 
@@ -1215,8 +1155,6 @@ string to send to device to disable paging</dd>
         if host_config.identity_file:
             self.auth_public_key = os.path.expanduser(host_config.identity_file.strip().encode())
 
-    &#34;&#34;&#34; pre socket setup &#34;&#34;&#34;  # noqa
-
     def _validate_host(self) -&gt; None:
         &#34;&#34;&#34;
         Validate host is valid IP or resolvable DNS name
@@ -1235,171 +1173,33 @@ string to send to device to disable paging</dd>
             ipaddress.ip_address(self.host)
             return
         except ValueError:
-            session_log.info(f&#34;Failed to validate host {self.host} as an ip address&#34;)
+            LOG.info(f&#34;Failed to validate host {self.host} as an ip address&#34;)
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
-            session_log.info(f&#34;Failed to validate host {self.host} as a resolvable dns name&#34;)
-        raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)
-
-    &#34;&#34;&#34; socket setup &#34;&#34;&#34;  # noqa
-
-    def _socket_alive(self) -&gt; bool:
-        &#34;&#34;&#34;
-        Check if underlying socket is alive
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            bool True/False if socket is alive
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        try:
-            self.sock.send(b&#34;&#34;)
-            return True
-        except OSError:
-            # socket is not alive
-            session_log.debug(f&#34;Socket to host {self.host} is not alive&#34;)
-            return False
-        except AttributeError:
-            # socket never created yet
-            session_log.debug(f&#34;Socket to host {self.host} has never been created&#34;)
-            return False
-
-    def _socket_open(self) -&gt; None:
-        &#34;&#34;&#34;
-        Open underlying socket
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            SetupTimeout: if socket connection times out
-
-        &#34;&#34;&#34;
-        if not self._socket_alive():
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(self.setup_timeout)
-            try:
-                self.sock.connect((self.host, self.port))
-            except socket.timeout:
-                session_log.critical(
-                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
-                )
-                raise SetupTimeout(
-                    f&#34;Timed out trying to open socket to {self.host} on port {self.port}&#34;
-                )
-            session_log.debug(f&#34;Socket to host {self.host} opened&#34;)
-
-    def _socket_close(self) -&gt; None:
-        &#34;&#34;&#34;
-        Close underlying socket
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        if self._socket_alive():
-            self.sock.close()
-            session_log.debug(f&#34;Socket to host {self.host} closed&#34;)
-
-    def close(self) -&gt; None:
-        &#34;&#34;&#34;
-        Fully close socket, session, and channel
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        self._channel_close()
-        self._session_close()
-        self._socket_close()
-        session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
+            LOG.info(f&#34;Failed to validate host {self.host} as a resolvable dns name&#34;)
+        raise ValidationError(f&#34;Host {self.host} is not an IP or resolvable DNS name.&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
 <li><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></li>
+<li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="ssh2net.core.driver.BaseNetworkDriver" href="core/driver.html#ssh2net.core.driver.BaseNetworkDriver">BaseNetworkDriver</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="ssh2net.base.SSH2Net.close"><code class="name flex">
-<span>def <span class="ident">close</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Fully close socket, session, and channel</p>
-<h2 id="args">Args</h2>
-<p>N/A
-# noqa</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>N</code>/<code>A</code>
-# <code>noqa</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>N</code>/<code>A</code>
-# <code>noqa</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def close(self) -&gt; None:
-    &#34;&#34;&#34;
-    Fully close socket, session, and channel
-
-    Args:
-        N/A  # noqa
-
-    Returns:
-        N/A  # noqa
-
-    Raises:
-        N/A  # noqa
-
-    &#34;&#34;&#34;
-    self._channel_close()
-    self._session_close()
-    self._socket_close()
-    session_log.info(f&#34;{str(self)}; Closed&#34;)</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></b></code>:
+<li><code><b><a title="ssh2net.channel.SSH2NetChannel" href="channel.html#ssh2net.channel.SSH2NetChannel">SSH2NetChannel</a></b></code>:
 <ul class="hlist">
-<li><code><a title="ssh2net.session.SSH2NetSession.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
-<li><code><a title="ssh2net.session.SSH2NetSession.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
-<li><code><a title="ssh2net.session.SSH2NetSession.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
-<li><code><a title="ssh2net.session.SSH2NetSession.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.close" href="session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_and_execute" href="channel.html#ssh2net.channel.SSH2NetChannel.open_and_execute">open_and_execute</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.open_shell" href="channel.html#ssh2net.channel.SSH2NetChannel.open_shell">open_shell</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs">send_inputs</a></code></li>
+<li><code><a title="ssh2net.channel.SSH2NetChannel.send_inputs_interact" href="channel.html#ssh2net.channel.SSH2NetChannel.send_inputs_interact">send_inputs_interact</a></code></li>
 </ul>
 </li>
 </ul>
@@ -1422,9 +1222,6 @@ string to send to device to disable paging</dd>
 <ul>
 <li>
 <h4><code><a title="ssh2net.base.SSH2Net" href="#ssh2net.base.SSH2Net">SSH2Net</a></code></h4>
-<ul class="">
-<li><code><a title="ssh2net.base.SSH2Net.close" href="#ssh2net.base.SSH2Net.close">close</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

@@ -27,12 +27,13 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.response&#34;&#34;&#34;
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 
 class SSH2NetResult:
     def __init__(
         self,
+        host: str,
         channel_input: str,
         expectation: Optional[str] = None,
         response: Optional[str] = None,
@@ -46,6 +47,7 @@ class SSH2NetResult:
         determine if command was successful or not and reflect that in a failed attribute.
 
         Args:
+            host: host that was operated on
             channel_input: input that got sent down the channel
             expectation: used for send_inputs_interact -- string to expect back from the channel
                 after initial input
@@ -61,15 +63,17 @@ class SSH2NetResult:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self.host = host
         self.start_time = datetime.now()
-        self.finish_time = None
-        self.elapsed_time = None
+        self.finish_time: Optional[datetime] = None
+        self.elapsed_time: Optional[float] = None
 
         self.channel_input = channel_input
         self.expectation = expectation
         self.response = response
         self.finale = finale
-        self.result = None
+        self.result: str = &#34;&#34;
+        self.structured_result: Optional[Union[Dict, List]] = None
 
         # for future use -- could add failed when terms in each driver, then check for those strings
         # in results to determine if the command failed, could also set this at send_inputs level
@@ -156,7 +160,7 @@ class SSH2NetResult:
 <dl>
 <dt id="ssh2net.result.SSH2NetResult"><code class="flex name class">
 <span>class <span class="ident">SSH2NetResult</span></span>
-<span>(</span><span>channel_input, expectation=None, response=None, finale=None, failed_when_contains=None)</span>
+<span>(</span><span>host, channel_input, expectation=None, response=None, finale=None, failed_when_contains=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>SSH2NetResult object</p>
@@ -164,6 +168,8 @@ class SSH2NetResult:
 determine if command was successful or not and reflect that in a failed attribute.</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>host</code></strong></dt>
+<dd>host that was operated on</dd>
 <dt><strong><code>channel_input</code></strong></dt>
 <dd>input that got sent down the channel</dd>
 <dt><strong><code>expectation</code></strong></dt>
@@ -196,6 +202,7 @@ failed command/interaction</dd>
 <pre><code class="python">class SSH2NetResult:
     def __init__(
         self,
+        host: str,
         channel_input: str,
         expectation: Optional[str] = None,
         response: Optional[str] = None,
@@ -209,6 +216,7 @@ failed command/interaction</dd>
         determine if command was successful or not and reflect that in a failed attribute.
 
         Args:
+            host: host that was operated on
             channel_input: input that got sent down the channel
             expectation: used for send_inputs_interact -- string to expect back from the channel
                 after initial input
@@ -224,15 +232,17 @@ failed command/interaction</dd>
             N/A  # noqa
 
         &#34;&#34;&#34;
+        self.host = host
         self.start_time = datetime.now()
-        self.finish_time = None
-        self.elapsed_time = None
+        self.finish_time: Optional[datetime] = None
+        self.elapsed_time: Optional[float] = None
 
         self.channel_input = channel_input
         self.expectation = expectation
         self.response = response
         self.finale = finale
-        self.result = None
+        self.result: str = &#34;&#34;
+        self.structured_result: Optional[Union[Dict, List]] = None
 
         # for future use -- could add failed when terms in each driver, then check for those strings
         # in results to determine if the command failed, could also set this at send_inputs level

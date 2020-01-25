@@ -27,15 +27,15 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;ssh2net.ssh_config&#34;&#34;&#34;
 import os
-from pathlib import Path
 import re
 import shlex
+from pathlib import Path
 
 
 class SSH2NetSSHConfig:
-    def __init__(self, ssh_config_file=&#34;&#34;):
+    def __init__(self, ssh_config_file=&#34;&#34;) -&gt; None:
         &#34;&#34;&#34;
-        Initialize SSH2NetSSHConfig Object
+        SSH2NetSSHConfig Object
 
         Parse OpenSSH config file
 
@@ -75,7 +75,7 @@ class SSH2NetSSHConfig:
         else:
             self.hosts = None
 
-    def __str__(self):
+    def __str__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic str method for SSH2NetSSHConfig class
 
@@ -91,7 +91,7 @@ class SSH2NetSSHConfig:
         &#34;&#34;&#34;
         return &#34;SSH2NetSSHConfig Object&#34;
 
-    def __repr__(self):
+    def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic repr method for SSH2NetSSHConfig class
 
@@ -109,7 +109,7 @@ class SSH2NetSSHConfig:
         del class_dict[&#34;ssh_config_file&#34;]
         return f&#34;SSH2NetSSHConfig {class_dict}&#34;
 
-    def __bool__(self):
+    def __bool__(self) -&gt; bool:
         &#34;&#34;&#34;
         Magic bool method; return True if ssh_config_file
 
@@ -128,7 +128,7 @@ class SSH2NetSSHConfig:
         return False
 
     @staticmethod
-    def _select_config_file(ssh_config_file):
+    def _select_config_file(ssh_config_file: str):
         &#34;&#34;&#34;
         Select ssh configuration file
 
@@ -151,7 +151,7 @@ class SSH2NetSSHConfig:
         return None
 
     @staticmethod
-    def _strip_comments(line):
+    def _strip_comments(line: str) -&gt; str:
         &#34;&#34;&#34;
         Strip out comments from ssh config file lines
 
@@ -241,7 +241,7 @@ class SSH2NetSSHConfig:
             discovered_hosts[host.hosts] = host
         return discovered_hosts
 
-    def _lookup_fuzzy_match(self, host):
+    def _lookup_fuzzy_match(self, host: str):
         &#34;&#34;&#34;
         Look up fuzzy matched hosts
 
@@ -292,7 +292,7 @@ class SSH2NetSSHConfig:
                 best_match = match
         return self.hosts[best_match[1]]
 
-    def lookup(self, host):
+    def lookup(self, host: str):
         &#34;&#34;&#34;
         Lookup a given host
 
@@ -319,9 +319,11 @@ class SSH2NetSSHConfig:
 
 
 class Host:
-    def __init__(self):
+    &#34;&#34;&#34;Host&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
         &#34;&#34;&#34;
-        Initialize SSH2Net Host Object
+        Host Object
 
         Create a Host object based on ssh config file information
         &#34;&#34;&#34;
@@ -338,7 +340,7 @@ class Host:
         self.password_authentication = None
         self.preferred_authentication = None
 
-    def __str__(self):
+    def __str__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic str method for HostEntry class
 
@@ -354,7 +356,7 @@ class Host:
         &#34;&#34;&#34;
         return f&#34;Host: {self.hosts}&#34;
 
-    def __repr__(self):
+    def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic repr method for HostEntry class
 
@@ -385,16 +387,19 @@ class Host:
 <span>class <span class="ident">Host</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2Net Host Object</p>
+<section class="desc"><p>Host</p>
+<p>Host Object</p>
 <p>Create a Host object based on ssh config file information</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Host:
-    def __init__(self):
+    &#34;&#34;&#34;Host&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
         &#34;&#34;&#34;
-        Initialize SSH2Net Host Object
+        Host Object
 
         Create a Host object based on ssh config file information
         &#34;&#34;&#34;
@@ -411,7 +416,7 @@ class Host:
         self.password_authentication = None
         self.preferred_authentication = None
 
-    def __str__(self):
+    def __str__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic str method for HostEntry class
 
@@ -427,7 +432,7 @@ class Host:
         &#34;&#34;&#34;
         return f&#34;Host: {self.hosts}&#34;
 
-    def __repr__(self):
+    def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic repr method for HostEntry class
 
@@ -450,7 +455,7 @@ class Host:
 <span>(</span><span>ssh_config_file='')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2NetSSHConfig Object</p>
+<section class="desc"><p>SSH2NetSSHConfig Object</p>
 <p>Parse OpenSSH config file</p>
 <p>Try to load the following data for all entries in config file:
 Host
@@ -489,9 +494,9 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SSH2NetSSHConfig:
-    def __init__(self, ssh_config_file=&#34;&#34;):
+    def __init__(self, ssh_config_file=&#34;&#34;) -&gt; None:
         &#34;&#34;&#34;
-        Initialize SSH2NetSSHConfig Object
+        SSH2NetSSHConfig Object
 
         Parse OpenSSH config file
 
@@ -531,7 +536,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
         else:
             self.hosts = None
 
-    def __str__(self):
+    def __str__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic str method for SSH2NetSSHConfig class
 
@@ -547,7 +552,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
         &#34;&#34;&#34;
         return &#34;SSH2NetSSHConfig Object&#34;
 
-    def __repr__(self):
+    def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Magic repr method for SSH2NetSSHConfig class
 
@@ -565,7 +570,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
         del class_dict[&#34;ssh_config_file&#34;]
         return f&#34;SSH2NetSSHConfig {class_dict}&#34;
 
-    def __bool__(self):
+    def __bool__(self) -&gt; bool:
         &#34;&#34;&#34;
         Magic bool method; return True if ssh_config_file
 
@@ -584,7 +589,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
         return False
 
     @staticmethod
-    def _select_config_file(ssh_config_file):
+    def _select_config_file(ssh_config_file: str):
         &#34;&#34;&#34;
         Select ssh configuration file
 
@@ -607,7 +612,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
         return None
 
     @staticmethod
-    def _strip_comments(line):
+    def _strip_comments(line: str) -&gt; str:
         &#34;&#34;&#34;
         Strip out comments from ssh config file lines
 
@@ -697,7 +702,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
             discovered_hosts[host.hosts] = host
         return discovered_hosts
 
-    def _lookup_fuzzy_match(self, host):
+    def _lookup_fuzzy_match(self, host: str):
         &#34;&#34;&#34;
         Look up fuzzy matched hosts
 
@@ -748,7 +753,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
                 best_match = match
         return self.hosts[best_match[1]]
 
-    def lookup(self, host):
+    def lookup(self, host: str):
         &#34;&#34;&#34;
         Lookup a given host
 
@@ -801,7 +806,7 @@ will try to use users ssh config file in ~/.ssh/config first, then will try
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def lookup(self, host):
+<pre><code class="python">def lookup(self, host: str):
     &#34;&#34;&#34;
     Lookup a given host
 

@@ -29,12 +29,11 @@
 import logging
 import re
 import sys
-from typing import List, Optional, Tuple, Union
-
-from ssh2.exceptions import SocketRecvError, Timeout
+from typing import Callable, List, Optional, Tuple, Union
 
 from ssh2net.decorators import channel_timeout
 from ssh2net.result import SSH2NetResult
+from ssh2net.session import SSH2NetSession
 
 if not sys.platform.startswith(&#34;win&#34;):
     from ssh2net.decorators import operation_timeout
@@ -42,11 +41,64 @@ else:
     from ssh2net.decorators import operation_timeout_win as operation_timeout
 
 
-channel_log = logging.getLogger(&#34;ssh2net_channel&#34;)
-session_log = logging.getLogger(&#34;ssh2net_session&#34;)
+LOG_ADMIN = logging.getLogger(&#34;ssh2net_channel_admin&#34;)
+LOG_RAW = logging.getLogger(&#34;ssh2net_channel_raw&#34;)
 
 
-class SSH2NetChannel:
+class SSH2NetChannel(SSH2NetSession):
+    &#34;&#34;&#34;
+    SSH2NetChannel
+
+    SSH2Net &lt;- SSH2NetChannel &lt;- SSH2NetSession &lt;- SSH2NetSocket
+
+    SSH2NetChannel is responsible for all channel input and output. SSH2NetChannel should not care
+    about what is providing the channel. At time of writing the channel can be provided by
+    ssh2-python or paramiko. The channel provided must provide the following methods:
+
+        write:
+            accept channel input as a string and write it to the channel
+
+        read:
+            read data from the channel
+
+        flush:
+            flush the channel -- pull all data off the channel basically
+
+        close:
+            close the channel object
+
+    The channel object should also provide an `execute` method, though this is really only useful
+    for ssh2-python at the moment so it could just raise a NotImplemented exception for that method.
+
+    The following arguments are type hinted here at the base class. ssh2net uses a mixin type
+    structure to divide each logical component of the overall ssh2net object into its own class.
+    Because of the mixin structure there are no init methods in the Channel, Session, or Socket
+    classes. In order to appease mypy and ensure that ssh2net is typed reasonably well the typing
+    information for these classes are done at the class level as found here.
+
+    &#34;&#34;&#34;
+
+    host: str
+    setup_validate_host: bool
+    setup_port: int
+    setup_timeout: int
+    setup_ssh_config_file: Union[str, bool]
+    setup_use_paramiko: bool
+    session_timeout: int
+    session_keepalive: bool
+    session_keepalive_interval: int
+    session_keepalive_type: str
+    session_keepalive_pattern: str
+    auth_user: str
+    auth_password: Optional[str]
+    auth_public_key: Optional[str]
+    comms_strip_ansi: bool
+    comms_prompt_regex: str
+    comms_operation_timeout: int
+    comms_return_char: str
+    comms_pre_login_handler: Callable
+    comms_disable_paging: Union[str, Callable]
+
     @staticmethod
     def _rstrip_all_lines(output: bytes) -&gt; str:
         &#34;&#34;&#34;
@@ -56,15 +108,16 @@ class SSH2NetChannel:
             output: bytes object to handle
 
         Returns:
-            output: bytes object with each line right stripped
+            output: str object with each line right stripped
 
         Raises:
             N/A  # noqa
 
         &#34;&#34;&#34;
-        output = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
-        output = [line.rstrip() for line in output]
-        return &#34;\n&#34;.join(output)
+        split_output: List[str] = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
+        split_output = [line.rstrip() for line in split_output]
+        rejoined_output = &#34;\n&#34;.join(split_output)
+        return rejoined_output
 
     @staticmethod
     def _strip_ansi(output: bytes) -&gt; bytes:
@@ -100,23 +153,23 @@ class SSH2NetChannel:
             N/A  # noqa
 
         &#34;&#34;&#34;
-        output = output.splitlines()
+        split_output = output.splitlines()
         # purge empty rows before actual output
-        for row in output.copy():
+        for row in split_output.copy():
             if row == &#34;&#34;:
-                output = output[1:]
+                split_output = split_output[1:]
             else:
                 break
 
-        output = &#34;\n&#34;.join(output)
+        output = &#34;\n&#34;.join(split_output)
         if strip_prompt:
-            # could be compiled somewhere else, btu this allows for users to modify the prompt on
+            # could be compiled somewhere else, but this allows for users to modify the prompt on
             # the fly if they want to
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
             output = re.sub(prompt_pattern, &#34;&#34;, output)
         return output
 
-    @channel_timeout(Timeout)
+    @channel_timeout()
     def _read_until_input(self, channel_input: str) -&gt; None:
         &#34;&#34;&#34;
         Read until all input has been entered, then send return.
@@ -139,13 +192,13 @@ class SSH2NetChannel:
                 output += self.channel.read()[1]
             else:
                 output += self._strip_ansi(self.channel.read()[1])
-        channel_log.debug(f&#34;Read: {repr(output)}&#34;)
+        LOG_RAW.debug(f&#34;Read: {repr(output)}&#34;)
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
+        LOG_RAW.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
 
-    @channel_timeout(Timeout)
+    @channel_timeout()
     def _read_until_prompt(self, output=None, prompt=None):
         &#34;&#34;&#34;
         Read the channel until the desired prompt is seen
@@ -185,7 +238,7 @@ class SSH2NetChannel:
                 output += self.channel.read()[1]
             else:
                 output += self._strip_ansi(self.channel.read()[1])
-            channel_log.debug(f&#34;Read: {repr(output)}&#34;)
+            LOG_RAW.debug(f&#34;Read: {repr(output)}&#34;)
             # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
@@ -218,16 +271,14 @@ class SSH2NetChannel:
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
-        result = SSH2NetResult(channel_input)
-        session_log.debug(
-            f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
-        )
+        result = SSH2NetResult(self.host, channel_input)
+        LOG_ADMIN.debug(f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;)
         self.channel.flush()
+        LOG_RAW.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self.channel.write(channel_input)
-        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
-        self.session_lock.release_lock()
+        self.session_lock.release()
         output = self._restructure_output(output, strip_prompt=strip_prompt)
         result.record_result(output)
         return result
@@ -259,15 +310,17 @@ class SSH2NetChannel:
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
-        result = SSH2NetResult(channel_input)
-        session_log.debug(
+        result = SSH2NetResult(self.host, channel_input)
+        LOG_ADMIN.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
-            f&#34;expecting: {expectation}; responding: {response}; &#34;
-            f&#34;with a finale: {finale}; hidden_response: {hidden_response}&#34;
+            f&#34;\texpecting: {expectation};&#34;
+            f&#34;\tresponding: {response};&#34;
+            f&#34;\twith a finale: {finale};&#34;
+            f&#34;\thidden_response: {hidden_response}&#34;
         )
         self.channel.flush()
         self.channel.write(channel_input)
-        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
+        LOG_RAW.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
@@ -278,86 +331,17 @@ class SSH2NetChannel:
         elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
-        channel_log.debug(f&#34;Write: {repr(response)}&#34;)
+        LOG_RAW.debug(f&#34;Write: {repr(response)}&#34;)
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
+        LOG_RAW.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
-        self.session_lock.release_lock()
+        self.session_lock.release()
         output = self._restructure_output(output)
         result.record_result(output)
         return result
 
-    def open_and_execute(self, command: str):
-        &#34;&#34;&#34;
-        Open ssh channel and execute a command; closes channel when done.
-
-        &#34;one time use&#34; method -- best for running one command then moving on; otherwise
-        use &#34;open_shell&#34; instead, though this will likely be substantially faster for &#34;single&#34;
-        operations.
-
-        Args:
-            command: string input to write to channel
-
-        Returns:
-            result: output from command sent over the channel
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        session_log.info(f&#34;Attempting to open channel for command execution&#34;)
-        if self._shell:
-            self._channel_close()
-        self._channel_open()
-        output = b&#34;&#34;
-        channel_buff = 1
-        session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
-        self.channel.execute(command)
-        while channel_buff &gt; 0:
-            try:
-                channel_buff, data = self.channel.read()
-                output += data
-            except SocketRecvError:
-                break
-        output = self._rstrip_all_lines(output)
-        result = self._restructure_output(output)
-        self.close()
-        session_log.info(f&#34;Command executed, channel closed&#34;)
-        return result
-
-    def open_shell(self) -&gt; None:
-        &#34;&#34;&#34;
-        Open and prepare interactive SSH shell
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        session_log.info(f&#34;Attempting to open interactive shell&#34;)
-        # open the channel itself
-        self._channel_open()
-        # invoke a shell on the channel
-        self._channel_invoke_shell()
-        # pre-login handling if needed for things like wlc
-        if self.comms_pre_login_handler:
-            self.comms_pre_login_handler(self)
-        # send disable paging if needed
-        if self.comms_disable_paging:
-            if callable(self.comms_disable_paging):
-                self.comms_disable_paging(self)
-            else:
-                self.send_inputs(self.comms_disable_paging)
-        self._session_keepalive()
-        session_log.info(&#34;Interactive shell opened&#34;)
-
-    @channel_timeout(Timeout)
-    def get_prompt(self) -&gt; bool:
+    @channel_timeout()
+    def get_prompt(self) -&gt; Union[str, bytes]:
         &#34;&#34;&#34;
         Read from shell and get the current shell prompt
 
@@ -375,7 +359,7 @@ class SSH2NetChannel:
         self.session.set_timeout(1000)
         self.channel.flush()
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
+        LOG_RAW.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         while True:
             output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
             output = output.decode(&#34;unicode_escape&#34;).strip()
@@ -410,7 +394,7 @@ class SSH2NetChannel:
             results.append(result)
         return results
 
-    def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
+    def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Primary entry point to interact with devices in shell mode; used to handle prompts
 
@@ -443,7 +427,58 @@ class SSH2NetChannel:
                 channel_input, expectation, response, finale, hidden_response
             )
             results.append(output)
-        return results</code></pre>
+        return results
+
+    def open_and_execute(self, command: str) -&gt; str:
+        &#34;&#34;&#34;
+        Open ssh channel and execute a command; closes channel when done.
+
+        &#34;one time use&#34; method -- best for running one command then moving on; otherwise
+        use &#34;open_shell&#34; instead, though this will likely be substantially faster for &#34;single&#34;
+        operations.
+
+        Args:
+            command: string input to write to channel
+
+        Returns:
+            result: output from command sent over the channel
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        if self.setup_use_paramiko:
+            raise NotImplementedError
+        output = self._open_and_execute(command)
+        stripped_output = self._rstrip_all_lines(output)
+        result = self._restructure_output(stripped_output)
+        return result
+
+    def open_shell(self) -&gt; None:
+        &#34;&#34;&#34;
+        Open and prepare interactive SSH shell
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        self._open_shell()
+        # pre-login handling if needed for things like accepting login banners etc.
+        if self.comms_pre_login_handler:
+            self.comms_pre_login_handler(self)
+        # send disable paging if needed
+        if self.comms_disable_paging:
+            if callable(self.comms_disable_paging):
+                self.comms_disable_paging(self)
+            else:
+                self.send_inputs(self.comms_disable_paging)
+        self._session_keepalive()</code></pre>
 </details>
 </section>
 <section>
@@ -459,12 +494,88 @@ class SSH2NetChannel:
 <span>class <span class="ident">SSH2NetChannel</span></span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>SSH2NetChannel</p>
+<p>SSH2Net &lt;- SSH2NetChannel &lt;- SSH2NetSession &lt;- SSH2NetSocket</p>
+<p>SSH2NetChannel is responsible for all channel input and output. SSH2NetChannel should not care
+about what is providing the channel. At time of writing the channel can be provided by
+ssh2-python or paramiko. The channel provided must provide the following methods:</p>
+<pre><code>write:
+    accept channel input as a string and write it to the channel
+
+read:
+    read data from the channel
+
+flush:
+    flush the channel -- pull all data off the channel basically
+
+close:
+    close the channel object
+</code></pre>
+<p>The channel object should also provide an <code>execute</code> method, though this is really only useful
+for ssh2-python at the moment so it could just raise a NotImplemented exception for that method.</p>
+<p>The following arguments are type hinted here at the base class. ssh2net uses a mixin type
+structure to divide each logical component of the overall ssh2net object into its own class.
+Because of the mixin structure there are no init methods in the Channel, Session, or Socket
+classes. In order to appease mypy and ensure that ssh2net is typed reasonably well the typing
+information for these classes are done at the class level as found here.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SSH2NetChannel:
+<pre><code class="python">class SSH2NetChannel(SSH2NetSession):
+    &#34;&#34;&#34;
+    SSH2NetChannel
+
+    SSH2Net &lt;- SSH2NetChannel &lt;- SSH2NetSession &lt;- SSH2NetSocket
+
+    SSH2NetChannel is responsible for all channel input and output. SSH2NetChannel should not care
+    about what is providing the channel. At time of writing the channel can be provided by
+    ssh2-python or paramiko. The channel provided must provide the following methods:
+
+        write:
+            accept channel input as a string and write it to the channel
+
+        read:
+            read data from the channel
+
+        flush:
+            flush the channel -- pull all data off the channel basically
+
+        close:
+            close the channel object
+
+    The channel object should also provide an `execute` method, though this is really only useful
+    for ssh2-python at the moment so it could just raise a NotImplemented exception for that method.
+
+    The following arguments are type hinted here at the base class. ssh2net uses a mixin type
+    structure to divide each logical component of the overall ssh2net object into its own class.
+    Because of the mixin structure there are no init methods in the Channel, Session, or Socket
+    classes. In order to appease mypy and ensure that ssh2net is typed reasonably well the typing
+    information for these classes are done at the class level as found here.
+
+    &#34;&#34;&#34;
+
+    host: str
+    setup_validate_host: bool
+    setup_port: int
+    setup_timeout: int
+    setup_ssh_config_file: Union[str, bool]
+    setup_use_paramiko: bool
+    session_timeout: int
+    session_keepalive: bool
+    session_keepalive_interval: int
+    session_keepalive_type: str
+    session_keepalive_pattern: str
+    auth_user: str
+    auth_password: Optional[str]
+    auth_public_key: Optional[str]
+    comms_strip_ansi: bool
+    comms_prompt_regex: str
+    comms_operation_timeout: int
+    comms_return_char: str
+    comms_pre_login_handler: Callable
+    comms_disable_paging: Union[str, Callable]
+
     @staticmethod
     def _rstrip_all_lines(output: bytes) -&gt; str:
         &#34;&#34;&#34;
@@ -474,15 +585,16 @@ class SSH2NetChannel:
             output: bytes object to handle
 
         Returns:
-            output: bytes object with each line right stripped
+            output: str object with each line right stripped
 
         Raises:
             N/A  # noqa
 
         &#34;&#34;&#34;
-        output = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
-        output = [line.rstrip() for line in output]
-        return &#34;\n&#34;.join(output)
+        split_output: List[str] = output.decode(&#34;unicode_escape&#34;).strip().splitlines()
+        split_output = [line.rstrip() for line in split_output]
+        rejoined_output = &#34;\n&#34;.join(split_output)
+        return rejoined_output
 
     @staticmethod
     def _strip_ansi(output: bytes) -&gt; bytes:
@@ -518,23 +630,23 @@ class SSH2NetChannel:
             N/A  # noqa
 
         &#34;&#34;&#34;
-        output = output.splitlines()
+        split_output = output.splitlines()
         # purge empty rows before actual output
-        for row in output.copy():
+        for row in split_output.copy():
             if row == &#34;&#34;:
-                output = output[1:]
+                split_output = split_output[1:]
             else:
                 break
 
-        output = &#34;\n&#34;.join(output)
+        output = &#34;\n&#34;.join(split_output)
         if strip_prompt:
-            # could be compiled somewhere else, btu this allows for users to modify the prompt on
+            # could be compiled somewhere else, but this allows for users to modify the prompt on
             # the fly if they want to
             prompt_pattern = re.compile(self.comms_prompt_regex, flags=re.M | re.I)
             output = re.sub(prompt_pattern, &#34;&#34;, output)
         return output
 
-    @channel_timeout(Timeout)
+    @channel_timeout()
     def _read_until_input(self, channel_input: str) -&gt; None:
         &#34;&#34;&#34;
         Read until all input has been entered, then send return.
@@ -557,13 +669,13 @@ class SSH2NetChannel:
                 output += self.channel.read()[1]
             else:
                 output += self._strip_ansi(self.channel.read()[1])
-        channel_log.debug(f&#34;Read: {repr(output)}&#34;)
+        LOG_RAW.debug(f&#34;Read: {repr(output)}&#34;)
         # once the input has been fully written to channel; flush it and send return char
         self.channel.flush()
+        LOG_RAW.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
 
-    @channel_timeout(Timeout)
+    @channel_timeout()
     def _read_until_prompt(self, output=None, prompt=None):
         &#34;&#34;&#34;
         Read the channel until the desired prompt is seen
@@ -603,7 +715,7 @@ class SSH2NetChannel:
                 output += self.channel.read()[1]
             else:
                 output += self._strip_ansi(self.channel.read()[1])
-            channel_log.debug(f&#34;Read: {repr(output)}&#34;)
+            LOG_RAW.debug(f&#34;Read: {repr(output)}&#34;)
             # we do not need to deal w/ line replacement for the actual output, only for
             # parsing if a prompt-like thing is at the end of the output
             output_copy = output
@@ -636,16 +748,14 @@ class SSH2NetChannel:
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
-        result = SSH2NetResult(channel_input)
-        session_log.debug(
-            f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;
-        )
+        result = SSH2NetResult(self.host, channel_input)
+        LOG_ADMIN.debug(f&#34;Attempting to send input: {channel_input}; strip_prompt: {strip_prompt}&#34;)
         self.channel.flush()
+        LOG_RAW.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self.channel.write(channel_input)
-        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
-        self.session_lock.release_lock()
+        self.session_lock.release()
         output = self._restructure_output(output, strip_prompt=strip_prompt)
         result.record_result(output)
         return result
@@ -677,15 +787,17 @@ class SSH2NetChannel:
 
         &#34;&#34;&#34;
         self._acquire_session_lock()
-        result = SSH2NetResult(channel_input)
-        session_log.debug(
+        result = SSH2NetResult(self.host, channel_input)
+        LOG_ADMIN.debug(
             f&#34;Attempting to send input interact: {channel_input}; &#34;
-            f&#34;expecting: {expectation}; responding: {response}; &#34;
-            f&#34;with a finale: {finale}; hidden_response: {hidden_response}&#34;
+            f&#34;\texpecting: {expectation};&#34;
+            f&#34;\tresponding: {response};&#34;
+            f&#34;\twith a finale: {finale};&#34;
+            f&#34;\thidden_response: {hidden_response}&#34;
         )
         self.channel.flush()
         self.channel.write(channel_input)
-        channel_log.debug(f&#34;Write: {repr(channel_input)}&#34;)
+        LOG_RAW.debug(f&#34;Write: {repr(channel_input)}&#34;)
         self._read_until_input(channel_input)
         output = self._read_until_prompt(prompt=expectation)
         # if response is simply a return; add that so it shows in output
@@ -696,86 +808,17 @@ class SSH2NetChannel:
         elif hidden_response is True:
             output += self.comms_return_char
         self.channel.write(response)
-        channel_log.debug(f&#34;Write: {repr(response)}&#34;)
+        LOG_RAW.debug(f&#34;Write: {repr(response)}&#34;)
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
+        LOG_RAW.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         output += self._read_until_prompt(prompt=finale)
-        self.session_lock.release_lock()
+        self.session_lock.release()
         output = self._restructure_output(output)
         result.record_result(output)
         return result
 
-    def open_and_execute(self, command: str):
-        &#34;&#34;&#34;
-        Open ssh channel and execute a command; closes channel when done.
-
-        &#34;one time use&#34; method -- best for running one command then moving on; otherwise
-        use &#34;open_shell&#34; instead, though this will likely be substantially faster for &#34;single&#34;
-        operations.
-
-        Args:
-            command: string input to write to channel
-
-        Returns:
-            result: output from command sent over the channel
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        session_log.info(f&#34;Attempting to open channel for command execution&#34;)
-        if self._shell:
-            self._channel_close()
-        self._channel_open()
-        output = b&#34;&#34;
-        channel_buff = 1
-        session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
-        self.channel.execute(command)
-        while channel_buff &gt; 0:
-            try:
-                channel_buff, data = self.channel.read()
-                output += data
-            except SocketRecvError:
-                break
-        output = self._rstrip_all_lines(output)
-        result = self._restructure_output(output)
-        self.close()
-        session_log.info(f&#34;Command executed, channel closed&#34;)
-        return result
-
-    def open_shell(self) -&gt; None:
-        &#34;&#34;&#34;
-        Open and prepare interactive SSH shell
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        &#34;&#34;&#34;
-        session_log.info(f&#34;Attempting to open interactive shell&#34;)
-        # open the channel itself
-        self._channel_open()
-        # invoke a shell on the channel
-        self._channel_invoke_shell()
-        # pre-login handling if needed for things like wlc
-        if self.comms_pre_login_handler:
-            self.comms_pre_login_handler(self)
-        # send disable paging if needed
-        if self.comms_disable_paging:
-            if callable(self.comms_disable_paging):
-                self.comms_disable_paging(self)
-            else:
-                self.send_inputs(self.comms_disable_paging)
-        self._session_keepalive()
-        session_log.info(&#34;Interactive shell opened&#34;)
-
-    @channel_timeout(Timeout)
-    def get_prompt(self) -&gt; bool:
+    @channel_timeout()
+    def get_prompt(self) -&gt; Union[str, bytes]:
         &#34;&#34;&#34;
         Read from shell and get the current shell prompt
 
@@ -793,7 +836,7 @@ class SSH2NetChannel:
         self.session.set_timeout(1000)
         self.channel.flush()
         self.channel.write(self.comms_return_char)
-        channel_log.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
+        LOG_RAW.debug(f&#34;Write (sending return character): {repr(self.comms_return_char)}&#34;)
         while True:
             output = self.channel.read()[1].rstrip(b&#34;\\&#34;)
             output = output.decode(&#34;unicode_escape&#34;).strip()
@@ -828,7 +871,7 @@ class SSH2NetChannel:
             results.append(result)
         return results
 
-    def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
+    def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[SSH2NetResult]:
         &#34;&#34;&#34;
         Primary entry point to interact with devices in shell mode; used to handle prompts
 
@@ -861,11 +904,67 @@ class SSH2NetChannel:
                 channel_input, expectation, response, finale, hidden_response
             )
             results.append(output)
-        return results</code></pre>
+        return results
+
+    def open_and_execute(self, command: str) -&gt; str:
+        &#34;&#34;&#34;
+        Open ssh channel and execute a command; closes channel when done.
+
+        &#34;one time use&#34; method -- best for running one command then moving on; otherwise
+        use &#34;open_shell&#34; instead, though this will likely be substantially faster for &#34;single&#34;
+        operations.
+
+        Args:
+            command: string input to write to channel
+
+        Returns:
+            result: output from command sent over the channel
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        if self.setup_use_paramiko:
+            raise NotImplementedError
+        output = self._open_and_execute(command)
+        stripped_output = self._rstrip_all_lines(output)
+        result = self._restructure_output(stripped_output)
+        return result
+
+    def open_shell(self) -&gt; None:
+        &#34;&#34;&#34;
+        Open and prepare interactive SSH shell
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        &#34;&#34;&#34;
+        self._open_shell()
+        # pre-login handling if needed for things like accepting login banners etc.
+        if self.comms_pre_login_handler:
+            self.comms_pre_login_handler(self)
+        # send disable paging if needed
+        if self.comms_disable_paging:
+            if callable(self.comms_disable_paging):
+                self.comms_disable_paging(self)
+            else:
+                self.send_inputs(self.comms_disable_paging)
+        self._session_keepalive()</code></pre>
 </details>
-<h3>Subclasses</h3>
+<h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></li>
+<li><a title="ssh2net.socket.SSH2NetSocket" href="socket.html#ssh2net.socket.SSH2NetSocket">SSH2NetSocket</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ssh2net.base.SSH2Net" href="base.html#ssh2net.base.SSH2Net">SSH2Net</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -879,12 +978,13 @@ class SSH2NetChannel:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def retry_wrapper(self, *args, **kwargs):
+    exception_to_check = getattr(self, &#34;session_driver_timeout_exception&#34;)
     attempt, delay = attempts, starting_delay
     while attempt &gt; 1:
         try:
             return wrapped_func(self, *args, **kwargs)
         except exception_to_check:
-            channel_log.info(f&#34;Retrying read operation in {delay} seconds...&#34;)
+            LOG.info(f&#34;Retrying read operation in {delay} seconds...&#34;)
             time.sleep(delay)
             attempt -= 1
             delay *= backoff
@@ -919,7 +1019,7 @@ operations.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def open_and_execute(self, command: str):
+<pre><code class="python">def open_and_execute(self, command: str) -&gt; str:
     &#34;&#34;&#34;
     Open ssh channel and execute a command; closes channel when done.
 
@@ -937,24 +1037,11 @@ operations.</p>
         N/A  # noqa
 
     &#34;&#34;&#34;
-    session_log.info(f&#34;Attempting to open channel for command execution&#34;)
-    if self._shell:
-        self._channel_close()
-    self._channel_open()
-    output = b&#34;&#34;
-    channel_buff = 1
-    session_log.debug(f&#34;Channel open, executing command: {command}&#34;)
-    self.channel.execute(command)
-    while channel_buff &gt; 0:
-        try:
-            channel_buff, data = self.channel.read()
-            output += data
-        except SocketRecvError:
-            break
-    output = self._rstrip_all_lines(output)
-    result = self._restructure_output(output)
-    self.close()
-    session_log.info(f&#34;Command executed, channel closed&#34;)
+    if self.setup_use_paramiko:
+        raise NotImplementedError
+    output = self._open_and_execute(command)
+    stripped_output = self._rstrip_all_lines(output)
+    result = self._restructure_output(stripped_output)
     return result</code></pre>
 </details>
 </dd>
@@ -996,12 +1083,8 @@ operations.</p>
         N/A  # noqa
 
     &#34;&#34;&#34;
-    session_log.info(f&#34;Attempting to open interactive shell&#34;)
-    # open the channel itself
-    self._channel_open()
-    # invoke a shell on the channel
-    self._channel_invoke_shell()
-    # pre-login handling if needed for things like wlc
+    self._open_shell()
+    # pre-login handling if needed for things like accepting login banners etc.
     if self.comms_pre_login_handler:
         self.comms_pre_login_handler(self)
     # send disable paging if needed
@@ -1010,8 +1093,7 @@ operations.</p>
             self.comms_disable_paging(self)
         else:
             self.send_inputs(self.comms_disable_paging)
-    self._session_keepalive()
-    session_log.info(&#34;Interactive shell opened&#34;)</code></pre>
+    self._session_keepalive()</code></pre>
 </details>
 </dd>
 <dt id="ssh2net.channel.SSH2NetChannel.send_inputs"><code class="name flex">
@@ -1102,7 +1184,7 @@ finale (what should ssh2net expect when "done")</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[Tuple[str, bytes]]:
+<pre><code class="python">def send_inputs_interact(self, inputs, hidden_response=False) -&gt; List[SSH2NetResult]:
     &#34;&#34;&#34;
     Primary entry point to interact with devices in shell mode; used to handle prompts
 
@@ -1139,6 +1221,14 @@ finale (what should ssh2net expect when "done")</dd>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ssh2net.session.SSH2NetSession" href="session.html#ssh2net.session.SSH2NetSession">SSH2NetSession</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ssh2net.session.SSH2NetSession.close" href="session.html#ssh2net.session.SSH2NetSession.close">close</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>

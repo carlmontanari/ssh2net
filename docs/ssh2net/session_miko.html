@@ -36,12 +36,12 @@ from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 class SSH2NetSessionParamiko:
     def __init__(self, p_self):
         &#34;&#34;&#34;
-        Initialize SSH2NetSessionParamiko Object
+        SSH2NetSessionParamiko Object
 
         This object, through composition, allows for using Paramiko as the underlying &#34;driver&#34;
-        for SSH2Net instead of the default &#34;ssh2-python&#34;. Paramiko will be ever so slightly slower
-        but as you will most likely be I/O constrained it shouldn&#39;t matter! &#34;ssh2-python&#34; as of
-        20 October 2019 has a bug preventing keyboard interactive authentication from working as
+        for SSH2Net instead of the default &#34;ssh2-python&#34;. Paramiko will be ever so slightly
+        slower but as you will most likely be I/O constrained it shouldn&#39;t matter! &#34;ssh2-python&#34; as
+        of 20 October 2019 has a bug preventing keyboard interactive authentication from working as
         desired; this is the reason Paramiko is in here now!
 
         Args:
@@ -54,7 +54,21 @@ class SSH2NetSessionParamiko:
             N/A  # noqa
 
         &#34;&#34;&#34;
+        # due to somewhat shitty composition and problematic multiple inheritance (how do i know to
+        # inherit session_miko vs session_ssh2) we copy the base session object dict to the driver
+        # session object dict. this angers mypy as it doesn&#39;t understand/like this darkness, so we
+        # also explicitly map all of the vars that are created at time of instantiating this class
+        # into this class so we have appropriate typing/hinting data... sorry...
         self.__dict__ = p_self.__dict__
+
+        # mypy did not like these being set w/ setattr, so we&#39;ll do it manually
+        self.sock = p_self.sock
+        self.host = p_self.host
+        self.auth_user = p_self.auth_user
+        self.auth_password = p_self.auth_password
+        self.auth_public_key = p_self.auth_public_key
+        self.session_timeout = p_self.session_timeout
+
         self._session_alive = p_self._session_alive
         self._session_open = p_self._session_open
         self._channel_alive = p_self._channel_alive
@@ -75,10 +89,14 @@ class SSH2NetSessionParamiko:
 
         &#34;&#34;&#34;
         try:
-            from paramiko import Transport  # noqa
-            from paramiko.ssh_exception import AuthenticationException  # noqa
+            from paramiko import Transport  # pylint: disable=C0415
+            from paramiko.ssh_exception import (  # pylint: disable=C0415
+                AuthenticationException,
+                SSHException,
+            )
 
             self.ParamikoAuthenticationException = AuthenticationException
+            self.session_driver_timeout_exception = SSHException
         except ModuleNotFoundError as exc:
             err = f&#34;Module &#39;{exc.name}&#39; not installed!&#34;
             msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
@@ -240,7 +258,7 @@ class SSH2NetSessionParamiko:
 
         &#34;&#34;&#34;
         while True:
-            time.sleep(0.01)
+            time.sleep(0.1)
             if self.channel.recv_ready():
                 self._paramiko_read_channel()
             else:
@@ -299,11 +317,11 @@ class SSH2NetSessionParamiko:
 <span>(</span><span>p_self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Initialize SSH2NetSessionParamiko Object</p>
+<section class="desc"><p>SSH2NetSessionParamiko Object</p>
 <p>This object, through composition, allows for using Paramiko as the underlying "driver"
-for SSH2Net instead of the default "ssh2-python". Paramiko will be ever so slightly slower
-but as you will most likely be I/O constrained it shouldn't matter! "ssh2-python" as of
-20 October 2019 has a bug preventing keyboard interactive authentication from working as
+for SSH2Net instead of the default "ssh2-python". Paramiko will be ever so slightly
+slower but as you will most likely be I/O constrained it shouldn't matter! "ssh2-python" as
+of 20 October 2019 has a bug preventing keyboard interactive authentication from working as
 desired; this is the reason Paramiko is in here now!</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -329,12 +347,12 @@ desired; this is the reason Paramiko is in here now!</p>
 <pre><code class="python">class SSH2NetSessionParamiko:
     def __init__(self, p_self):
         &#34;&#34;&#34;
-        Initialize SSH2NetSessionParamiko Object
+        SSH2NetSessionParamiko Object
 
         This object, through composition, allows for using Paramiko as the underlying &#34;driver&#34;
-        for SSH2Net instead of the default &#34;ssh2-python&#34;. Paramiko will be ever so slightly slower
-        but as you will most likely be I/O constrained it shouldn&#39;t matter! &#34;ssh2-python&#34; as of
-        20 October 2019 has a bug preventing keyboard interactive authentication from working as
+        for SSH2Net instead of the default &#34;ssh2-python&#34;. Paramiko will be ever so slightly
+        slower but as you will most likely be I/O constrained it shouldn&#39;t matter! &#34;ssh2-python&#34; as
+        of 20 October 2019 has a bug preventing keyboard interactive authentication from working as
         desired; this is the reason Paramiko is in here now!
 
         Args:
@@ -347,7 +365,21 @@ desired; this is the reason Paramiko is in here now!</p>
             N/A  # noqa
 
         &#34;&#34;&#34;
+        # due to somewhat shitty composition and problematic multiple inheritance (how do i know to
+        # inherit session_miko vs session_ssh2) we copy the base session object dict to the driver
+        # session object dict. this angers mypy as it doesn&#39;t understand/like this darkness, so we
+        # also explicitly map all of the vars that are created at time of instantiating this class
+        # into this class so we have appropriate typing/hinting data... sorry...
         self.__dict__ = p_self.__dict__
+
+        # mypy did not like these being set w/ setattr, so we&#39;ll do it manually
+        self.sock = p_self.sock
+        self.host = p_self.host
+        self.auth_user = p_self.auth_user
+        self.auth_password = p_self.auth_password
+        self.auth_public_key = p_self.auth_public_key
+        self.session_timeout = p_self.session_timeout
+
         self._session_alive = p_self._session_alive
         self._session_open = p_self._session_open
         self._channel_alive = p_self._channel_alive
@@ -368,10 +400,14 @@ desired; this is the reason Paramiko is in here now!</p>
 
         &#34;&#34;&#34;
         try:
-            from paramiko import Transport  # noqa
-            from paramiko.ssh_exception import AuthenticationException  # noqa
+            from paramiko import Transport  # pylint: disable=C0415
+            from paramiko.ssh_exception import (  # pylint: disable=C0415
+                AuthenticationException,
+                SSHException,
+            )
 
             self.ParamikoAuthenticationException = AuthenticationException
+            self.session_driver_timeout_exception = SSHException
         except ModuleNotFoundError as exc:
             err = f&#34;Module &#39;{exc.name}&#39; not installed!&#34;
             msg = f&#34;***** {err} {&#39;*&#39; * (80 - len(err))}&#34;
@@ -533,7 +569,7 @@ desired; this is the reason Paramiko is in here now!</p>
 
         &#34;&#34;&#34;
         while True:
-            time.sleep(0.01)
+            time.sleep(0.1)
             if self.channel.recv_ready():
                 self._paramiko_read_channel()
             else:
