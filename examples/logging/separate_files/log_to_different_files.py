@@ -19,10 +19,29 @@ session_logger.addHandler(session_logger_file_handler)
 # Do not propagate logs to stdout
 session_logger.propagate = False
 
-# Repeat similar steps as above for channel logger; channel logger captures reads/writes
-# ssh2net_channel logger removes duplicate entries from the log to avoid logs being massive
-channel_log_file = "channel.log"
-channel_logger = logging.getLogger("ssh2net_channel")
+# Repeat similar steps as above for channel admin logger; channel admin logger captures what you are
+# putting into the channel
+channel_log_file = "channel_admin.log"
+channel_logger = logging.getLogger("ssh2net_channel_admin")
+channel_logger.setLevel(logging.DEBUG)
+channel_logger_file_handler = logging.FileHandler(channel_log_file)
+channel_logger_file_handler.setFormatter(logging.Formatter(log_format))
+channel_logger.addHandler(channel_logger_file_handler)
+channel_logger.propagate = False
+
+# Repeat similar steps as above for channel raw logger; channel raw captures the raw in/out on the
+# channel
+channel_log_file = "channel_raw.log"
+channel_logger = logging.getLogger("ssh2net_channel_raw")
+channel_logger.setLevel(logging.DEBUG)
+channel_logger_file_handler = logging.FileHandler(channel_log_file)
+channel_logger_file_handler.setFormatter(logging.Formatter(log_format))
+channel_logger.addHandler(channel_logger_file_handler)
+channel_logger.propagate = False
+
+# Repeat similar steps as above for socket logger; socket logger captures socket related info
+channel_log_file = "socket.log"
+channel_logger = logging.getLogger("ssh2net_socket")
 channel_logger.setLevel(logging.DEBUG)
 channel_logger_file_handler = logging.FileHandler(channel_log_file)
 channel_logger_file_handler.setFormatter(logging.Formatter(log_format))

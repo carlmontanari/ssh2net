@@ -118,7 +118,8 @@ As for platforms to *run* ssh2net on -- it has and will be tested on MacOS and U
 - [Basic "native" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_native_style.py)
 - [Basic "driver" SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_driver_style.py)
 - [Basic "ConnectHandler" (i.e. Netmiko) SSH2Net operations](/examples/basic_usage/basic_usage_ssh2net_connecthandler_style.py)
-- [Setting session and channel logging](/examples/logging/session_and_channel_log_diff_files.py)
+- [Setting up basic logging](/examples/logging/basic/basic.py)
+- [Setting up separate log files](/examples/logging/separate_files/log_to_different_files.py)
 - [Using SSH Key for authentication](/examples/ssh_keys/ssh_key_basic.py)
 
 

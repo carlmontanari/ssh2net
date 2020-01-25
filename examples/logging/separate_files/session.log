@@ -1,6 +1,0 @@
-2020-01-25 10:23:49,375 [INFO] in /Users/carl/dev/github/ssh2net/ssh2net/session.py:428 
-	 Attempting to open interactive shell
-2020-01-25 10:23:49,524 [INFO] in /Users/carl/dev/github/ssh2net/ssh2net/session.py:434 
-	 Interactive shell opened
-2020-01-25 10:23:50,189 [INFO] in /Users/carl/dev/github/ssh2net/ssh2net/session.py:453 
-	 SSH2NetSocket Connection Object for host 172.18.0.11; Closed
