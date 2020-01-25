@@ -66,9 +66,9 @@ class SSH2NetSession(SSH2NetChannel):
                 if diff.seconds >= self.session_keepalive_interval:
                     if not self.session_lock.locked():
                         lock_counter = 0
-                        self.session_lock.acquire_lock()
+                        self.session_lock.acquire()
                         self.channel.write(self.session_keepalive_pattern)
-                        self.session_lock.release_lock()
+                        self.session_lock.release()
                         last_keepalive = datetime.now()
                     else:
                         lock_counter += 1
@@ -122,7 +122,7 @@ class SSH2NetSession(SSH2NetChannel):
         """
         while True:
             if not self.session_lock.locked():
-                self.session_lock.acquire_lock()
+                self.session_lock.acquire()
                 return
 
     def _session_open(self) -> None:
