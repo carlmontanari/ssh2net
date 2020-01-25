@@ -8,13 +8,12 @@ from typing import Callable, Optional, Union
 
 from ssh2net.exceptions import SetupTimeout, ValidationError
 from ssh2net.helper import validate_external_function
-from ssh2net.session import SSH2NetSession
 from ssh2net.ssh_config import SSH2NetSSHConfig
 
 session_log = logging.getLogger("ssh2net_session")
 
 
-class SSH2Net(SSH2NetSession):
+class SSH2Net:
     def __init__(
         self,
         setup_host: str = "",
@@ -136,41 +135,6 @@ class SSH2Net(SSH2NetSession):
 
         session_log.info(f"{str(self)}; {repr(self)}")
 
-    def __enter__(self):
-        """
-        Enter method for context manager
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            self: instance of self
-
-        Raises:
-            N/A  # noqa
-
-        """
-        self.open_shell()
-        return self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        """
-        Exit method to cleanup for context manager
-
-        Args:
-            exception_type: exception type being raised
-            exception_value: message from exception being raised
-            traceback: traceback from exception being raised
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        """
-        self.close()
-
     def __str__(self):
         """
         Magic str method for SSH2Net class
@@ -207,19 +171,19 @@ class SSH2Net(SSH2NetSession):
 
     def __bool__(self):
         """
-        Magic bool method based on result of session_alive
+        Magic bool method for SSH2Net
 
         Args:
             N/A  # noqa
 
         Returns:
-            bool: True/False if session is alive or not
+            bool: True/False if socket is alive or not
 
         Raises:
             N/A  # noqa
 
         """
-        return self._session_alive()
+        return self._socket_alive()
 
     @staticmethod
     def _set_comms_pre_login_handler(
@@ -590,22 +554,3 @@ class SSH2Net(SSH2NetSession):
         if self._socket_alive():
             self.sock.close()
             session_log.debug(f"Socket to host {self.host} closed")
-
-    def close(self) -> None:
-        """
-        Fully close socket, session, and channel
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        """
-        self._channel_close()
-        self._session_close()
-        self._socket_close()
-        session_log.info(f"{str(self)}; Closed")

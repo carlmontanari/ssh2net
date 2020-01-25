@@ -5,14 +5,33 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from threading import Lock
 
-from ssh2net.channel import SSH2NetChannel
+from ssh2net.base import SSH2Net
 from ssh2net.session_miko import SSH2NetSessionParamiko
 from ssh2net.session_ssh2 import SSH2NetSessionSSH2
 
 TRANSPORT_CLASS_SELECTOR = {True: SSH2NetSessionParamiko, False: SSH2NetSessionSSH2}
 
 
-class SSH2NetSession(SSH2NetChannel):
+class SSH2NetSession(SSH2Net):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __bool__(self):
+        """
+        Magic bool method for SSH2NetSession
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            bool: True/False if session is alive or not
+
+        Raises:
+            N/A  # noqa
+
+        """
+        return self._session_alive()
+
     def _session_alive(self):
         """
         Check if session is alive and authenticated

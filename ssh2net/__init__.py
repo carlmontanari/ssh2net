@@ -3,6 +3,7 @@ import logging
 from logging import NullHandler
 
 from ssh2net.base import SSH2Net
+from ssh2net.entrypoint import SSH2NetBase
 from ssh2net.channel import SSH2NetChannel
 from ssh2net.core.driver import BaseNetworkDriver
 from ssh2net.netmiko_compatibility import connect_handler as ConnectHandler
@@ -12,6 +13,7 @@ from ssh2net.ssh_config import SSH2NetSSHConfig
 __version__ = "2020.01.10"
 __all__ = (
     "SSH2Net",
+    "SSH2NetBase",
     "SSH2NetSession",
     "SSH2NetChannel",
     "SSH2NetSSHConfig",

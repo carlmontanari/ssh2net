@@ -8,6 +8,7 @@ from ssh2.exceptions import SocketRecvError, Timeout
 
 from ssh2net.decorators import channel_timeout
 from ssh2net.result import SSH2NetResult
+from ssh2net.session import SSH2NetSession
 
 if not sys.platform.startswith("win"):
     from ssh2net.decorators import operation_timeout
@@ -19,7 +20,64 @@ channel_log = logging.getLogger("ssh2net_channel")
 session_log = logging.getLogger("ssh2net_session")
 
 
-class SSH2NetChannel:
+class SSH2NetChannel(SSH2NetSession):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __enter__(self):
+        """
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self.open_shell()
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        """
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self.close()
+
+    def close(self) -> None:
+        """
+        Fully close socket, session, and channel
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self._channel_close()
+        self._session_close()
+        self._socket_close()
+        session_log.info(f"{str(self)}; Closed")
+
     @staticmethod
     def _rstrip_all_lines(output: bytes) -> bytes:
         """
@@ -201,7 +259,7 @@ class SSH2NetChannel:
         self.channel.write(channel_input)
         self._read_until_input(channel_input)
         output = self._read_until_prompt()
-        self.session_lock.release_lock()
+        self.session_lock.release()
         output = self._restructure_output(output, strip_prompt=strip_prompt)
         result.record_result(output)
         return result
@@ -256,7 +314,7 @@ class SSH2NetChannel:
         self.channel.write(self.comms_return_char)
         channel_log.debug(f"Write (sending return character): {repr(self.comms_return_char)}")
         output += self._read_until_prompt(prompt=finale)
-        self.session_lock.release_lock()
+        self.session_lock.release()
         output = self._restructure_output(output)
         result.record_result(output)
         return result

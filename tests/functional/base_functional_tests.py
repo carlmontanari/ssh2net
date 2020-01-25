@@ -43,25 +43,25 @@ class BaseFunctionalTest:
         pass
 
     def show_run_execute(self):
-        conn = ssh2net.SSH2Net(**self.test_device)
+        conn = ssh2net.SSH2NetBase(**self.test_device)
         show_run = conn.open_and_execute("show run")
         show_run = self.clean_input_data(show_run)
         return show_run
 
     def show_run_inputs(self, setup_use_paramiko, command):
-        with ssh2net.SSH2Net(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
+        with ssh2net.SSH2NetBase(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
             show_run = conn.send_inputs(command)[0].result
         show_run = self.clean_input_data(show_run)
         return show_run
 
     def show_run_inputs_no_strip_prompt(self, setup_use_paramiko, command):
-        with ssh2net.SSH2Net(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
+        with ssh2net.SSH2NetBase(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
             show_run = conn.send_inputs(command, strip_prompt=False)[0].result
         show_run = self.clean_input_data(show_run)
         return show_run
 
     def _send_inputs_interact(self, setup_use_paramiko, interact, **kwargs):
-        with ssh2net.SSH2Net(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
+        with ssh2net.SSH2NetBase(**self.test_device, setup_use_paramiko=setup_use_paramiko) as conn:
             try:
                 current_prompt = interact[3]
             except IndexError:
@@ -72,7 +72,7 @@ class BaseFunctionalTest:
         return interactive
 
     def _disable_paging_function(self, setup_use_paramiko):
-        with ssh2net.SSH2Net(
+        with ssh2net.SSH2NetBase(
             **self.test_device,
             setup_use_paramiko=setup_use_paramiko,
             comms_disable_paging=self.disable_paging,
@@ -82,7 +82,7 @@ class BaseFunctionalTest:
         return show_run
 
     def _disable_paging_external_function(self, setup_use_paramiko):
-        with ssh2net.SSH2Net(
+        with ssh2net.SSH2NetBase(
             **self.test_device,
             setup_use_paramiko=setup_use_paramiko,
             comms_disable_paging=self.disable_paging_ext_function,
