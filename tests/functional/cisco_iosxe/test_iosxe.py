@@ -1,10 +1,14 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
-from tests.functional.base_functional_tests import BaseFunctionalTest
 import ssh2net
+from tests.functional.base_functional_tests import (
+    BaseFunctionalTest,
+    paramiko_present,
+    ssh2_present,
+)
 
 TEST_DEVICE = {"setup_host": "172.18.0.11", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
@@ -67,17 +71,53 @@ class TestIOSXE(BaseFunctionalTest):
     def disable_paging(self, cls):
         cls.send_inputs("term length 0")
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     def test_send_inputs_interact(self, setup_use_paramiko):
         interact = ["clear logg", "Clear logging buffer [confirm]", ""]
         super().test_send_inputs_interact(setup_use_paramiko, interact)
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     @pytest.mark.parametrize("priv_level", [priv for priv in PRIV_LEVELS.values()])
     def test_acquire_all_priv_levels(self, setup_use_paramiko, priv_level):
         super().test_acquire_all_priv_levels(setup_use_paramiko, priv_level)
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     def test__determine_current_priv_special_configuration(self, setup_use_paramiko):
         with self.platform_driver(
             **self.test_device, setup_use_paramiko=setup_use_paramiko

@@ -2,10 +2,9 @@ import sys
 
 import pytest
 
-from ssh2net.exceptions import UnknownPrivLevel
-from ssh2net.core.driver import BaseNetworkDriver
 from ssh2net.core.cisco_iosxe.driver import PRIVS
-
+from ssh2net.core.driver import BaseNetworkDriver
+from ssh2net.exceptions import UnknownPrivLevel
 
 IOS_ARP = """Protocol  Address          Age (min)  Hardware Addr   Type   Interface
 Internet  172.31.254.1            -   0000.0c07.acfe  ARPA   Vlan254

@@ -72,9 +72,11 @@ PRIVS = {
 
 
 class IOSXEDriver(BaseNetworkDriver):
+    """IOSXEDriver"""
+
     def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         """
-        Initialize SSH2Net IOSXEDriver Object
+        IOSXEDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)

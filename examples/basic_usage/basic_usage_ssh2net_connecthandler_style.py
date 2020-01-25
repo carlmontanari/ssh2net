@@ -15,3 +15,7 @@ driver.send_configs(["interface loopback123", "description ssh2net was here"])
 output = driver.send_commands("show run int loopback123")
 print(output[0].result)
 driver.send_configs("no interface loopback123")
+
+# or use "normal" netmiko methods
+output = driver.send_command("show version")
+print(output)

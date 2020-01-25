@@ -1,11 +1,10 @@
 from pathlib import Path
+
 import pytest
-import sys
 
 import ssh2net
-from ssh2net import SSH2Net, SSH2NetBase
-from ssh2net.exceptions import ValidationError, SetupTimeout
-
+from ssh2net import SSH2NetBase
+from ssh2net.exceptions import ValidationError
 
 NET2_DIR = ssh2net.__file__
 UNIT_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/unit/"
@@ -416,7 +415,7 @@ def test_init_ssh_config_file():
 # will fail without mocking or a real host
 # def test_enter_exit():
 #    test_host = {"setup_host": "1.2.3.4", "auth_user": "username", "auth_password": "password"}
-#    with SSH2Net(**test_host) as conn:
+#    with SSH2NetBase(**test_host) as conn:
 #        assert bool(conn) is True
 #    assert bool(conn) is False
 
@@ -483,40 +482,3 @@ def test__validate_host_invalid_dns():
     with pytest.raises(ValidationError) as e:
         conn._validate_host()
     assert str(e.value) == f"Host {test_host['setup_host']} is not an IP or resolvable DNS name."
-
-
-def test__socket_alive_false():
-    test_host = {"setup_host": "127.0.0.1", "auth_user": "username", "auth_password": "password"}
-    conn = SSH2NetBase(**test_host)
-    assert conn._socket_alive() is False
-
-
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="no ssh server for windows")
-def test__socket_alive_true():
-    test_host = {"setup_host": "127.0.0.1", "auth_user": "username", "auth_password": "password"}
-    conn = SSH2NetBase(**test_host)
-    conn._socket_open()
-    assert conn._socket_alive() is True
-
-
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="no ssh server for windows")
-def test__socket_close():
-    test_host = {"setup_host": "127.0.0.1", "auth_user": "username", "auth_password": "password"}
-    conn = SSH2NetBase(**test_host)
-    conn._socket_open()
-    assert conn._socket_alive() is True
-    conn._socket_close()
-    assert conn._socket_alive() is False
-
-
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="no ssh server for windows")
-def test__socket_open_timeout():
-    test_host = {
-        "setup_host": "240.0.0.1",
-        "setup_timeout": 1,
-        "auth_user": "username",
-        "auth_password": "password",
-    }
-    conn = SSH2NetBase(**test_host)
-    with pytest.raises(SetupTimeout):
-        conn._socket_open()

@@ -1,6 +1,6 @@
 import pytest
 
-from ssh2net.core.cisco_iosxr.driver import IOSXRDriver, PRIVS
+from ssh2net.core.cisco_iosxr.driver import PRIVS, IOSXRDriver
 from tests.unit.drivers.base_driver_unit_tests import BaseDriverUnitTest
 
 

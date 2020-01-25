@@ -5,6 +5,20 @@ import ssh2net
 NET2_DIR = ssh2net.__file__
 privs = None
 
+try:
+    import paramiko
+
+    paramiko_present = True
+except ImportError:
+    paramiko_present = False
+
+try:
+    import ssh2
+
+    ssh2_present = True
+except ImportError:
+    ssh2_present = False
+
 
 class BaseFunctionalTest:
     def setup_method(self):
@@ -91,6 +105,7 @@ class BaseFunctionalTest:
         show_run = self.clean_input_data(show_run)
         return show_run
 
+    @pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present")
     def test_show_run_execute(self):
         with open(f"{self.func_test_dir}expected_output/show_run_execute", "r") as f:
             expected_show_run = f.read().strip()
@@ -99,7 +114,19 @@ class BaseFunctionalTest:
         assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
         assert show_run == expected_show_run
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     def test_show_run_inputs(self, setup_use_paramiko, command="show run"):
         with open(f"{self.func_test_dir}expected_output/show_run", "r") as f:
             expected_show_run = f.read()
@@ -108,7 +135,19 @@ class BaseFunctionalTest:
         assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
         assert show_run == expected_show_run
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     def test_show_run_inputs_no_strip_prompt(self, setup_use_paramiko, command="show run"):
         with open(f"{self.func_test_dir}expected_output/show_run", "r") as f:
             expected_show_run = f.read()
@@ -117,7 +156,19 @@ class BaseFunctionalTest:
         assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
         assert show_run == expected_show_run
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     def test_send_inputs_interact(self, setup_use_paramiko, interact, clean=False, **kwargs):
         with open(f"{self.func_test_dir}expected_output/interactive", "r") as f:
             expected_interactive = f.read().strip()
@@ -128,7 +179,19 @@ class BaseFunctionalTest:
         assert len(interactive.splitlines()) == len(expected_interactive.splitlines())
         assert interactive == expected_interactive
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     def test_disable_paging_function(self, setup_use_paramiko):
         with open(f"{self.func_test_dir}expected_output/show_run", "r") as f:
             expected_show_run = f.read()
@@ -137,7 +200,19 @@ class BaseFunctionalTest:
         assert len(show_run.splitlines()) == len(expected_show_run.splitlines())
         assert show_run == expected_show_run
 
-    @pytest.mark.parametrize("setup_use_paramiko", [False, True], ids=["ssh2", "paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                False, marks=pytest.mark.skipif(ssh2_present is False, reason="ssh2 not present"),
+            ),
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["ssh2", "paramiko"],
+    )
     def test_disable_paging_external_function(self, setup_use_paramiko):
         with open(f"{self.func_test_dir}expected_output/show_run", "r") as f:
             expected_show_run = f.read()

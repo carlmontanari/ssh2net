@@ -1,7 +1,7 @@
 """ssh2net.netmiko_compatibility"""
 import types
 import warnings
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from ssh2net.core import EOSDriver, IOSXEDriver, IOSXRDriver, JunosDriver, NXOSDriver
 from ssh2net.core.arista_eos.driver import EOS_ARG_MAPPER
@@ -85,7 +85,7 @@ def connect_handler(auto_open=True, **kwargs):
     return driver
 
 
-def transform_netmiko_kwargs(kwargs):
+def transform_netmiko_kwargs(kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """
     Transform netmiko style ConnectHandler arguments to ssh2net style
 
@@ -204,7 +204,7 @@ def netmiko_send_command(self, command_string: Union[str, List[str]], **kwargs) 
     return result
 
 
-def netmiko_send_command_timing(self, *args, **kwargs):
+def netmiko_send_command_timing(self, *args: str, **kwargs: Dict[str, Any]):
     """
     Patch `send_command_timing` in netmiko connect handler
 
@@ -263,7 +263,7 @@ def netmiko_send_config_set(self, config_commands: Union[str, List[str]], **kwar
     return result
 
 
-def netmiko_send_config_from_file(self, config_file: str, **kwargs) -> str:
+def netmiko_send_config_from_file(self, config_file: str, **kwargs: Dict[str, Any]) -> str:
     """
     Patch `send_config_from_file` in netmiko connect handler
 

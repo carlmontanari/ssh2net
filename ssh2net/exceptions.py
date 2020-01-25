@@ -2,24 +2,24 @@
 
 
 class ValidationError(Exception):
-    pass
+    """Exception for any argument validation"""
 
 
 class RequirementsNotSatisfied(Exception):
-    pass
+    """Exception for any requirements not satisfied (missing dependencies)"""
 
 
 class AuthenticationFailed(Exception):
-    pass
+    """Exception for any authentication failures"""
 
 
 class SetupTimeout(Exception):
-    pass
+    """Exception for any timeout setting up socket"""
 
 
 class UnknownPrivLevel(Exception):
-    pass
+    """Exception for encountering unknown privilege level"""
 
 
 class CouldNotAcquirePrivLevel(Exception):
-    pass
+    """Exception for failure to acquire desired privilege level"""

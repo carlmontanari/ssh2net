@@ -6,9 +6,11 @@ from pathlib import Path
 
 
 class SSH2NetSSHConfig:
-    def __init__(self, ssh_config_file=""):
+    """SSH2NetSSHConfig"""
+
+    def __init__(self, ssh_config_file="") -> None:
         """
-        Initialize SSH2NetSSHConfig Object
+        SSH2NetSSHConfig Object
 
         Parse OpenSSH config file
 
@@ -48,7 +50,7 @@ class SSH2NetSSHConfig:
         else:
             self.hosts = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Magic str method for SSH2NetSSHConfig class
 
@@ -64,7 +66,7 @@ class SSH2NetSSHConfig:
         """
         return "SSH2NetSSHConfig Object"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Magic repr method for SSH2NetSSHConfig class
 
@@ -82,7 +84,7 @@ class SSH2NetSSHConfig:
         del class_dict["ssh_config_file"]
         return f"SSH2NetSSHConfig {class_dict}"
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """
         Magic bool method; return True if ssh_config_file
 
@@ -101,7 +103,7 @@ class SSH2NetSSHConfig:
         return False
 
     @staticmethod
-    def _select_config_file(ssh_config_file):
+    def _select_config_file(ssh_config_file: str):
         """
         Select ssh configuration file
 
@@ -124,7 +126,7 @@ class SSH2NetSSHConfig:
         return None
 
     @staticmethod
-    def _strip_comments(line):
+    def _strip_comments(line: str) -> str:
         """
         Strip out comments from ssh config file lines
 
@@ -214,7 +216,7 @@ class SSH2NetSSHConfig:
             discovered_hosts[host.hosts] = host
         return discovered_hosts
 
-    def _lookup_fuzzy_match(self, host):
+    def _lookup_fuzzy_match(self, host: str):
         """
         Look up fuzzy matched hosts
 
@@ -265,7 +267,7 @@ class SSH2NetSSHConfig:
                 best_match = match
         return self.hosts[best_match[1]]
 
-    def lookup(self, host):
+    def lookup(self, host: str):
         """
         Lookup a given host
 
@@ -292,9 +294,11 @@ class SSH2NetSSHConfig:
 
 
 class Host:
-    def __init__(self):
+    """Host"""
+
+    def __init__(self) -> None:
         """
-        Initialize SSH2Net Host Object
+        Host Object
 
         Create a Host object based on ssh config file information
         """
@@ -311,7 +315,7 @@ class Host:
         self.password_authentication = None
         self.preferred_authentication = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Magic str method for HostEntry class
 
@@ -327,7 +331,7 @@ class Host:
         """
         return f"Host: {self.hosts}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Magic repr method for HostEntry class
 

@@ -1,6 +1,6 @@
 import pytest
 
-from ssh2net.core.juniper_junos.driver import JunosDriver, PRIVS
+from ssh2net.core.juniper_junos.driver import PRIVS, JunosDriver
 from tests.unit.drivers.base_driver_unit_tests import BaseDriverUnitTest
 
 

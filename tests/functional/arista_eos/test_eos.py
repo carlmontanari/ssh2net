@@ -1,10 +1,10 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
-from tests.functional.base_functional_tests import BaseFunctionalTest
 import ssh2net
+from tests.functional.base_functional_tests import BaseFunctionalTest, paramiko_present
 
 TEST_DEVICE = {"setup_host": "172.18.0.14", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 
@@ -55,32 +55,95 @@ class TestEOS(BaseFunctionalTest):
     def test_show_run_execute(self):
         pytest.skip("no ssh2 support for keyboard interactive auth")
 
-    @pytest.mark.parametrize("setup_use_paramiko", [True], ids=["paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["paramiko"],
+    )
     def test_show_run_inputs(self, setup_use_paramiko):
         super().test_show_run_inputs(setup_use_paramiko)
 
-    @pytest.mark.parametrize("setup_use_paramiko", [True], ids=["paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["paramiko"],
+    )
     def test_show_run_inputs_no_strip_prompt(self, setup_use_paramiko):
         super().test_show_run_inputs_no_strip_prompt(setup_use_paramiko)
 
-    @pytest.mark.parametrize("setup_use_paramiko", [True], ids=["paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["paramiko"],
+    )
     def test_send_inputs_interact(self, setup_use_paramiko):
         pytest.skip("dont know what to do that is interactive on eos...?")
 
-    @pytest.mark.parametrize("setup_use_paramiko", [True], ids=["paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["paramiko"],
+    )
     def test_disable_paging_function(self, setup_use_paramiko):
         super().test_disable_paging_function(setup_use_paramiko)
 
-    @pytest.mark.parametrize("setup_use_paramiko", [True], ids=["paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["paramiko"],
+    )
     def test_disable_paging_external_function(self, setup_use_paramiko):
         super().test_disable_paging_external_function(setup_use_paramiko)
 
-    @pytest.mark.parametrize("setup_use_paramiko", [True], ids=["paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["paramiko"],
+    )
     @pytest.mark.parametrize("priv_level", [priv for priv in PRIV_LEVELS.values()])
     def test_acquire_all_priv_levels(self, setup_use_paramiko, priv_level):
         super().test_acquire_all_priv_levels(setup_use_paramiko, priv_level)
 
-    @pytest.mark.parametrize("setup_use_paramiko", [True], ids=["paramiko"])
+    @pytest.mark.parametrize(
+        "setup_use_paramiko",
+        [
+            pytest.param(
+                True,
+                marks=pytest.mark.skipif(paramiko_present is False, reason="paramiko not present"),
+            ),
+        ],
+        ids=["paramiko"],
+    )
     def test__determine_current_priv_special_configuration(self, setup_use_paramiko):
         with self.platform_driver(
             **self.test_device, setup_use_paramiko=setup_use_paramiko

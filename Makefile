@@ -1,6 +1,13 @@
 DOCKER_COMPOSE_FILE=docker-compose.yaml
 DOCKER_COMPOSE=docker-compose -f ${DOCKER_COMPOSE_FILE}
 
+lint:
+	python -m isort -rc .
+	python -m black .
+	python -m pylama .
+	python -m pydocstyle .
+	darglint ssh2net/.
+
 start_dev_env:
 	${DOCKER_COMPOSE} \
 		up -d \

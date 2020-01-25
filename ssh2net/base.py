@@ -6,39 +6,42 @@ import re
 import socket
 from typing import Callable, Optional, Union
 
-from ssh2net.exceptions import SetupTimeout, ValidationError
+from ssh2net.channel import SSH2NetChannel
+from ssh2net.exceptions import ValidationError
 from ssh2net.helper import validate_external_function
 from ssh2net.ssh_config import SSH2NetSSHConfig
 
-session_log = logging.getLogger("ssh2net_session")
+LOG = logging.getLogger("ssh2net_base")
 
 
-class SSH2Net:
+class SSH2NetBase(SSH2NetChannel):
+    """SSH2NetBase Object"""
+
     def __init__(
         self,
         setup_host: str = "",
-        setup_validate_host: Optional[bool] = False,
-        setup_port: Optional[int] = 22,
-        setup_timeout: Optional[int] = 5,
-        setup_ssh_config_file: Optional[Union[str, bool]] = False,
-        setup_use_paramiko: Optional[bool] = False,
-        session_timeout: Optional[int] = 5000,
-        session_keepalive: Optional[bool] = False,
-        session_keepalive_interval: Optional[int] = 10,
-        session_keepalive_type: Optional[str] = "network",
-        session_keepalive_pattern: Optional[str] = "\005",
+        setup_validate_host: bool = False,
+        setup_port: int = 22,
+        setup_timeout: int = 5,
+        setup_ssh_config_file: Union[str, bool] = False,
+        setup_use_paramiko: bool = False,
+        session_timeout: int = 5000,
+        session_keepalive: bool = False,
+        session_keepalive_interval: int = 10,
+        session_keepalive_type: str = "network",
+        session_keepalive_pattern: str = "\005",
         auth_user: str = "",
-        auth_password: Optional[Union[str]] = None,
-        auth_public_key: Optional[Union[str]] = None,
-        comms_strip_ansi: Optional[bool] = False,
-        comms_prompt_regex: Optional[str] = r"^[a-z0-9.\-@()/:]{1,32}[#>$]$",
-        comms_operation_timeout: Optional[int] = 10,
-        comms_return_char: Optional[str] = "\n",
-        comms_pre_login_handler: Optional[Union[str, Callable]] = "",
-        comms_disable_paging: Optional[Union[str, Callable]] = "terminal length 0",
+        auth_password: Optional[str] = None,
+        auth_public_key: Optional[str] = None,
+        comms_strip_ansi: bool = False,
+        comms_prompt_regex: str = r"^[a-z0-9.\-@()/:]{1,32}[#>$]$",
+        comms_operation_timeout: int = 10,
+        comms_return_char: str = "\n",
+        comms_pre_login_handler: Union[str, Callable] = "",
+        comms_disable_paging: Union[str, Callable] = "terminal length 0",
     ):
         r"""
-        Initialize SSH2Net Object
+        SSH2NetBase Object
 
         Setup basic parameters required to connect to devices via ssh. Pay extra attention
         to the "comms_prompt_regex" as this is highly critical to this tool working well!
@@ -58,7 +61,7 @@ class SSH2Net:
                 "normal" ssh keepalives via ssh2 library. In both cases a thread is spawned in
                 which the keepalives are sent. This introduces a locking mechanism which in
                 theory will slow things down slightly, however provides the ability to keep the
-                session alive indefinitely.
+                session alive indefinitely. # TODO dont support "normal" via paramiko?
             session_keepalive_pattern: pattern to send to keep network channel alive. Default is
                 u"\005" which is equivalent to "ctrl+e". This pattern moves cursor to end of the
                 line which should be an innocuous pattern. This will only be entered *if* a lock
@@ -133,7 +136,7 @@ class SSH2Net:
                 setup_ssh_config_file = ""
             self._setup_ssh_config_args(setup_ssh_config_file)
 
-        session_log.info(f"{str(self)}; {repr(self)}")
+        LOG.info(f"{str(self)}; {repr(self)}")
 
     def __str__(self):
         """
@@ -183,7 +186,42 @@ class SSH2Net:
             N/A  # noqa
 
         """
-        return self._socket_alive()
+        return self._session_alive()
+
+    def __enter__(self):
+        """
+        Enter method for context manager
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            self: instance of self
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self.open_shell()
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        """
+        Exit method to cleanup for context manager
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self.close()
 
     @staticmethod
     def _set_comms_pre_login_handler(
@@ -209,7 +247,7 @@ class SSH2Net:
             ext_func = validate_external_function(comms_pre_login_handler)
             if ext_func:
                 return ext_func
-            session_log.critical(f"Invalid comms_pre_login_handler: {comms_pre_login_handler}")
+            LOG.critical(f"Invalid comms_pre_login_handler: {comms_pre_login_handler}")
             raise ValueError(
                 f"{comms_pre_login_handler} is an invalid comms_pre_login_handler function "
                 "or path to a function."
@@ -242,7 +280,7 @@ class SSH2Net:
                 return ext_func
             if isinstance(comms_disable_paging, str):
                 return comms_disable_paging
-            session_log.critical(f"Invalid comms_disable_paging: {comms_disable_paging}")
+            LOG.critical(f"Invalid comms_disable_paging: {comms_disable_paging}")
             raise ValueError(
                 f"{comms_disable_paging} is an invalid comms_disable_paging function, "
                 "path to a function, or is not a string."
@@ -266,7 +304,7 @@ class SSH2Net:
             TypeError
 
         """
-        session_log.critical(f"Invalid '{arg_name}': {arg}")
+        LOG.critical(f"Invalid '{arg_name}': {arg}")
         raise TypeError(f"'{arg_name}' must be {target_type}, got: {type(arg)}'")
 
     def _setup_setup_args(
@@ -430,7 +468,7 @@ class SSH2Net:
         self.comms_pre_login_handler = self._set_comms_pre_login_handler(comms_pre_login_handler)
         self.comms_disable_paging = self._set_comms_disable_paging(comms_disable_paging)
 
-    def _setup_ssh_config_args(self, setup_ssh_config_file) -> None:
+    def _setup_ssh_config_args(self, setup_ssh_config_file: Union[str, bool]) -> None:
         """
         Set any args from ssh config file to override existing settings
 
@@ -453,8 +491,6 @@ class SSH2Net:
         if host_config.identity_file:
             self.auth_public_key = os.path.expanduser(host_config.identity_file.strip().encode())
 
-    """ pre socket setup """  # noqa
-
     def _validate_host(self) -> None:
         """
         Validate host is valid IP or resolvable DNS name
@@ -473,84 +509,10 @@ class SSH2Net:
             ipaddress.ip_address(self.host)
             return
         except ValueError:
-            session_log.info(f"Failed to validate host {self.host} as an ip address")
+            LOG.info(f"Failed to validate host {self.host} as an ip address")
         try:
             socket.gethostbyname(self.host)
             return
         except socket.gaierror:
-            session_log.info(f"Failed to validate host {self.host} as a resolvable dns name")
+            LOG.info(f"Failed to validate host {self.host} as a resolvable dns name")
         raise ValidationError(f"Host {self.host} is not an IP or resolvable DNS name.")
-
-    """ socket setup """  # noqa
-
-    def _socket_alive(self) -> bool:
-        """
-        Check if underlying socket is alive
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            bool True/False if socket is alive
-
-        Raises:
-            N/A  # noqa
-
-        """
-        try:
-            self.sock.send(b"")
-            return True
-        except OSError:
-            # socket is not alive
-            session_log.debug(f"Socket to host {self.host} is not alive")
-            return False
-        except AttributeError:
-            # socket never created yet
-            session_log.debug(f"Socket to host {self.host} has never been created")
-            return False
-
-    def _socket_open(self) -> None:
-        """
-        Open underlying socket
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            SetupTimeout: if socket connection times out
-
-        """
-        if not self._socket_alive():
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(self.setup_timeout)
-            try:
-                self.sock.connect((self.host, self.port))
-            except socket.timeout:
-                session_log.critical(
-                    f"Timed out trying to open socket to {self.host} on port {self.port}"
-                )
-                raise SetupTimeout(
-                    f"Timed out trying to open socket to {self.host} on port {self.port}"
-                )
-            session_log.debug(f"Socket to host {self.host} opened")
-
-    def _socket_close(self) -> None:
-        """
-        Close underlying socket
-
-        Args:
-            N/A  # noqa
-
-        Returns:
-            N/A  # noqa
-
-        Raises:
-            N/A  # noqa
-
-        """
-        if self._socket_alive():
-            self.sock.close()
-            session_log.debug(f"Socket to host {self.host} closed")

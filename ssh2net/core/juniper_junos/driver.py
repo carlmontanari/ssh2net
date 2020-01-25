@@ -44,9 +44,11 @@ PRIVS = {
 
 
 class JunosDriver(BaseNetworkDriver):
+    """JunosDriver"""
+
     def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         """
-        Initialize SSH2Net JunosDriver Object
+        JunosDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from datetime import datetime
 
-from netmiko import ConnectHandler
+from ssh2net import SSH2NetBase
 
 IOSXE_TEST = {
     "host": "172.18.0.11",
@@ -48,15 +48,20 @@ test_hosts = [IOSXE_TEST]
 
 def main():
     for host in test_hosts:
+        del host["device_type"]
         commands = host.pop("test_commands")
-        conn = ConnectHandler(**host)
+        host["setup_host"] = host.pop("host")
+        host["auth_user"] = host.pop("username")
+        host["auth_password"] = host.pop("password")
+        conn = SSH2NetBase(**host)
+        conn.open_shell()
         for command in commands:
             print(f"Sending command: '{command}'")
             print("*" * 80)
             command_start_time = datetime.now()
-            r = conn.send_commands(command)
+            r = conn.send_inputs(command)
             command_end_time = datetime.now()
-            print(r)
+            print(r[0].result)
             print("*" * 80)
             print(
                 f"Sending command: '{command}' took {command_end_time - command_start_time} seconds!"

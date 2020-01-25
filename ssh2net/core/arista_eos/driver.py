@@ -72,9 +72,11 @@ PRIVS = {
 
 
 class EOSDriver(BaseNetworkDriver):
+    """EOSDriver"""
+
     def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         """
-        Initialize SSH2Net EOSDriver Object
+        EOSDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)

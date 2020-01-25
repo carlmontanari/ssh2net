@@ -1,16 +1,16 @@
 """ssh2net.session_ssh2"""
 import logging
+import warnings
 
-from ssh2.exceptions import AuthenticationError
-from ssh2.session import Session
-
-from ssh2net.exceptions import AuthenticationFailed
+from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 
 
 class SSH2NetSessionSSH2:
+    """SSH2NetSessionSSH2"""
+
     def __init__(self, p_self):
         """
-        Initialize SSH2NetSessionSSH2 Object
+        SSH2NetSessionSSH2 Object
 
         This is the default underlying "driver" for ssh2net. This has been pulled out of the
         "base" SSH2NetSession class to provide a mechanism for supporting both "ssh2-python" and
@@ -59,6 +59,25 @@ class SSH2NetSessionSSH2:
             Exception: catch all for unknown exceptions during session handshake
 
         """
+        try:
+            from ssh2.session import Session  # pylint: disable=C0415
+            from ssh2.exceptions import AuthenticationError, Timeout  # pylint: disable=C0415
+
+            self.SSH2AuthenticationException = AuthenticationError
+            self.session_driver_timeout_exception = Timeout
+        except ModuleNotFoundError as exc:
+            err = f"Module '{exc.name}' not installed!"
+            msg = f"***** {err} {'*' * (80 - len(err))}"
+            fix = (
+                f"To resolve this issue, install '{exc.name}'. You can do this in one of the "
+                "following ways:\n"
+                "1: 'pip install -r requirements-ssh2.txt'\n"
+                "2: 'pip install ssh2net[ssh2]'"
+            )
+            warning = "\n" + msg + "\n" + fix + "\n" + msg
+            warnings.warn(warning)
+            raise RequirementsNotSatisfied
+
         self.session = Session()
         if self.session_timeout:
             self.session.set_timeout(self.session_timeout)
@@ -86,7 +105,7 @@ class SSH2NetSessionSSH2:
         """
         try:
             self.session.userauth_publickey_fromfile(self.auth_user, self.auth_public_key)
-        except AuthenticationError:
+        except self.SSH2AuthenticationException:
             logging.critical(f"Public key authentication with host {self.host} failed. ")
         except Exception as exc:
             logging.critical(
@@ -112,14 +131,16 @@ class SSH2NetSessionSSH2:
         """
         try:
             self.session.userauth_password(self.auth_user, self.auth_password)
-        except AuthenticationError as exc:
+        except self.SSH2AuthenticationException as exc:
             logging.critical(
                 f"Password authentication with host {self.host} failed. Exception: {exc}."
                 f"\n\tTrying keyboard interactive auth..."
             )
             try:
-                self.session.userauth_keyboardinteractive(self.auth_user, self.auth_password)
-            except AuthenticationError as exc:
+                self.session.userauth_keyboardinteractive(  # pylint: disable=E1101
+                    self.auth_user, self.auth_password
+                )
+            except self.SSH2AuthenticationException as exc:
                 logging.critical(
                     f"Keyboard interactive authentication with host {self.host} failed. "
                     f"Exception: {exc}."

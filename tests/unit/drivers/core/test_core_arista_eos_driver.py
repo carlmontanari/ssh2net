@@ -1,4 +1,4 @@
-from ssh2net.core.arista_eos.driver import EOSDriver, PRIVS
+from ssh2net.core.arista_eos.driver import PRIVS, EOSDriver
 from tests.unit.drivers.base_driver_unit_tests import BaseDriverUnitTest
 
 

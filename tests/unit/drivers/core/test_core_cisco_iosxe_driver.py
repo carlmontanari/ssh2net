@@ -1,4 +1,4 @@
-from ssh2net.core.cisco_iosxe.driver import IOSXEDriver, PRIVS
+from ssh2net.core.cisco_iosxe.driver import PRIVS, IOSXEDriver
 from tests.unit.drivers.base_driver_unit_tests import BaseDriverUnitTest
 
 

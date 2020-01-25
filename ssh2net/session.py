@@ -4,17 +4,83 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from threading import Lock
+from typing import Callable, Optional, Union
 
-from ssh2net.base import SSH2Net
 from ssh2net.session_miko import SSH2NetSessionParamiko
 from ssh2net.session_ssh2 import SSH2NetSessionSSH2
+from ssh2net.socket import SSH2NetSocket
+from ssh2net.type_helper import DummyChannel, DummySession
 
 TRANSPORT_CLASS_SELECTOR = {True: SSH2NetSessionParamiko, False: SSH2NetSessionSSH2}
 
+LOG = logging.getLogger("ssh2net_session")
 
-class SSH2NetSession(SSH2Net):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+class SSH2NetSession(SSH2NetSocket):
+    """
+    SSH2NetSession
+
+    SSH2NetBase <- SSH2NetChannel <- SSH2NetSession <- SSH2NetSocket
+
+    SSH2NetSession is responsible for handling the actual SSH session that gets built atop the
+    socket connection. SSH2NetSession should not care about what is providing the session. At time
+    of writing the session can be provided by ssh2-python or paramiko. The session provided must
+    provide the following methods:
+
+        is_authenticated:
+            TODO
+
+        userauth_authenticated:
+            TODO
+
+        keepalive_config:
+            TODO
+
+        keepalive_send:
+            TODO
+
+        close:
+            TODO
+
+        disconnect:
+            TODO
+
+        set_timeout:
+            TODO
+
+    Arguments are type hinted here for linting, these should all come from the SSH2Net child class.
+    ssh2net uses a mixin type structure to divide each logical component of the overall ssh2net
+    object into its own class. Because of the mixin structure there are no init methods in the
+    Channel, Session, or Socket classes. In order to appease mypy and ensure that ssh2net is typed
+    reasonably well the typing information for these classes are done at the class level as found
+    here.
+
+    """
+
+    host: str
+    setup_validate_host: bool
+    setup_port: int
+    setup_timeout: int
+    setup_ssh_config_file: Union[str, bool]
+    setup_use_paramiko: bool
+    session_timeout: int
+    session_keepalive: bool
+    session_keepalive_interval: int
+    session_keepalive_type: str
+    session_keepalive_pattern: str
+    auth_user: str
+    auth_password: Optional[str]
+    auth_public_key: Optional[str]
+    comms_strip_ansi: bool
+    comms_prompt_regex: str
+    comms_operation_timeout: int
+    comms_return_char: str
+    comms_pre_login_handler: Callable
+    comms_disable_paging: Union[str, Callable]
+
+    _shell: bool
+    session: DummySession
+    channel: DummyChannel
 
     def __bool__(self):
         """
@@ -155,7 +221,7 @@ class SSH2NetSession(SSH2Net):
             N/A  # noqa
 
         Raises:
-            N/A  # noqa
+            TypeError: if for some reason the desired driver can't be loaded
 
         """
         # setup the socket prior to creating composite transport class so we can point to it in the
@@ -163,9 +229,15 @@ class SSH2NetSession(SSH2Net):
         if not self._socket_alive():
             self._socket_open()
 
-        driver_session_obj = TRANSPORT_CLASS_SELECTOR.get(self.setup_use_paramiko)(self)
+        driver_session: Optional[Callable] = TRANSPORT_CLASS_SELECTOR.get(
+            self.setup_use_paramiko, None
+        )
+        if not driver_session:
+            raise TypeError
 
-        # assign methods from transport class to this base class
+        driver_session_obj = driver_session(self)
+
+        # assign methods/attributes from transport class to this base class
         self._session_open_connect = (
             driver_session_obj._session_open_connect  # pylint: disable=W0212
         )
@@ -182,6 +254,9 @@ class SSH2NetSession(SSH2Net):
 
         if not self._session_alive():
             self._session_open_connect()
+            self.session_driver_timeout_exception = (
+                driver_session_obj.session_driver_timeout_exception
+            )
 
         logging.debug(f"Session to host {self.host} opened")
         self.session_lock = Lock()
@@ -296,3 +371,83 @@ class SSH2NetSession(SSH2Net):
             self.channel.close  # noqa
             self.channel = None
             logging.debug(f"Channel to host {self.host} closed")
+
+    def _open_and_execute(self, command: str) -> bytes:
+        """
+        Open ssh channel and execute a command; closes channel when done.
+
+        "one time use" method -- best for running one command then moving on; otherwise
+        use "open_shell" instead, though this will likely be substantially faster for "single"
+        operations.
+
+        Args:
+            command: string input to write to channel
+
+        Returns:
+            result: output from command sent over the channel
+
+        Raises:
+            N/A  # noqa
+
+        """
+        # import here so ssh2 is not required if using different ssh driver
+        from ssh2.exceptions import SocketRecvError  # noqa
+
+        LOG.info(f"Attempting to open channel for command execution")
+        if self._shell:
+            self._channel_close()
+        self._channel_open()
+        output = b""
+        channel_buff = 1
+        LOG.debug(f"Channel open, executing command: {command}")
+        self.channel.execute(command)
+        while channel_buff > 0:
+            try:
+                channel_buff, data = self.channel.read()
+                output += data
+            except SocketRecvError:
+                break
+        self.close()
+        LOG.info(f"Command executed, channel closed")
+        return output
+
+    def _open_shell(self) -> None:
+        """
+        Open and prepare interactive SSH shell
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        LOG.info(f"Attempting to open interactive shell")
+        # open the channel itself
+        self._channel_open()
+        # invoke a shell on the channel
+        self._channel_invoke_shell()
+        self._session_keepalive()
+        LOG.info("Interactive shell opened")
+
+    def close(self) -> None:
+        """
+        Fully close socket, session, and channel
+
+        Args:
+            N/A  # noqa
+
+        Returns:
+            N/A  # noqa
+
+        Raises:
+            N/A  # noqa
+
+        """
+        self._channel_close()
+        self._session_close()
+        self._socket_close()
+        LOG.info(f"{str(self)}; Closed")

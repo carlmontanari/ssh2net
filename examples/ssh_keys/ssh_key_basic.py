@@ -6,7 +6,6 @@ my_device = {
     "auth_public_key": "/PATH/TO/KEY/TO/USE",
 }
 
-
 with IOSXEDriver(**my_device) as conn:
     output = conn.send_commands("show version")
     print(output[0].result)

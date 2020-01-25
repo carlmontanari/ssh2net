@@ -1,10 +1,10 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
-from tests.functional.base_functional_tests import BaseFunctionalTest
 import ssh2net
+from tests.functional.base_functional_tests import BaseFunctionalTest
 
 TEST_DEVICE = {"setup_host": "172.18.0.12", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 

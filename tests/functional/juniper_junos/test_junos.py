@@ -1,10 +1,10 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
-from tests.functional.base_functional_tests import BaseFunctionalTest
 import ssh2net
+from tests.functional.base_functional_tests import BaseFunctionalTest
 
 TEST_DEVICE = {
     "setup_host": "172.18.0.15",
@@ -53,7 +53,7 @@ class TestJunos(BaseFunctionalTest):
     def _disable_paging_function(self, setup_use_paramiko):
         test_device_copy = self.test_device.copy()
         test_device_copy.pop("comms_disable_paging")
-        with ssh2net.SSH2Net(
+        with ssh2net.SSH2NetSocket(
             **test_device_copy,
             setup_use_paramiko=setup_use_paramiko,
             comms_disable_paging=self.disable_paging,
@@ -65,7 +65,7 @@ class TestJunos(BaseFunctionalTest):
     def _disable_paging_external_function(self, setup_use_paramiko):
         test_device_copy = self.test_device.copy()
         test_device_copy.pop("comms_disable_paging")
-        with ssh2net.SSH2Net(
+        with ssh2net.SSH2NetSocket(
             **test_device_copy,
             setup_use_paramiko=setup_use_paramiko,
             comms_disable_paging=self.disable_paging_ext_function,

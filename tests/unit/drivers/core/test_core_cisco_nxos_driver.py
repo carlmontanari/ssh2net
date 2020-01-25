@@ -1,4 +1,4 @@
-from ssh2net.core.cisco_nxos.driver import NXOSDriver, PRIVS
+from ssh2net.core.cisco_nxos.driver import PRIVS, NXOSDriver
 from tests.unit.drivers.base_driver_unit_tests import BaseDriverUnitTest
 
 

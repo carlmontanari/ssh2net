@@ -59,14 +59,29 @@ PRIVS = {
 
 
 def comms_pre_login_handler(cls):  # pylint: disable=W0613
+    """
+    IOSXR default pre login handler
+
+    Args:
+        cls: IOSXRDriver object
+
+    Returns:
+        N/A  # noqa
+
+    Raises:
+        N/A  # noqa
+
+    """
     # sleep for session to establish; without this we never find base prompt
     time.sleep(1)
 
 
 class IOSXRDriver(BaseNetworkDriver):
+    """IOSXRDriver"""
+
     def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Dict[str, Any]):
         """
-        Initialize SSH2Net IOSXRDriver Object
+        IOSXRDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)

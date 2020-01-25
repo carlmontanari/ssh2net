@@ -1,13 +1,12 @@
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import pytest
 
 import ssh2net
 from ssh2net import SSH2NetSSHConfig
 from ssh2net.ssh_config import Host
-
 
 NET2_DIR = ssh2net.__file__
 UNIT_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/tests/unit/"

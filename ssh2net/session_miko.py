@@ -1,19 +1,22 @@
 """ssh2net.session_miko"""
 import logging
+import time
 import warnings
 
 from ssh2net.exceptions import AuthenticationFailed, RequirementsNotSatisfied
 
 
 class SSH2NetSessionParamiko:
+    """SSH2NetSessionParamiko"""
+
     def __init__(self, p_self):
         """
-        Initialize SSH2NetSessionParamiko Object
+        SSH2NetSessionParamiko Object
 
         This object, through composition, allows for using Paramiko as the underlying "driver"
-        for SSH2Net instead of the default "ssh2-python". Paramiko will be ever so slightly slower
-        but as you will most likely be I/O constrained it shouldn't matter! "ssh2-python" as of
-        20 October 2019 has a bug preventing keyboard interactive authentication from working as
+        for SSH2Net instead of the default "ssh2-python". Paramiko will be ever so slightly
+        slower but as you will most likely be I/O constrained it shouldn't matter! "ssh2-python" as
+        of 20 October 2019 has a bug preventing keyboard interactive authentication from working as
         desired; this is the reason Paramiko is in here now!
 
         Args:
@@ -61,10 +64,14 @@ class SSH2NetSessionParamiko:
 
         """
         try:
-            from paramiko import Transport  # noqa
-            from paramiko.ssh_exception import AuthenticationException  # noqa
+            from paramiko import Transport  # pylint: disable=C0415
+            from paramiko.ssh_exception import (  # pylint: disable=C0415
+                AuthenticationException,
+                SSHException,
+            )
 
             self.ParamikoAuthenticationException = AuthenticationException
+            self.session_driver_timeout_exception = SSHException
         except ModuleNotFoundError as exc:
             err = f"Module '{exc.name}' not installed!"
             msg = f"***** {err} {'*' * (80 - len(err))}"
@@ -226,6 +233,7 @@ class SSH2NetSessionParamiko:
 
         """
         while True:
+            time.sleep(0.1)
             if self.channel.recv_ready():
                 self._paramiko_read_channel()
             else:

@@ -1,11 +1,10 @@
-from io import TextIOWrapper
-import pkg_resources
 import sys
+from io import TextIOWrapper
 
+import pkg_resources
 import pytest
 
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
-
 
 IOS_ARP = """Protocol  Address          Age (min)  Hardware Addr   Type   Interface
 Internet  172.31.254.1            -   0000.0c07.acfe  ARPA   Vlan254

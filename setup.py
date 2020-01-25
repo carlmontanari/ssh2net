@@ -2,7 +2,6 @@
 """ssh2net network ssh client library"""
 import setuptools
 
-
 __author__ = "Carl Montanari"
 
 with open("README.md", "r") as f:

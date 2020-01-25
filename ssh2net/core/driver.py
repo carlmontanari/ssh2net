@@ -3,7 +3,7 @@ import collections
 import re
 from typing import Any, Dict, List, Optional, Union
 
-from ssh2net.channel import SSH2NetChannel
+from ssh2net.base import SSH2NetBase
 from ssh2net.exceptions import CouldNotAcquirePrivLevel, UnknownPrivLevel
 from ssh2net.helper import _textfsm_get_template, textfsm_parse
 from ssh2net.result import SSH2NetResult
@@ -25,11 +25,12 @@ PrivilegeLevel = collections.namedtuple(
 PRIVS: Dict[str, PrivilegeLevel] = {}
 
 
-class BaseNetworkDriver(SSH2NetChannel):
-    # Note: don't like the Any for typing here but it did make mypy happy...
+class BaseNetworkDriver(SSH2NetBase):
+    """BaseNetworkDriver"""
+
     def __init__(self, auth_secondary: Optional[Union[str]] = None, **kwargs: Any):
         """
-        Initialize SSH2Net BaseNetworkDriver Object
+        BaseNetworkDriver Object
 
         Args:
             auth_secondary: password to use for secondary authentication (enable)

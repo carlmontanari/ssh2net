@@ -3,7 +3,7 @@ import logging
 import multiprocessing.pool
 import time
 
-channel_log = logging.getLogger("ssh2net_channel")
+LOG = logging.getLogger("ssh2net_channel_admin")
 
 
 def operation_timeout(attribute):
@@ -92,15 +92,17 @@ def operation_timeout_win(attribute):
     return decorate
 
 
-def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=2):
+def channel_timeout(attempts=5, starting_delay=0.1, backoff=2):
     """
     Decorate read operations; basic backoff timer to try to read channel for reasonable time
 
     This decorator wraps individual read operations. If/when the read operation times out
-    (timeout configured by `session_timeout`), run a basic backoff process retrying five times
+    (timeout configured by `session_timeout`), run a basic backoff process retrying five times.
+
+    exception_to_check: Exception to handle; basically if this exception is seen, try again, so map
+    this to the ssh2/paramiko/etc timeout to catch
 
     Args:
-        exception_to_check: Exception to handle; basically if this exception is seen, try again
         attempts: number of attempts to make to retry
         starting_delay: initial backoff delay
         backoff: backoff multiplier
@@ -115,12 +117,13 @@ def channel_timeout(exception_to_check, attempts=5, starting_delay=0.1, backoff=
 
     def decorate(wrapped_func):
         def retry_wrapper(self, *args, **kwargs):
+            exception_to_check = getattr(self, "session_driver_timeout_exception")
             attempt, delay = attempts, starting_delay
             while attempt > 1:
                 try:
                     return wrapped_func(self, *args, **kwargs)
                 except exception_to_check:
-                    channel_log.info(f"Retrying read operation in {delay} seconds...")
+                    LOG.info(f"Retrying read operation in {delay} seconds...")
                     time.sleep(delay)
                     attempt -= 1
                     delay *= backoff

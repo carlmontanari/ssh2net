@@ -1,11 +1,11 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
-from tests.functional.base_functional_tests import BaseFunctionalTest
-from ssh2net.core.cisco_iosxr.driver import comms_pre_login_handler
 import ssh2net
+from ssh2net.core.cisco_iosxr.driver import comms_pre_login_handler
+from tests.functional.base_functional_tests import BaseFunctionalTest
 
 TEST_DEVICE = {"setup_host": "172.18.0.13", "auth_user": "vrnetlab", "auth_password": "VR-netlab9"}
 

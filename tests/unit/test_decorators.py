@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from ssh2net import SSH2Net
+from ssh2net import SSH2NetSocket
 
 if not sys.platform.startswith("win"):
     from ssh2net.decorators import operation_timeout
@@ -11,9 +11,8 @@ else:
     from ssh2net.decorators import operation_timeout_win as operation_timeout
 
 
-class MockSSH2Net(SSH2Net):
+class MockSSH2Net(SSH2NetSocket):
     def __init__(self):
-        super().__init__()
         self.comms_operation_timeout = 0.1
 
     @operation_timeout("comms_operation_timeout")

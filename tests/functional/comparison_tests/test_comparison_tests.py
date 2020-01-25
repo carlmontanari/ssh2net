@@ -1,8 +1,7 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 import ssh2net
-
 
 NET2_DIR = ssh2net.__file__
 COMPARISON_TEST_DIR = f"{Path(NET2_DIR).parents[1]}/comparison_tests/"
